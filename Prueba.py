@@ -11,7 +11,7 @@ import streamlit.components.v1 as components
 # ─────────────────────────────────────────
 # 0. CONFIGURACIÓN DEL LOGO OFICIAL (URL DIRECTA)
 # ─────────────────────────────────────────
-LOGO_SRC = "https://i.ibb.co/DDDFzZp3/Gd-L.jpg"
+LOGO_SRC = "https://i.ibb.co/nNxy2zyt/Gd-L-removebg-preview.png"
 
 # ─────────────────────────────────────────
 # 1. CONFIGURACIÓN DE PÁGINA Y ESTILOS
@@ -19,7 +19,7 @@ LOGO_SRC = "https://i.ibb.co/DDDFzZp3/Gd-L.jpg"
 st.set_page_config(
     page_title="Gota de Leche - Sistema Maestro",
     layout="wide",
-    page_icon=LOGO_SRC,
+    page_icon=LOGO_SRC, # El ícono de la pestaña ahora es el logo oficial
 )
 
 st.markdown("""
@@ -31,19 +31,26 @@ st.markdown("""
     }
     .stApp { animation: fadeIn 0.4s ease-out; }
     
-    /* LOGIN COMPACTO Y CENTRADO */
     .centered-login {
-        max-width: 400px; /* Ancho reducido a 400px */
+        max-width: 420px;
         margin: 0 auto;
         text-align: center;
-        padding-top: 10vh;
+        padding-top: 6vh;
+    }
+    /* Centra el título y subtítulo */
+    .centered-login h1, .centered-login p {
+        text-align: center !important;
     }
     .stForm {
         background-color: #1E293B !important;
-        border: 3px solid #3B82F6 !important;
-        border-radius: 20px !important;
-        padding: 2.5rem !important;
-        box-shadow: 0px 10px 30px rgba(0,0,0,0.5) !important;
+        border: 2px solid #3B82F6 !important;
+        border-radius: 18px !important;
+        padding: 2rem 2rem 1.5rem 2rem !important;
+        box-shadow: 0px 8px 24px rgba(59, 130, 246, 0.15) !important;
+    }
+    /* Centra el botón submit */
+    .stForm [data-testid="stFormSubmitButton"] button {
+        border-radius: 10px !important;
     }
     
     /* Modelo de Tarjeta Unificado */
@@ -71,6 +78,7 @@ st.markdown("""
         line-height: 1;
     }
     
+    /* Bloques de ficha detallados estilo formulario impreso */
     .ficha-seccion-datos {
         background-color: #1e293b;
         border-left: 4px solid #3b82f6;
@@ -241,48 +249,47 @@ def init_supabase():
 supabase = init_supabase()
 
 # ─────────────────────────────────────────
-# 4. LOGIN (ADAPTADO A ANCHO COMPACTO)
+# 4. LOGIN MEJORADO (CON LOGO INTEGRADO EN MODO OSCURO)
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
-    
-    # Contenedor principal centrado
-    st.markdown('<div class="centered-login">', unsafe_allow_html=True)
-    
-    # Logo
-    st.markdown(f"""
-        <div style="display: flex; justify-content: center; margin-bottom: 10px;">
-            <img src="{LOGO_SRC}" style="
-                height: 130px; 
-                object-fit: contain; 
-                mix-blend-mode: screen; 
-                filter: brightness(1.4) drop-shadow(0px 4px 12px rgba(96, 165, 250, 0.4));
-                border-radius: 0px;
-            ">
-        </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("<h1 style='color:#60A5FA; font-size:2rem; margin-bottom:5px; font-weight:800;'>GOTAS DE LECHE</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#94A3B8; font-size:1rem; margin-bottom:20px;'>Sistema Maestro de Gestión</p>", unsafe_allow_html=True)
-    
-    # Formulario
-    with st.form("login"):
-        username = st.text_input("Usuario", placeholder="👤 Ingrese su usuario")
-        password = st.text_input("Contraseña", type="password", placeholder="🔒 Ingrese su contraseña")
-        if st.form_submit_button("INGRESAR AL SISTEMA 🚀", use_container_width=True):
-            if not username or not password:
-                st.error("Ingrese usuario y contraseña.")
-            else:
-                try:
-                    res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
-                    if res.data and verify_password(password, res.data[0]["clave"]):
-                        st.session_state.user = res.data[0]
-                        st.rerun()
-                    else:
-                        st.error("Credenciales incorrectas.")
-                except Exception as e:
-                    st.error(f"Error al verificar credenciales: {e}")
-    st.markdown('</div>', unsafe_allow_html=True)
+    _, col_mid, _ = st.columns([1, 0.8, 1])
+    with col_mid:
+        st.markdown('<div class="centered-login">', unsafe_allow_html=True)
+        
+        # LOGO OPTIMIZADO CON TRATAMIENTO DE MEZCLA DE PANTALLA CSS
+        st.markdown(f"""
+            <div style="display: flex; justify-content: center; margin-bottom: 10px;">
+                <img src="{LOGO_SRC}" style="
+                    height: 130px; 
+                    object-fit: contain; 
+                    mix-blend-mode: screen; 
+                    filter: brightness(1.4) drop-shadow(0px 4px 12px rgba(96, 165, 250, 0.4));
+                    border-radius: 0px;
+                ">
+            </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<h1 style='color:#60A5FA; font-size:2.4rem; margin-bottom:0px; font-weight:800; letter-spacing:1px; text-align:center;'>GOTAS DE LECHE</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#94A3B8; font-size:1rem; margin-bottom:24px; letter-spacing:0.5px; text-align:center;'>Sistema Maestro de Gestión</p>", unsafe_allow_html=True)
+        
+        with st.form("login"):
+            username = st.text_input("Usuario", placeholder="👤 Ingrese su usuario")
+            password = st.text_input("Contraseña", type="password", placeholder="🔒 Ingrese su contraseña")
+            if st.form_submit_button("INGRESAR AL SISTEMA 🚀", use_container_width=True):
+                if not username or not password:
+                    st.error("Ingrese usuario y contraseña.")
+                else:
+                    try:
+                        res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
+                        if res.data and verify_password(password, res.data[0]["clave"]):
+                            st.session_state.user = res.data[0]
+                            st.rerun()
+                        else:
+                            st.error("Credenciales incorrectas.")
+                    except Exception as e:
+                        st.error(f"Error al verificar credenciales: {e}")
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────
 # 5. PANEL PRINCIPAL (SESIÓN ACTIVA)
@@ -292,6 +299,7 @@ else:
     MAX_FICHAS = 210
     
     with st.sidebar:
+        # Mini logo integrado mediante CSS en el menú lateral
         st.markdown(f"""
             <div style="text-align:center; margin-bottom:10px;">
                 <img src="{LOGO_SRC}" style="height:65px; object-fit:contain; mix-blend-mode:screen; filter:brightness(1.3);">
