@@ -11,7 +11,7 @@ import streamlit.components.v1 as components
 # ─────────────────────────────────────────
 # 0. CONFIGURACIÓN DEL LOGO OFICIAL (URL DIRECTA)
 # ─────────────────────────────────────────
-LOGO_SRC = "https://i.ibb.co/DDDFzZp3/Gd-L.jpg"
+LOGO_SRC = "https://i.ibb.co/nNxy2zyt/Gd-L-removebg-preview.png"
 
 # ─────────────────────────────────────────
 # 1. CONFIGURACIÓN DE PÁGINA Y ESTILOS
