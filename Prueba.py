@@ -261,7 +261,7 @@ if "user" not in st.session_state:
         st.markdown(f"""
             <div style="display: flex; justify-content: center; margin-bottom: 10px;">
                 <img src="{LOGO_SRC}" style="
-                    height: 130px; 
+                    height: 180px; 
                     object-fit: contain; 
                     mix-blend-mode: screen; 
                     filter: brightness(1.4) drop-shadow(0px 4px 12px rgba(96, 165, 250, 0.4));
