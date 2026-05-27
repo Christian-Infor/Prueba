@@ -138,8 +138,9 @@ st.markdown("""
 }
 
     /* Cada opción del radio */
+    section[data-testid="stSidebar"] .stRadio input[type="radio"] + div { display: none !important; }
     section[data-testid="stSidebar"] .stRadio > div > label {
-        display: flex !important;
+        display: flex !important; align-items: center !important; padding: 11px 20px !important;
         align-items: center !important;
         padding: 11px 20px !important;
         border-left: 3px solid transparent !important;
