@@ -27,14 +27,17 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
     @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
 
-    /* Forzar rendering correcto del ícono de expander */
-    .material-icons { font-family: 'Material Icons' !important; font-size: 20px !important; }
-
-    /* Si el ícono igual aparece como texto, ocultarlo */
-    [data-testid="stExpander"] summary > div > div:first-child,
-    [data-testid="stExpander"] summary > div > span.material-icons {
-        font-size: 16px !important;
-        color: #475569 !important;
+    /* Ocultar definitivamente el texto del icono de la flecha rota en los expanders */
+    [data-testid="stExpander"] summary svg,
+    [data-testid="stExpander"] summary [data-testid="stIconVisibility"],
+    [data-testid="stExpander"] summary span,
+    [data-testid="stExpander"] summary div:first-child {
+        display: none !important;
+    }
+    
+    /* Asegurar que el título ocupe el espacio correcto sin la flecha */
+    [data-testid="stExpander"] summary > div {
+        width: 100% !important;
     }
 
     html, body, [class*="st-"] {
