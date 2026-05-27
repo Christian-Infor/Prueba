@@ -31,20 +31,36 @@ st.markdown("""
     }
     .stApp { animation: fadeIn 0.4s ease-out; }
     
-    /* Contenedor central estilo tarjeta translúcida (Glassmorphism) */
+    /* ── CORRECCIÓN CRÍTICA PARA EL LOGIN (DISEÑO FASE 2) ── */
+    /* Encapsula toda la pantalla de login cuando no se ha iniciado sesión */
+    .stAppHasSidebar[data-sidebar-visible="false"], 
+    .stApp:not(:has(div[data-testid="stSidebar"])) [data-testid="stVerticalBlock"] > div:has(.login-card) {
+        background-color: #060b13 !important;
+    }
+    
+    /* Contenedor principal de la tarjeta translúcida */
     .login-card {
         background: rgba(13, 22, 41, 0.75) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 16px !important;
-        padding: 40px 30px !important;
-        max-width: 440px;
-        margin: 6vh auto 0 auto;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important;
+        padding: 40px 35px !important;
+        max-width: 450px !important;
+        margin: 8vh auto 0 auto !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+        text-align: center;
     }
 
-    /* Input text boxes integradas al fondo oscuro */
+    /* Forzar a los inputs de Streamlit que siguen a la tarjeta a meterse visualmente dentro del diseño */
+    .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput,
+    .stApp:not(:has(div[data-testid="stSidebar"])) .stButton {
+        max-width: 380px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+    }
+
+    /* Cajas de texto integradas al fondo oscuro */
     .stTextInput div[data-baseweb="input"] {
         background-color: rgba(255, 255, 255, 0.03) !important;
         border: 1px solid rgba(255, 255, 255, 0.12) !important;
@@ -55,8 +71,14 @@ st.markdown("""
         border-color: #3b82f6 !important;
         box-shadow: 0 0 0 1px #3b82f6 !important;
     }
+    .stTextInput label {
+        color: #94a3b8 !important;
+        font-weight: 500 !important;
+        text-align: left !important;
+        display: block !important;
+    }
 
-    /* Botón de ingreso moderno y llamativo */
+    /* Botón de ingreso moderno con degradado azul */
     .stButton > button[kind="primary"] {
         background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
         border: none !important;
@@ -66,13 +88,14 @@ st.markdown("""
         border-radius: 8px !important;
         transition: transform 0.1s ease, opacity 0.2s ease !important;
         width: 100% !important;
+        margin-top: 10px;
     }
     .stButton > button[kind="primary"]:hover {
         opacity: 0.95 !important;
         transform: translateY(-1px);
     }
     
-    /* Modelo de Tarjeta Unificado */
+    /* Modelo de Tarjeta Unificado de tu Dashboard */
     .metric-card {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         border: 1px solid #334155;
@@ -268,36 +291,37 @@ def init_supabase():
 supabase = init_supabase()
 
 # ─────────────────────────────────────────
-# 4. LOGIN MEJORADO (TARJETA TRANSPARENTE EN CONTEXTO OSCURO)
+# 4. LOGIN MEJORADO (DISEÑO GLASSMORPHISM PERFECTO)
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
     
-    # Renderizado centrado y con tarjeta estilo Glassmorphism
+    # Abrimos la tarjeta translúcida centralizada
     st.markdown('<div class="login-card">', unsafe_allow_html=True)
     
-    # Logo oficial centrado dentro del marco
+    # Logo oficial centrado y destacado
     st.markdown(f"""
-        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: center; margin-bottom: 15px;">
             <img src="{LOGO_SRC}" style="
-                height: 110px; 
+                height: 100px; 
                 object-fit: contain; 
                 mix-blend-mode: screen; 
-                filter: brightness(1.4) drop-shadow(0px 4px 12px rgba(96, 165, 250, 0.4));
+                filter: brightness(1.4) drop-shadow(0px 4px 12px rgba(96, 165, 250, 0.35));
             ">
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("<h2 style='color: white; text-align: center; margin-bottom: 4px; font-weight: 700; font-size: 1.8rem; letter-spacing: 0.5px;'>Iniciar Sesión</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #94a3b8; text-align: center; font-size: 0.95rem; margin-bottom: 28px;'>Introduce tus credenciales para acceder</p>", unsafe_allow_html=True)
+    st.markdown("<h2 style='color: white; margin-bottom: 4px; font-weight: 700; font-size: 1.75rem; letter-spacing: 0.5px;'>Iniciar Sesión</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #94a3b8; font-size: 0.95rem; margin-bottom: 24px;'>Introduce tus credenciales para acceder</p>", unsafe_allow_html=True)
     
-    # Campos utilizando claves nativas e interfaz de texto integrada
+    # Cerramos el contenedor HTML para que los inputs nativos fluyan ordenados por el CSS superior
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Campos utilizando claves nativas e interfaz integrada
     username = st.text_input("Usuario", placeholder="Ej: admin", label_visibility="visible")
     password = st.text_input("Contraseña", type="password", placeholder="••••••••", label_visibility="visible")
     
-    st.markdown('<div style="margin-top: 24px;"></div>', unsafe_allow_html=True)
-    
-    if st.button("Ingresar al Sistema 🚀", type="primary", use_container_width=True):
+    if st.button("Ingresar al Sistema 🚀", type="primary"):
         if not username or not password:
             st.error("⚠️ Por favor, ingresa tu usuario y contraseña.")
         else:
@@ -310,8 +334,6 @@ if "user" not in st.session_state:
                     st.error("❌ Credenciales incorrectas.")
             except Exception as e:
                 st.error(f"Error al verificar credenciales: {e}")
-                
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # ─────────────────────────────────────────
 # 5. PANEL PRINCIPAL (SESIÓN ACTIVA)
@@ -321,7 +343,6 @@ else:
     MAX_FICHAS = 210
     
     with st.sidebar:
-        # Mini logo integrado mediante CSS en el menú lateral
         st.markdown(f"""
             <div style="text-align:center; margin-bottom:10px;">
                 <img src="{LOGO_SRC}" style="height:65px; object-fit:contain; mix-blend-mode:screen; filter:brightness(1.3);">
