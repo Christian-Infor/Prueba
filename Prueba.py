@@ -652,12 +652,20 @@ else:
             for child in children:
                 with st.expander(f"📋 Ficha {child['ficha']} — {child['nombre']} ({child.get('sexo','-')})"):
                     
-                    btn_col1, btn_col2, _ = st.columns([1.5, 1.5, 4])
+                    btn_col1, btn_col2, btn_col3, _ = st.columns([1.5, 1.5, 1.5, 2.5])
                     with btn_col1:
                         if st.button(f"📄 Descargar Ficha PDF", key=f"pdf_{child['ficha']}", use_container_width=True):
                             st.session_state.pdf_trigger = child
                             st.rerun()
                     with btn_col2:
+                        edit_key = f"edit_mode_{child['ficha']}"
+                        if edit_key not in st.session_state:
+                            st.session_state[edit_key] = False
+                            
+                        if st.button(f"✏️ Editar Datos", key=f"btn_edit_{child['ficha']}", use_container_width=True):
+                            st.session_state[edit_key] = not st.session_state[edit_key]
+                            st.rerun()
+                    with btn_col3:
                         if st.button(f"❌ Registrar Egreso", key=f"egresar_{child['ficha']}", type="secondary", use_container_width=True):
                             try:
                                 supabase.table("beneficiarios").update({"estado": "Egresado"}).eq("ficha", child["ficha"]).execute()
@@ -672,26 +680,83 @@ else:
                                 st.error(f"Error al egresar: {e}")
                     st.write("---")
                     
-                    sub_c1, sub_c2 = st.columns(2)
-                    with sub_c1:
-                        st.markdown(f"**RUN:** `{child['rut']}`")
-                        st.markdown(f"**Fecha Nacimiento:** {child.get('nacimiento', '-')}")
-                        st.markdown(f"**Peso al Nacer:** {child.get('peso_nacer', '-')}")
-                        st.markdown(f"**Vacunas al Día:** `{child.get('vacunas', '-')}`")
-                        st.markdown(f"**Último Control Médico:** {child.get('ultimo_control', '-')}")
-                        st.markdown(f"**Dirección:** {child.get('direccion', '-')}")
-                    with sub_c2:
-                        st.markdown(f"**Madre:** {child.get('madre', '-')} | **Padre:** {child.get('padre', '-')}")
-                        st.markdown(f"**Teléfono:** {child.get('telefono_madre', '-')}")
-                        st.markdown(f"**Fecha Ingreso:** `{child.get('fecha_ingreso', '-')}`")
-                        st.markdown(f"**Egreso Estimado (2 años):** `{child.get('fecha_egreso', '-')}`")
-                        st.markdown(f"**Suplentes:** 1: {child.get('suplente_1','-')} | 2: {child.get('suplente_2','-')} | 3: {child.get('suplente_3','-')}")
-                    
-                    st.write("###")
-                    st.markdown("##### 📝 ANTECEDENTES GENERALES E HISTORIA SOCIAL")
-                    historia = child.get('historia_social')
-                    if historia: st.info(historia)
-                    else: st.caption("No se registran antecedentes sociales.")
+                    if st.session_state[edit_key]:
+                        st.markdown("##### ✏️ Modificar Datos del Beneficiario")
+                        with st.form(key=f"form_edit_data_{child['ficha']}"):
+                            ec1, ec2, ec3 = st.columns([2, 1.5, 1])
+                            u_name = ec1.text_input("Nombre Completo *", value=child["nombre"])
+                            u_rut = ec2.text_input("RUN / Identificación *", value=child["rut"])
+                            u_ficha = ec3.number_input("N° Ficha (Lectura)", value=int(child["ficha"]), disabled=True)
+                            
+                            ecc1, ecc2, ecc3 = st.columns(3)
+                            u_birth = ecc1.text_input("Fecha Nacimiento", value=child.get("nacimiento", ""))
+                            u_sexo = ecc2.selectbox("Sexo", ["Masculino", "Femenino"], index=0 if child.get("sexo") == "Masculino" else 1)
+                            u_peso = ecc3.text_input("Peso al Nacer", value=child.get("peso_nacer", ""))
+                            
+                            ecx1, ecx2 = st.columns(2)
+                            u_vacunas = ecx1.selectbox("¿Vacunas al Día?", ["Sí", "No"], index=0 if child.get("vacunas") == "Sí" else 1)
+                            u_control = ecx2.text_input("Último Control Médico", value=child.get("ultimo_control", ""))
+                            
+                            st.markdown("##### 👥 Contactos y Suplentes")
+                            eccc1, eccc2, eccc3 = st.columns(3)
+                            u_mother = eccc1.text_input("Nombre de la Madre", value=child.get("madre", ""))
+                            u_father = eccc2.text_input("Nombre del Padre", value=child.get("padre", ""))
+                            u_phone = eccc3.text_input("Teléfono", value=child.get("telefono_madre", ""))
+                            u_address = st.text_input("Dirección Particular", value=child.get("direccion", ""))
+                            
+                            es1, es2, es3 = st.columns(3)
+                            u_sup1 = es1.text_input("Suplente 1", value=child.get("suplente_1", ""))
+                            u_sup2 = es2.text_input("Suplente 2", value=child.get("suplente_2", ""))
+                            u_sup3 = es3.text_input("Suplente 3", value=child.get("suplente_3", ""))
+                            
+                            u_social = st.text_area("Antecedentes / Historia Social", value=child.get("historia_social", ""))
+                            
+                            if st.form_submit_button("💾 GUARDAR CAMBIOS", type="primary", use_container_width=True):
+                                if not u_name or not u_rut:
+                                    st.error("Nombre y RUN no pueden quedar vacíos.")
+                                else:
+                                    try:
+                                        supabase.table("beneficiarios").update({
+                                            "nombre": u_name, "rut": u_rut, "nacimiento": u_birth,
+                                            "sexo": u_sexo, "peso_nacer": u_peso, "vacunas": u_vacunas,
+                                            "ultimo_control": u_control, "madre": u_mother, "padre": u_father,
+                                            "telefono_madre": u_phone, "direccion": u_address,
+                                            "suplente_1": u_sup1, "suplente_2": u_sup2, "suplente_3": u_sup3,
+                                            "historia_social": u_social
+                                        }).eq("ficha", child["ficha"]).execute()
+                                        
+                                        supabase.table("historial").insert({
+                                            "responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1,
+                                            "tipo": "EDICIÓN", "observaciones": f"Ficha {child['ficha']} corregida por digitación", "created_at": get_local_now(),
+                                        }).execute()
+                                        
+                                        st.session_state[edit_key] = False
+                                        st.toast("✅ Ficha actualizada de manera exitosa.", icon="💾")
+                                        time.sleep(0.5)
+                                        st.rerun()
+                                    except Exception as e:
+                                        st.error(f"Error al actualizar la base de datos: {e}")
+                    else:
+                        sub_c1, sub_c2 = st.columns(2)
+                        with sub_c1:
+                            st.markdown(f"**RUN:** `{child['rut']}`")
+                            st.markdown(f"**Fecha Nacimiento:** {child.get('nacimiento', '-')}")
+                            st.markdown(f"**Peso al Nacer:** {child.get('peso_nacer', '-')}")
+                            st.markdown(f"**Vacunas al Día:** `{child.get('vacunas', '-')}`")
+                            st.markdown(f"**Último Control Médico:** {child.get('ultimo_control', '-')}")
+                            st.markdown(f"**Dirección:** {child.get('direccion', '-')}")
+                        with sub_c2:
+                            st.markdown(f"**Madre:** {child.get('madre', '-')} | **Padre:** {child.get('padre', '-')}")
+                            st.markdown(f"**Teléfono:** {child.get('telefono_madre', '-')}")
+                            st.markdown(f"**Fecha Ingreso:** `{child.get('fecha_ingreso', '-')}`")
+                            st.markdown(f"**Egreso Estimado (2 años):** `{child.get('fecha_egreso', '-')}`")
+                            st.markdown(f"**Suplentes:** 1: {child.get('suplente_1','-')} | 2: {child.get('suplente_2','-')} | 3: {child.get('suplente_3','-')}")
+                        
+                        st.write("###")
+                        st.markdown("##### 📝 ANTECEDENTES GENERALES E HISTORIA SOCIAL")
+                        historia = child.get('historia_social')
+                        if historia: st.info(historia)
+                        else: st.caption("No se registran antecedentes sociales.")
                     
                     st.write("###")
                     st.markdown("##### 📦 HISTORIAL DE ENTREGAS RECIBIDAS")
