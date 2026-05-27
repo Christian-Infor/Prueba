@@ -19,7 +19,7 @@ LOGO_SRC = "https://i.ibb.co/nNxy2zyt/Gd-L-removebg-preview.png"
 st.set_page_config(
     page_title="Gota de Leche - Sistema Maestro",
     layout="wide",
-    page_icon=LOGO_SRC, # El ícono de la pestaña ahora es el logo oficial
+    page_icon=LOGO_SRC, 
 )
 
 st.markdown("""
@@ -31,26 +31,45 @@ st.markdown("""
     }
     .stApp { animation: fadeIn 0.4s ease-out; }
     
-    .centered-login {
-        max-width: 420px;
-        margin: 0 auto;
-        text-align: center;
-        padding-top: 6vh;
+    /* Contenedor central estilo tarjeta translúcida (Glassmorphism) */
+    .login-card {
+        background: rgba(13, 22, 41, 0.75) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 16px !important;
+        padding: 40px 30px !important;
+        max-width: 440px;
+        margin: 6vh auto 0 auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important;
     }
-    /* Centra el título y subtítulo */
-    .centered-login h1, .centered-login p {
-        text-align: center !important;
+
+    /* Input text boxes integradas al fondo oscuro */
+    .stTextInput div[data-baseweb="input"] {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 8px !important;
+        transition: all 0.2s ease !important;
     }
-    .stForm {
-        background-color: #1E293B !important;
-        border: 2px solid #3B82F6 !important;
-        border-radius: 18px !important;
-        padding: 2rem 2rem 1.5rem 2rem !important;
-        box-shadow: 0px 8px 24px rgba(59, 130, 246, 0.15) !important;
+    .stTextInput div[data-baseweb="input"]:focus-within {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 1px #3b82f6 !important;
     }
-    /* Centra el botón submit */
-    .stForm [data-testid="stFormSubmitButton"] button {
-        border-radius: 10px !important;
+
+    /* Botón de ingreso moderno y llamativo */
+    .stButton > button[kind="primary"] {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+        border: none !important;
+        color: white !important;
+        font-weight: 600 !important;
+        padding: 12px 24px !important;
+        border-radius: 8px !important;
+        transition: transform 0.1s ease, opacity 0.2s ease !important;
+        width: 100% !important;
+    }
+    .stButton > button[kind="primary"]:hover {
+        opacity: 0.95 !important;
+        transform: translateY(-1px);
     }
     
     /* Modelo de Tarjeta Unificado */
@@ -249,47 +268,50 @@ def init_supabase():
 supabase = init_supabase()
 
 # ─────────────────────────────────────────
-# 4. LOGIN MEJORADO (CON LOGO INTEGRADO EN MODO OSCURO)
+# 4. LOGIN MEJORADO (TARJETA TRANSPARENTE EN CONTEXTO OSCURO)
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
-    _, col_mid, _ = st.columns([1, 0.8, 1])
-    with col_mid:
-        st.markdown('<div class="centered-login">', unsafe_allow_html=True)
-        
-        # LOGO OPTIMIZADO CON TRATAMIENTO DE MEZCLA DE PANTALLA CSS
-        st.markdown(f"""
-            <div style="display: flex; justify-content: center; margin-bottom: 10px;">
-                <img src="{LOGO_SRC}" style="
-                    height: 130px; 
-                    object-fit: contain; 
-                    mix-blend-mode: screen; 
-                    filter: brightness(1.4) drop-shadow(0px 4px 12px rgba(96, 165, 250, 0.4));
-                    border-radius: 0px;
-                ">
-            </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("<h1 style='color:#60A5FA; font-size:2.4rem; margin-bottom:0px; font-weight:800; letter-spacing:1px; text-align:center;'>GOTAS DE LECHE</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='color:#94A3B8; font-size:1rem; margin-bottom:24px; letter-spacing:0.5px; text-align:center;'>Sistema Maestro de Gestión</p>", unsafe_allow_html=True)
-        
-        with st.form("login"):
-            username = st.text_input("Usuario", placeholder="👤 Ingrese su usuario")
-            password = st.text_input("Contraseña", type="password", placeholder="🔒 Ingrese su contraseña")
-            if st.form_submit_button("INGRESAR AL SISTEMA 🚀", use_container_width=True):
-                if not username or not password:
-                    st.error("Ingrese usuario y contraseña.")
+    
+    # Renderizado centrado y con tarjeta estilo Glassmorphism
+    st.markdown('<div class="login-card">', unsafe_allow_html=True)
+    
+    # Logo oficial centrado dentro del marco
+    st.markdown(f"""
+        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+            <img src="{LOGO_SRC}" style="
+                height: 110px; 
+                object-fit: contain; 
+                mix-blend-mode: screen; 
+                filter: brightness(1.4) drop-shadow(0px 4px 12px rgba(96, 165, 250, 0.4));
+            ">
+        </div>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<h2 style='color: white; text-align: center; margin-bottom: 4px; font-weight: 700; font-size: 1.8rem; letter-spacing: 0.5px;'>Iniciar Sesión</h2>", unsafe_allow_html=True)
+    st.markdown("<p style='color: #94a3b8; text-align: center; font-size: 0.95rem; margin-bottom: 28px;'>Introduce tus credenciales para acceder</p>", unsafe_allow_html=True)
+    
+    # Campos utilizando claves nativas e interfaz de texto integrada
+    username = st.text_input("Usuario", placeholder="Ej: admin", label_visibility="visible")
+    password = st.text_input("Contraseña", type="password", placeholder="••••••••", label_visibility="visible")
+    
+    st.markdown('<div style="margin-top: 24px;"></div>', unsafe_allow_html=True)
+    
+    if st.button("Ingresar al Sistema 🚀", type="primary", use_container_width=True):
+        if not username or not password:
+            st.error("⚠️ Por favor, ingresa tu usuario y contraseña.")
+        else:
+            try:
+                res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
+                if res.data and verify_password(password, res.data[0]["clave"]):
+                    st.session_state.user = res.data[0]
+                    st.rerun()
                 else:
-                    try:
-                        res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
-                        if res.data and verify_password(password, res.data[0]["clave"]):
-                            st.session_state.user = res.data[0]
-                            st.rerun()
-                        else:
-                            st.error("Credenciales incorrectas.")
-                    except Exception as e:
-                        st.error(f"Error al verificar credenciales: {e}")
-        st.markdown("</div>", unsafe_allow_html=True)
+                    st.error("❌ Credenciales incorrectas.")
+            except Exception as e:
+                st.error(f"Error al verificar credenciales: {e}")
+                
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # ─────────────────────────────────────────
 # 5. PANEL PRINCIPAL (SESIÓN ACTIVA)
