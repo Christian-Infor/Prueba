@@ -11,7 +11,7 @@ import streamlit.components.v1 as components
 # ─────────────────────────────────────────
 # 0. CONFIGURACIÓN DEL LOGO OFICIAL (URL DIRECTA)
 # ─────────────────────────────────────────
-LOGO_SRC = "https://i.ibb.co/DDDFzZp3/Gd-L.jpg"
+LOGO_SRC = "https://i.ibb.co/nNxy2zyt/Gd-L-removebg-preview.png"
 
 # ─────────────────────────────────────────
 # 1. CONFIGURACIÓN DE PÁGINA Y ESTILOS
@@ -19,64 +19,484 @@ LOGO_SRC = "https://i.ibb.co/DDDFzZp3/Gd-L.jpg"
 st.set_page_config(
     page_title="Gota de Leche - Sistema Maestro",
     layout="wide",
-    page_icon=LOGO_SRC,
+    page_icon=LOGO_SRC, # El ícono de la pestaña ahora es el logo oficial
 )
 
 st.markdown("""
     <style>
-    html, body, [class*="st-"] { font-size: 1.1rem !important; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+    /* Forzar rendering correcto del ícono de expander */
+    .material-icons { font-family: 'Material Icons' !important; font-size: 20px !important; }
+
+    /* Si el ícono igual aparece como texto, ocultarlo */
+    [data-testid="stExpander"] summary > div > div:first-child,
+    [data-testid="stExpander"] summary > div > span.material-icons {
+        font-size: 16px !important;
+        color: #475569 !important;
+    }
+
+    html, body, [class*="st-"] {
+        font-family: 'Inter', sans-serif !important;
+        font-size: 1rem !important;
+    }
+
+    /* ── Fondo global ── */
+    .stApp {
+        background: #070d1a !important;
+        animation: fadeIn 0.5s ease-out;
+    }
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
+        from { opacity: 0; transform: translateY(8px); }
         to   { opacity: 1; transform: translateY(0); }
     }
-    .stApp { animation: fadeIn 0.4s ease-out; }
-    
-    /* LOGIN COMPACTO Y CENTRADO */
+
+    /* ── Eliminar padding superior por defecto ── */
+    .block-container { padding-top: 1.5rem !important; }
+
+    /* ══════════════════════════════
+       LOGIN
+    ══════════════════════════════ */
     .centered-login {
-        max-width: 400px; /* Ancho reducido a 400px */
+        max-width: 420px;
         margin: 0 auto;
         text-align: center;
-        padding-top: 10vh;
+        padding-top: 5vh;
     }
+    .centered-login h1, .centered-login p { text-align: center !important; }
+
+    /* Formulario de login */
     .stForm {
-        background-color: #1E293B !important;
-        border: 3px solid #3B82F6 !important;
+        background: linear-gradient(160deg, #111827 0%, #0f172a 100%) !important;
+        border: 1px solid rgba(99, 131, 246, 0.35) !important;
         border-radius: 20px !important;
-        padding: 2.5rem !important;
-        box-shadow: 0px 10px 30px rgba(0,0,0,0.5) !important;
+        padding: 2rem 2rem 1.6rem 2rem !important;
+        box-shadow: 0 0 40px rgba(59, 130, 246, 0.12), 0 20px 60px rgba(0,0,0,0.5) !important;
     }
-    
-    /* Modelo de Tarjeta Unificado */
-    .metric-card {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        border: 1px solid #334155;
-        border-radius: 16px;
-        padding: 24px;
-        text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        margin-bottom: 15px;
+    /* Botón submit del login */
+    .stForm [data-testid="stFormSubmitButton"] button {
+        background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
+        color: #fff !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        letter-spacing: 0.06em !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 0.75rem 1rem !important;
+        transition: all 0.2s ease !important;
+        box-shadow: 0 4px 20px rgba(79, 70, 229, 0.4) !important;
     }
-    .metric-label {
-        color: #94a3b8;
-        font-size: 0.85rem;
-        font-weight: 600;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
+    .stForm [data-testid="stFormSubmitButton"] button:hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 28px rgba(79, 70, 229, 0.55) !important;
+    }
+
+    /* ══════════════════════════════
+       SIDEBAR PROFESIONAL
+    ══════════════════════════════ */
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #0d1526 0%, #090f1e 100%) !important;
+        border-right: 1px solid rgba(255,255,255,0.06) !important;
+    }
+    section[data-testid="stSidebar"] > div { padding: 0 !important; }
+
+    /* Header del sidebar */
+    .sidebar-header {
+        background: rgba(15, 23, 42, 0.6);
+        padding: 24px 20px 20px 20px;
         margin-bottom: 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .sidebar-user-name {
+        color: #f1f5f9;
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 10px 0 2px 0;
+        letter-spacing: 0.01em;
+    }
+    .sidebar-user-role {
+        color: #64748b;
+        font-size: 0.78rem;
+        font-weight: 500;
+        margin-top: 4px;
+    }
+
+    /* ══════════════════════════════
+       SIDEBAR — RADIO COMO NAV
+    ══════════════════════════════ */
+    /* Ocultar el label del radio group */
+    section[data-testid="stSidebar"] .stRadio > label { display: none !important; }
+
+    /* Contenedor de opciones en columna */
+    section[data-testid="stSidebar"] .stRadio > div {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 2px !important;
+        padding: 4px 0 !important;
+    }
+
+    /* Cada opción del radio */
+    section[data-testid="stSidebar"] .stRadio > div > label {
+        display: flex !important;
+        align-items: center !important;
+        padding: 11px 20px !important;
+        border-left: 3px solid transparent !important;
+        border-radius: 0 !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+        color: #94a3b8 !important;
+        font-size: 0.88rem !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.03em !important;
+        background: transparent !important;
+        margin: 0 !important;
+    }
+    section[data-testid="stSidebar"] .stRadio > div > label:hover {
+        background: rgba(59,130,246,0.08) !important;
+        color: #e2e8f0 !important;
+        border-left-color: rgba(59,130,246,0.35) !important;
+    }
+    /* Opción seleccionada */
+    section[data-testid="stSidebar"] .stRadio > div > label[data-checked="true"],
+    section[data-testid="stSidebar"] .stRadio > div > label:has(input:checked) {
+        background: rgba(59,130,246,0.12) !important;
+        color: #60a5fa !important;
+        border-left-color: #3b82f6 !important;
+        font-weight: 600 !important;
+    }
+    /* Ocultar el círculo del radio */
+    section[data-testid="stSidebar"] .stRadio > div > label > div:first-child {
+        display: none !important;
+    }
+
+    /* Botón cerrar sesión en sidebar */
+    .sidebar-logout .stButton button {
+        background: rgba(239,68,68,0.08) !important;
+        color: #f87171 !important;
+        border: 1px solid rgba(239,68,68,0.2) !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 0.82rem !important;
+        transition: all 0.2s !important;
+    }
+    .sidebar-logout .stButton button:hover {
+        background: rgba(239,68,68,0.15) !important;
+        border-color: rgba(239,68,68,0.4) !important;
+    }
+
+    /* ══════════════════════════════
+       PAGE HEADER UNIFICADO
+    ══════════════════════════════ */
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding: 0 0 20px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+        margin-bottom: 28px;
+    }
+    .page-header-left h2 {
+        color: #f1f5f9;
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin: 0 0 4px 0;
+        letter-spacing: -0.01em;
+    }
+    .page-header-left p {
+        color: #64748b;
+        font-size: 0.82rem;
+        margin: 0;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+    .page-header-right {
+        text-align: right;
+        font-size: 0.8rem;
+        color: #475569;
+        font-weight: 500;
+        line-height: 1.6;
+    }
+    .page-header-badge {
+        display: inline-block;
+        background: rgba(59,130,246,0.12);
+        color: #60a5fa;
+        border: 1px solid rgba(59,130,246,0.2);
+        border-radius: 20px;
+        padding: 3px 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+        letter-spacing: 0.04em;
+    }
+
+    /* ══════════════════════════════
+       TARJETAS KPI
+    ══════════════════════════════ */
+    .kpi-card {
+        background: linear-gradient(145deg, #131f35 0%, #0d1526 100%);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 16px;
+        padding: 22px 24px;
+        margin-bottom: 16px;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .kpi-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+    }
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: var(--accent, linear-gradient(90deg, #3b82f6, #6366f1));
+    }
+    .kpi-label {
+        color: #64748b;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+    .kpi-value {
+        color: #f1f5f9;
+        font-size: 2.4rem;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.02em;
+    }
+    .kpi-sub {
+        color: #475569;
+        font-size: 0.82rem;
+        font-weight: 500;
+        margin-top: 6px;
+    }
+    .kpi-progress-bar {
+        height: 4px;
+        background: rgba(255,255,255,0.06);
+        border-radius: 4px;
+        margin-top: 12px;
+        overflow: hidden;
+    }
+    .kpi-progress-fill {
+        height: 100%;
+        border-radius: 4px;
+        background: linear-gradient(90deg, #3b82f6, #6366f1);
+        transition: width 0.6s ease;
+    }
+
+    /* ══════════════════════════════
+       TARJETAS DE STOCK
+    ══════════════════════════════ */
+    .metric-card {
+        background: linear-gradient(145deg, #131f35 0%, #0d1526 100%);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 14px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 14px;
+        transition: transform 0.2s ease;
+    }
+    .metric-card:hover { transform: translateY(-2px); }
+    .metric-label {
+        color: #64748b;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+        min-height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     .metric-value {
         color: #38bdf8;
-        font-size: 2.5rem;
-        font-weight: 700;
+        font-size: 2.2rem;
+        font-weight: 800;
         line-height: 1;
+        letter-spacing: -0.02em;
     }
-    
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-top: 12px;
+    }
+    .status-ok    { background: rgba(16,185,129,0.12); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
+    .status-warn  { background: rgba(245,158,11,0.12); color: #fbbf24; border: 1px solid rgba(245,158,11,0.2); }
+    .status-crit  { background: rgba(239,68,68,0.12);  color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+
+    /* ══════════════════════════════
+       SECCIÓN DE TÍTULO (sub-header)
+    ══════════════════════════════ */
+    .section-title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        padding: 20px 0 12px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* ══════════════════════════════
+       FICHA DATOS
+    ══════════════════════════════ */
     .ficha-seccion-datos {
-        background-color: #1e293b;
-        border-left: 4px solid #3b82f6;
-        padding: 15px;
-        border-radius: 4px;
+        background: rgba(30, 41, 59, 0.5);
+        border-left: 3px solid #3b82f6;
+        padding: 14px 16px;
+        border-radius: 0 8px 8px 0;
         margin-bottom: 10px;
+        font-size: 0.93rem;
+        line-height: 1.6;
+    }
+
+    /* ══════════════════════════════
+       TABLAS Y DATAFRAMES
+    ══════════════════════════════ */
+    .stDataFrame { border-radius: 12px !important; overflow: hidden; }
+
+    /* ══════════════════════════════
+       EXPANDERS — ocultar ícono ▸ y estilizar
+    ══════════════════════════════ */
+    /* El ícono _arrow_ de Streamlit es un span con aria-hidden */
+    [data-testid="stExpander"] summary [data-testid="stExpanderToggleIcon"],
+    [data-testid="stExpander"] summary > div > div:first-child {
+        display: none !important;
+    }
+    /* Ocultar el SVG de flecha dentro del expander */
+    [data-testid="stExpander"] summary svg {
+        display: none !important;
+    }
+    [data-testid="stExpander"] summary::-webkit-details-marker {
+        display: none !important;
+    }
+    /* En Streamlit el label del expander va dentro de un <p> con clase especial */
+    [data-testid="stExpander"] summary p {
+        font-weight: 600 !important;
+        color: #cbd5e1 !important;
+        font-size: 0.9rem !important;
+        margin: 0 !important;
+    }
+    /* Estilo del summary */
+    [data-testid="stExpander"] summary {
+        background: rgba(15, 23, 42, 0.7) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        border-radius: 10px !important;
+        padding: 14px 18px !important;
+        list-style: none !important;
+        cursor: pointer !important;
+        transition: background 0.15s !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    [data-testid="stExpander"] summary:hover {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: rgba(59,130,246,0.25) !important;
+    }
+    [data-testid="stExpander"][open] > summary {
+        border-radius: 10px 10px 0 0 !important;
+        border-bottom-color: rgba(59,130,246,0.2) !important;
+    }
+
+    /* ══════════════════════════════
+       INPUTS Y SELECTBOXES
+    ══════════════════════════════ */
+    .stTextInput input, .stNumberInput input, .stTextArea textarea, .stSelectbox select {
+        background-color: #0d1526 !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 10px !important;
+        color: #e2e8f0 !important;
+        font-size: 0.92rem !important;
+        transition: border-color 0.2s !important;
+    }
+    .stTextInput input:focus, .stNumberInput input:focus, .stTextArea textarea:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.12) !important;
+    }
+
+    /* ══════════════════════════════
+       OCULTAR ÍCONO ▸ DE TODOS LOS BOTONES
+    ══════════════════════════════ */
+    /* El ícono _arrow_ que Streamlit agrega a st.button */
+    button[data-testid="stBaseButton-secondary"] svg,
+    button[data-testid="stBaseButton-primary"] svg,
+    .stButton button svg {
+        display: none !important;
+    }
+    /* Alternativa: el span del ícono dentro del botón */
+    .stButton button [data-testid="stMarkdownContainer"] + span,
+    .stButton button > div > span:first-child {
+        display: none !important;
+    }
+    .stButton button[kind="primary"] {
+        background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
+        border: none !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.04em !important;
+        transition: all 0.2s !important;
+        box-shadow: 0 4px 14px rgba(79,70,229,0.3) !important;
+    }
+    .stButton button[kind="primary"]:hover {
+        transform: translateY(-1px) !important;
+        box-shadow: 0 6px 20px rgba(79,70,229,0.45) !important;
+    }
+
+    /* ══════════════════════════════
+       ALERTS / MENSAJES
+    ══════════════════════════════ */
+    .stAlert {
+        border-radius: 12px !important;
+        border: none !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* ══════════════════════════════
+       DIVIDER
+    ══════════════════════════════ */
+    hr { border-color: rgba(255,255,255,0.07) !important; }
+
+    /* ══════════════════════════════
+       TABS
+    ══════════════════════════════ */
+    .stTabs [data-baseweb="tab-list"] {
+        background: transparent !important;
+        gap: 4px !important;
+        border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+    }
+    .stTabs [data-baseweb="tab"] {
+        background: transparent !important;
+        color: #64748b !important;
+        font-weight: 600 !important;
+        font-size: 0.85rem !important;
+        letter-spacing: 0.04em !important;
+        padding: 10px 20px !important;
+        border-radius: 8px 8px 0 0 !important;
+        border: none !important;
+        transition: color 0.2s !important;
+    }
+    .stTabs [aria-selected="true"] {
+        background: rgba(59,130,246,0.1) !important;
+        color: #60a5fa !important;
+        border-bottom: 2px solid #3b82f6 !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -232,57 +652,54 @@ def init_supabase():
         key = st.secrets["SUPABASE_KEY"]
         return create_client(url, key)
     except KeyError as e:
-        st.error(f"Falta la credencial en Secrets: {e}")
+        st.error(f"Configuración incompleta: falta la credencial {e}. Revise los Secrets.")
         st.stop()
     except Exception as e:
-        st.error(f"⚠️ Error de conexión: {e}")
+        st.error("No fue posible establecer conexión con la base de datos. Intente más tarde.")
         st.stop()
 
 supabase = init_supabase()
 
 # ─────────────────────────────────────────
-# 4. LOGIN (ADAPTADO A ANCHO COMPACTO)
+# 4. LOGIN MEJORADO (CON LOGO INTEGRADO EN MODO OSCURO)
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
-    
-    # Contenedor principal centrado
-    st.markdown('<div class="centered-login">', unsafe_allow_html=True)
-    
-    # Logo
-    st.markdown(f"""
-        <div style="display: flex; justify-content: center; margin-bottom: 10px;">
-            <img src="{LOGO_SRC}" style="
-                height: 130px; 
-                object-fit: contain; 
-                mix-blend-mode: screen; 
-                filter: brightness(1.4) drop-shadow(0px 4px 12px rgba(96, 165, 250, 0.4));
-                border-radius: 0px;
-            ">
-        </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown("<h1 style='color:#60A5FA; font-size:2rem; margin-bottom:5px; font-weight:800;'>GOTAS DE LECHE</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#94A3B8; font-size:1rem; margin-bottom:20px;'>Sistema Maestro de Gestión</p>", unsafe_allow_html=True)
-    
-    # Formulario
-    with st.form("login"):
-        username = st.text_input("Usuario", placeholder="👤 Ingrese su usuario")
-        password = st.text_input("Contraseña", type="password", placeholder="🔒 Ingrese su contraseña")
-        if st.form_submit_button("INGRESAR AL SISTEMA 🚀", use_container_width=True):
-            if not username or not password:
-                st.error("Ingrese usuario y contraseña.")
-            else:
-                try:
-                    res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
-                    if res.data and verify_password(password, res.data[0]["clave"]):
-                        st.session_state.user = res.data[0]
-                        st.rerun()
-                    else:
-                        st.error("Credenciales incorrectas.")
-                except Exception as e:
-                    st.error(f"Error al verificar credenciales: {e}")
-    st.markdown('</div>', unsafe_allow_html=True)
+    _, col_mid, _ = st.columns([1, 0.8, 1])
+    with col_mid:
+        st.markdown('<div class="centered-login">', unsafe_allow_html=True)
+        
+        st.markdown(f"""
+            <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+                <img src="{LOGO_SRC}" style="
+                    height: 180px; 
+                    object-fit: contain; 
+                    mix-blend-mode: screen; 
+                    filter: brightness(1.4) drop-shadow(0px 6px 18px rgba(96, 165, 250, 0.5));
+                ">
+            </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<h1 style='color:#e2e8f0; font-size:2rem; margin-bottom:2px; font-weight:800; letter-spacing:-0.01em; text-align:center;'>GOTAS DE LECHE</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#475569; font-size:0.8rem; margin-bottom:28px; letter-spacing:0.12em; text-transform:uppercase; font-weight:600; text-align:center;'>Sistema Maestro de Gestión</p>", unsafe_allow_html=True)
+        
+        with st.form("login"):
+            username = st.text_input("Usuario", placeholder="Ingrese su usuario")
+            password = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña")
+            if st.form_submit_button("INGRESAR AL SISTEMA", use_container_width=True):
+                if not username or not password:
+                    st.error("Por favor complete usuario y contraseña.")
+                else:
+                    try:
+                        res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
+                        if res.data and verify_password(password, res.data[0]["clave"]):
+                            st.session_state.user = res.data[0]
+                            st.rerun()
+                        else:
+                            st.error("Usuario o contraseña incorrectos. Intente nuevamente.")
+                    except Exception as e:
+                        st.error("No fue posible conectar con el servidor. Intente más tarde.")
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────
 # 5. PANEL PRINCIPAL (SESIÓN ACTIVA)
@@ -290,129 +707,180 @@ if "user" not in st.session_state:
 else:
     user = st.session_state.user
     MAX_FICHAS = 210
-    
+
+    if "menu_choice" not in st.session_state:
+        st.session_state.menu_choice = "📊  DASHBOARD"
+
     with st.sidebar:
+        # ── Header del sidebar ──
         st.markdown(f"""
-            <div style="text-align:center; margin-bottom:10px;">
-                <img src="{LOGO_SRC}" style="height:65px; object-fit:contain; mix-blend-mode:screen; filter:brightness(1.3);">
+            <div class="sidebar-header">
+                <div style="text-align:center;">
+                    <img src="{LOGO_SRC}" style="height:72px; object-fit:contain; mix-blend-mode:screen; filter:brightness(1.35);">
+                </div>
+                <div style="text-align:center; margin-top:12px;">
+                    <div class="sidebar-user-name">{user['nombre']}</div>
+                    <div class="sidebar-user-role">Operador Autorizado</div>
+                </div>
             </div>
         """, unsafe_allow_html=True)
-        st.markdown(f"### 👤 {user['nombre']}")
-        st.caption(f"Operador autorizado")
-        st.divider()
-        
-        menu_choice = st.radio(
-            "MENÚ PRINCIPAL", 
-            [
-                "📊 DASHBOARD",
-                "📦 BODEGA CENTRAL",
-                "⚖️ SALA DE ATENCIÓN",
-                "👥 GESTIÓN DE NIÑOS",
-                "📜 HISTORIAL",
-            ],
-            label_visibility="collapsed"
+
+        st.markdown("<div style='padding: 6px 0 4px 0;'>", unsafe_allow_html=True)
+
+        # ── Navegación con radio estilizado ──
+        menu_choice_selected = st.radio(
+            "nav",
+            ["📊  DASHBOARD", "📦  BODEGA CENTRAL", "⚖️  SALA DE ATENCIÓN", "👥  GESTIÓN DE NIÑOS", "📜  HISTORIAL"],
+            label_visibility="collapsed",
+            key="menu_radio"
         )
-        
-        st.divider()
-        if st.button("🚪 CERRAR SESIÓN", use_container_width=True, type="secondary"):
+        st.session_state.menu_choice = menu_choice_selected
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        # ── Separador ──
+        st.markdown("<div style='height:1px; background:rgba(255,255,255,0.06); margin: 8px 0 12px 0;'></div>", unsafe_allow_html=True)
+
+        # ── Cerrar sesión ──
+        st.markdown("<div class='sidebar-logout'>", unsafe_allow_html=True)
+        if st.button("🚪  CERRAR SESIÓN", use_container_width=True, type="secondary"):
             st.session_state.clear()
             st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        # ── Timestamp en el fondo ──
+        st.markdown(f"""
+            <div style="padding: 16px 20px; color: #334155; font-size: 0.72rem; font-weight:500; letter-spacing:0.04em;">
+                {datetime.now(CHILE_TZ).strftime("%d/%m/%Y  %H:%M")} — Chile
+            </div>
+        """, unsafe_allow_html=True)
+
+    menu_choice = st.session_state.get("menu_radio", "📊  DASHBOARD")
+
+    # ── Helper: page header unificado ──
+    def render_page_header(title: str, subtitle: str, badge: str = ""):
+        fecha_hoy = datetime.now(CHILE_TZ).strftime("%d/%m/%Y")
+        nombre_usuario = user['nombre']
+        st.markdown(
+            f'<div class="page-header">'
+            f'<div class="page-header-left"><h2>{title}</h2><p>{subtitle}</p></div>'
+            f'<div class="page-header-right">{fecha_hoy}<br><span style="color:#475569;">{nombre_usuario}</span></div>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
 
     # 📊 PANEL: DASHBOARD
-    if menu_choice == "📊 DASHBOARD":
-        st.header("📊 Resumen de Operación e Info Inmediata", divider="blue")
+    if menu_choice == "📊  DASHBOARD":
+        render_page_header("Dashboard", "Resumen operacional en tiempo real", "SISTEMA ACTIVO")
         try:
-            with st.spinner("Actualizando métricas..."):
+            with st.spinner("Cargando métricas..."):
                 stock_res = supabase.table("stock").select("*").order("producto").execute()
                 benef_res = supabase.table("beneficiarios").select("rut", count="exact").eq("estado", "Activo").execute()
         except Exception as e:
-            st.error(f"Error al conectar con Supabase: {e}"); st.stop()
+            st.error("No fue posible cargar los datos. Verifique la conexión."); st.stop()
             
         if stock_res.data:
             df = pd.DataFrame(stock_res.data)
             niños_activos = benef_res.count if benef_res.count else 0
             fichas_disponibles = max(0, MAX_FICHAS - niños_activos)
-            
+            pct_ocupacion = int((niños_activos / MAX_FICHAS) * 100)
+            color_ocupacion = "#ef4444" if pct_ocupacion >= 90 else "#f59e0b" if pct_ocupacion >= 70 else "#3b82f6"
+
             m1, m2, m3, m4 = st.columns(4)
             with m1:
-                st.markdown(f'<div class="metric-card"><div class="metric-label">Niños Activos</div><div class="metric-value">{niños_activos} <span style="font-size:1.1rem; color:#94a3b8;">/ {MAX_FICHAS}</span></div></div>', unsafe_allow_html=True)
+                st.markdown(f"""
+                    <div class="kpi-card" style="--accent: linear-gradient(90deg,{color_ocupacion},{color_ocupacion}88);">
+                        <div class="kpi-label">Niños Activos</div>
+                        <div class="kpi-value" style="color:{color_ocupacion};">{niños_activos}</div>
+                        <div class="kpi-sub">de {MAX_FICHAS} fichas totales</div>
+                        <div class="kpi-progress-bar">
+                            <div class="kpi-progress-fill" style="width:{pct_ocupacion}%; background:{color_ocupacion};"></div>
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
             with m2:
-                st.markdown(f'<div class="metric-card"><div class="metric-label">Fichas Disponibles</div><div class="metric-value" style="color:#10b981;">{fichas_disponibles}</div></div>', unsafe_allow_html=True)
+                st.markdown(f"""
+                    <div class="kpi-card" style="--accent: linear-gradient(90deg,#10b981,#059669);">
+                        <div class="kpi-label">Fichas Disponibles</div>
+                        <div class="kpi-value" style="color:#34d399;">{fichas_disponibles}</div>
+                        <div class="kpi-sub">{100 - pct_ocupacion}% de capacidad libre</div>
+                    </div>
+                """, unsafe_allow_html=True)
             with m3:
-                st.markdown(f'<div class="metric-card"><div class="metric-label">Total en Sala</div><div class="metric-value">{int(df["sala"].sum())} <span style="font-size:1.1rem; color:#94a3b8;">unid</span></div></div>', unsafe_allow_html=True)
+                st.markdown(f"""
+                    <div class="kpi-card" style="--accent: linear-gradient(90deg,#6366f1,#8b5cf6);">
+                        <div class="kpi-label">Total en Sala</div>
+                        <div class="kpi-value" style="color:#a78bfa;">{int(df["sala"].sum())}</div>
+                        <div class="kpi-sub">unidades disponibles</div>
+                    </div>
+                """, unsafe_allow_html=True)
             with m4:
-                st.markdown(f'<div class="metric-card"><div class="metric-label">Bodega Central</div><div class="metric-value">{int(df["bodega"].sum())} <span style="font-size:1.1rem; color:#94a3b8;">unid</span></div></div>', unsafe_allow_html=True)
+                st.markdown(f"""
+                    <div class="kpi-card" style="--accent: linear-gradient(90deg,#0ea5e9,#38bdf8);">
+                        <div class="kpi-label">Bodega Central</div>
+                        <div class="kpi-value" style="color:#38bdf8;">{int(df["bodega"].sum())}</div>
+                        <div class="kpi-sub">unidades almacenadas</div>
+                    </div>
+                """, unsafe_allow_html=True)
             
             productos_filtrados = [item for item in stock_res.data if item["producto"].upper() not in ["AJUAR", "OTROS"]]
             
-            st.write("###")
-            st.markdown("### 📦 Stock de Bodega")
+            st.markdown('<div class="section-title">🏢 Stock de Bodega Central</div>', unsafe_allow_html=True)
             cols_bodega = st.columns(3)
             for i, item in enumerate(productos_filtrados):
                 with cols_bodega[i % 3]:
                     if item["bodega"] <= 15:
-                        color_valor = "#ef4444"
-                        sub_label = '<span style="color:#ef4444; font-weight:bold; font-size:0.9rem;">🚨 CRÍTICO EN BODEGA</span>'
+                        color_valor = "#f87171"
+                        badge = '<span class="status-badge status-crit">🚨 Crítico</span>'
                     elif item["bodega"] <= 40:
-                        color_valor = "#f59e0b"
-                        sub_label = '<span style="color:#f59e0b; font-weight:bold; font-size:0.9rem;">⚠️ INVENTARIO GLOBAL BAJO</span>'
+                        color_valor = "#fbbf24"
+                        badge = '<span class="status-badge status-warn">⚠️ Bajo</span>'
                     else:
                         color_valor = "#60a5fa"
-                        sub_label = '<span style="color:#10b981; font-weight:bold; font-size:0.9rem;">🏢 ALMACENADO</span>'
-                        
+                        badge = '<span class="status-badge status-ok">✓ Estable</span>'
                     st.markdown(f"""
                         <div class="metric-card">
-                            <div class="metric-label" style="font-size:1rem; min-height:40px; display:flex; align-items:center; justify-content:center;">
-                                {item['producto']}
+                            <div class="metric-label">{item['producto']}</div>
+                            <div class="metric-value" style="color:{color_valor};">
+                                {int(item['bodega'])} <span style="font-size:1rem; color:#475569; font-weight:500;">ud</span>
                             </div>
-                            <div class="metric-value" style="color: {color_valor};">
-                                {int(item['bodega'])} <span style="font-size:1.2rem; color:#94a3b8;">ud</span>
-                            </div>
-                            <div style="margin-top:10px;">
-                                {sub_label}
-                            </div>
+                            {badge}
                         </div>
                     """, unsafe_allow_html=True)
 
-            st.write("###")
-            st.markdown("### ⚖️ Insumos Sala de Atención")
+            st.markdown('<div class="section-title">⚖️ Insumos en Sala de Atención</div>', unsafe_allow_html=True)
             cols_sala = st.columns(3)
             for i, item in enumerate(productos_filtrados):
                 with cols_sala[i % 3]:
                     if item["sala"] <= 5:
-                        color_valor = "#ef4444"
-                        sub_label = '<span style="color:#ef4444; font-weight:bold; font-size:0.9rem;">🚨 CRÍTICO</span>'
+                        color_valor = "#f87171"
+                        badge = '<span class="status-badge status-crit">🚨 Crítico</span>'
                     elif item["sala"] <= 15:
-                        color_valor = "#f59e0b"
-                        sub_label = '<span style="color:#f59e0b; font-weight:bold; font-size:0.9rem;">⚠️ INVENTARIO BAJO</span>'
+                        color_valor = "#fbbf24"
+                        badge = '<span class="status-badge status-warn">⚠️ Bajo</span>'
                     else:
-                        color_valor = "#10b981"
-                        sub_label = '<span style="color:#10b981; font-weight:bold; font-size:0.9rem;">📦 STOCK ESTABLE</span>'
-                    
+                        color_valor = "#34d399"
+                        badge = '<span class="status-badge status-ok">✓ Estable</span>'
                     st.markdown(f"""
                         <div class="metric-card">
-                            <div class="metric-label" style="font-size:1rem; min-height:40px; display:flex; align-items:center; justify-content:center;">
-                                {item['producto']}
+                            <div class="metric-label">{item['producto']}</div>
+                            <div class="metric-value" style="color:{color_valor};">
+                                {int(item['sala'])} <span style="font-size:1rem; color:#475569; font-weight:500;">ud</span>
                             </div>
-                            <div class="metric-value" style="color: {color_valor};">
-                                {int(item['sala'])} <span style="font-size:1.2rem; color:#94a3b8;">ud</span>
-                            </div>
-                            <div style="margin-top:10px;">
-                                {sub_label}
-                            </div>
+                            {badge}
                         </div>
                     """, unsafe_allow_html=True)
 
     # 📦 PANEL: BODEGA CENTRAL
-    elif menu_choice == "📦 BODEGA CENTRAL":
-        st.header("📦 Gestión e Inventario General", divider="blue")
+    elif menu_choice == "📦  BODEGA CENTRAL":
+        render_page_header("Bodega Central", "Gestión e inventario general de insumos")
         try:
             raw = supabase.table("stock").select("*").order("id").execute().data
         except Exception as e:
-            st.error(f"Fallo al recuperar stock: {e}"); st.stop()
+            st.error("No fue posible recuperar el stock. Verifique la conexión."); st.stop()
             
         df_inventory = pd.DataFrame(raw)
-        st.write("### Niveles Actuales de Existencias")
+        st.markdown('<div class="section-title">📋 Niveles Actuales de Existencias</div>', unsafe_allow_html=True)
         st.dataframe(
             df_inventory[["producto", "bodega", "sala"]], 
             use_container_width=True, 
@@ -463,18 +931,18 @@ else:
                             time.sleep(0.5)
                             st.rerun()
                         except Exception as e:
-                            st.error(f"Error crítico en la transacción: {e}")
+                            st.error("Error al procesar el movimiento. Intente nuevamente.")
 
     # ⚖️ PANEL: SALA DE ATENCIÓN
-    elif menu_choice == "⚖️ SALA DE ATENCIÓN":
-        st.header("⚖️ Sala de Atención - Despacho y Control", divider="blue")
+    elif menu_choice == "⚖️  SALA DE ATENCIÓN":
+        render_page_header("Sala de Atención", "Despacho y control de insumos")
         
         tab_entrega, tab_resumen_stock = st.tabs(["📝 CONTROL DE ENTREGA (REGISTRAR)", "📊 RESUMEN DE INGRESOS Y SALIDAS"])
         
         try:
             stock_data = supabase.table("stock").select("*").order("producto").execute().data
         except Exception as e:
-            st.error(f"Error de stock: {e}"); st.stop()
+            st.error("Error de stock. Verifique la conexión."); st.stop()
             
         with tab_entrega:
             metodo_busqueda = st.radio("Buscar beneficiario por:", ["N° de Ficha 📋", "RUN / Identificación 🪪"], horizontal=True)
@@ -580,7 +1048,7 @@ else:
                                 time.sleep(0.5)
                                 st.rerun()
                             except Exception as e:
-                                st.error(f"Error crítico guardando la entrega: {e}")
+                                st.error("Error al guardar la entrega. Intente nuevamente.")
                                 
         with tab_resumen_stock:
             st.markdown("### 📊 Resumen Estadístico de Cargas en Sala de Atención")
@@ -612,8 +1080,8 @@ else:
                 st.dataframe(pd.DataFrame(resumen_productos), use_container_width=True, hide_index=True)
 
     # 👥 PANEL: GESTIÓN DE NIÑOS
-    elif menu_choice == "👥 GESTIÓN DE NIÑOS":
-        st.header("👥 Padrón de Beneficiarios", divider="blue")
+    elif menu_choice == "👥  GESTIÓN DE NIÑOS":
+        render_page_header("Padrón de Beneficiarios", "Gestión de fichas clínicas activas e historial de egresos")
         tab_active, tab_inactive = st.tabs(["🟢 NIÑOS ACTIVOS", "⚪ HISTORIAL DE EGRESOS"])
         
         try:
@@ -697,14 +1165,14 @@ else:
                                     time.sleep(0.5)
                                     st.rerun()
                             except Exception as e:
-                                st.error(f"Fallo en inserción: {e}")
+                                st.error("Error al inscribir el beneficiario. Intente nuevamente.")
                                 
             try:
                 children = supabase.table("beneficiarios").select("*").eq("estado", "Activo").order("ficha").execute().data
             except Exception as e:
-                st.error(f"Error cargando padrón: {e}"); st.stop()
+                st.error("Error al cargar el padrón de beneficiarios."); st.stop()
                 
-            st.write("### Fichas Clínicas en Sistema")
+            st.markdown('<div class="section-title">📋 Fichas Clínicas en Sistema</div>', unsafe_allow_html=True)
             for child in children:
                 with st.expander(f"📋 Ficha {child['ficha']} — {child['nombre']} ({child.get('sexo','-')})"):
                     
@@ -733,7 +1201,7 @@ else:
                                 time.sleep(0.5)
                                 st.rerun()
                             except Exception as e:
-                                st.error(f"Error al egresar: {e}")
+                                st.error("Error al registrar el egreso. Intente nuevamente.")
                     st.write("---")
                     
                     if st.session_state[edit_key]:
@@ -789,7 +1257,7 @@ else:
                                         time.sleep(0.5)
                                         st.rerun()
                                     except Exception as e:
-                                        st.error(f"Error al actualizar la base de datos: {e}")
+                                        st.error("Error al actualizar la ficha. Intente nuevamente.")
                     else:
                         fecha_ingreso_clean = clean_timestamp_to_date(child.get('fecha_ingreso', '-'))
                         fecha_egreso_clean = clean_timestamp_to_date(child.get('fecha_egreso', '-'))
@@ -841,11 +1309,11 @@ else:
                         st.info("No se registran entregas históricas.")
 
         with tab_inactive:
-            st.write("### Historial de Egresos Pasivos")
+            st.markdown('<div class="section-title">⚪ Historial de Egresos Pasivos</div>', unsafe_allow_html=True)
             try:
                 egresados = supabase.table("beneficiarios").select("*").eq("estado", "Egresado").order("ficha").execute().data
             except Exception as e:
-                st.error(f"Error: {e}"); st.stop()
+                st.error("No fue posible cargar el historial de egresados."); st.stop()
                 
             if not egresados:
                 st.info("No se registran egresados.")
@@ -863,13 +1331,13 @@ else:
                                 time.sleep(0.5)
                                 st.rerun()
                             except Exception as e:
-                                st.error(f"Error: {e}")
+                                st.error("Error al re-incorporar el beneficiario. Intente nuevamente.")
 
     # 📜 PANEL: HISTORIAL
-    elif menu_choice == "📜 HISTORIAL":
-        st.header("📜 Historial de Operaciones y Movimientos", divider="blue")
+    elif menu_choice == "📜  HISTORIAL":
+        render_page_header("Historial de Operaciones", "Registro completo de movimientos y transacciones")
         
-        st.markdown("##### 🔍 Búsqueda Avanzada por Filtros de Fecha")
+        st.markdown('<div class="section-title">🔍 Filtros de Búsqueda</div>', unsafe_allow_html=True)
         c_f1, c_f2 = st.columns(2)
         with c_f1:
             fecha_inicio = st.date_input("Fecha Inicial de Búsqueda", value=datetime.now(CHILE_TZ) - timedelta(days=30))
@@ -880,7 +1348,7 @@ else:
             with st.spinner("Consultando registros..."):
                 datos_historial = supabase.table("historial").select("*").order("id", desc=True).execute().data
         except Exception as e:
-            st.error(f"Fallo al conectar con el historial: {e}"); st.stop()
+            st.error("No fue posible cargar el historial. Intente nuevamente."); st.stop()
             
         if not datos_historial:
             st.info("No se registran movimientos históricos.")
@@ -904,7 +1372,21 @@ else:
             df_historial_general["Fecha y Hora ⏰"] = df_historial_general["created_at_dt"].dt.strftime("%d/%m/%Y %H:%M")
             
             tipos_disponibles = ["TODOS"] + list(df_historial_general["tipo"].unique()) if not df_historial_general.empty else ["TODOS"]
-            filtro_tipo = st.selectbox("Filtrar por tipo de operation:", tipos_disponibles)
+            
+            col_filtro, col_export = st.columns([3, 1])
+            with col_filtro:
+                filtro_tipo = st.selectbox("Filtrar por tipo de operación:", tipos_disponibles)
+            with col_export:
+                st.markdown("<div style='height:28px'></div>", unsafe_allow_html=True)
+                if not df_historial_general.empty:
+                    csv_data = df_historial_general[["Fecha y Hora ⏰", "tipo", "producto", "cantidad", "responsable", "observaciones"]].to_csv(index=False).encode("utf-8")
+                    st.download_button(
+                        label="⬇️ Exportar CSV",
+                        data=csv_data,
+                        file_name=f"historial_gdl_{datetime.now(CHILE_TZ).strftime('%Y%m%d')}.csv",
+                        mime="text/csv",
+                        use_container_width=True,
+                    )
             
             if filtro_tipo != "TODOS" and not df_historial_general.empty:
                 df_filtrado = df_historial_general[df_historial_general["tipo"] == filtro_tipo]
