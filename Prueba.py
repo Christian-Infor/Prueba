@@ -25,6 +25,17 @@ st.set_page_config(
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
+    /* Forzar rendering correcto del ícono de expander */
+    .material-icons { font-family: 'Material Icons' !important; font-size: 20px !important; }
+
+    /* Si el ícono igual aparece como texto, ocultarlo */
+    [data-testid="stExpander"] summary > div > div:first-child,
+    [data-testid="stExpander"] summary > div > span.material-icons {
+        font-size: 16px !important;
+        color: #475569 !important;
+    }
 
     html, body, [class*="st-"] {
         font-family: 'Inter', sans-serif !important;
@@ -92,10 +103,10 @@ st.markdown("""
 
     /* Header del sidebar */
     .sidebar-header {
-        background: linear-gradient(135deg, #1e3a8a 0%, #1e2d6b 100%);
+        background: rgba(15, 23, 42, 0.6);
         padding: 24px 20px 20px 20px;
         margin-bottom: 8px;
-        border-bottom: 1px solid rgba(255,255,255,0.08);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
     }
     .sidebar-user-name {
         color: #f1f5f9;
@@ -363,20 +374,46 @@ st.markdown("""
     .stDataFrame { border-radius: 12px !important; overflow: hidden; }
 
     /* ══════════════════════════════
-       EXPANDERS
+       EXPANDERS — ocultar ícono ▸ y estilizar
     ══════════════════════════════ */
-    details[data-testid="stExpander"] summary {
-        background: rgba(19, 31, 53, 0.8) !important;
-        border-radius: 10px !important;
+    /* El ícono _arrow_ de Streamlit es un span con aria-hidden */
+    [data-testid="stExpander"] summary [data-testid="stExpanderToggleIcon"],
+    [data-testid="stExpander"] summary > div > div:first-child {
+        display: none !important;
+    }
+    /* Ocultar el SVG de flecha dentro del expander */
+    [data-testid="stExpander"] summary svg {
+        display: none !important;
+    }
+    [data-testid="stExpander"] summary::-webkit-details-marker {
+        display: none !important;
+    }
+    /* En Streamlit el label del expander va dentro de un <p> con clase especial */
+    [data-testid="stExpander"] summary p {
         font-weight: 600 !important;
         color: #cbd5e1 !important;
         font-size: 0.9rem !important;
-        padding: 14px 16px !important;
-        border: 1px solid rgba(255,255,255,0.07) !important;
+        margin: 0 !important;
     }
-    details[data-testid="stExpander"][open] summary {
+    /* Estilo del summary */
+    [data-testid="stExpander"] summary {
+        background: rgba(15, 23, 42, 0.7) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        border-radius: 10px !important;
+        padding: 14px 18px !important;
+        list-style: none !important;
+        cursor: pointer !important;
+        transition: background 0.15s !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+    [data-testid="stExpander"] summary:hover {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: rgba(59,130,246,0.25) !important;
+    }
+    [data-testid="stExpander"][open] > summary {
         border-radius: 10px 10px 0 0 !important;
-        border-bottom: 1px solid rgba(59,130,246,0.2) !important;
+        border-bottom-color: rgba(59,130,246,0.2) !important;
     }
 
     /* ══════════════════════════════
@@ -396,8 +433,19 @@ st.markdown("""
     }
 
     /* ══════════════════════════════
-       BOTONES PRIMARIOS
+       OCULTAR ÍCONO ▸ DE TODOS LOS BOTONES
     ══════════════════════════════ */
+    /* El ícono _arrow_ que Streamlit agrega a st.button */
+    button[data-testid="stBaseButton-secondary"] svg,
+    button[data-testid="stBaseButton-primary"] svg,
+    .stButton button svg {
+        display: none !important;
+    }
+    /* Alternativa: el span del ícono dentro del botón */
+    .stButton button [data-testid="stMarkdownContainer"] + span,
+    .stButton button > div > span:first-child {
+        display: none !important;
+    }
     .stButton button[kind="primary"] {
         background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
         border: none !important;
