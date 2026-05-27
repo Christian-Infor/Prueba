@@ -168,8 +168,8 @@ st.markdown("""
         border-left-color: #3b82f6 !important;
         font-weight: 600 !important;
     }
-    /* Ocultar el círculo del radio */
-    section[data-testid="stSidebar"] .stRadio > div > label > div:first-child {
+    /* Ocultar SOLO el círculo del radio nativo sin romper los botones */
+    section[data-testid="stSidebar"] .stRadio input[type="radio"] + div {
         display: none !important;
     }
 
