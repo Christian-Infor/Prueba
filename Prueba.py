@@ -286,73 +286,21 @@ supabase = init_supabase()
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
 
-    st.markdown(f"""
-    <style>
-    /* ── Fondo y padding del bloque principal ── */
-    .block-container {{
-        padding-top: 4vh !important;
-        max-width: 100% !important;
-    }}
+    _, col_mid, _ = st.columns([1, 0.8, 1])
+    with col_mid:
 
-    /* ── Estilizar el st.container con borde (el formulario) ── */
-    [data-testid="stVerticalBlockBorderWrapper"] > div {{
-        background: #0e1525 !important;
-        border: 1px solid #2a3550 !important;
-        border-radius: 18px !important;
-        padding: 32px 36px !important;
-    }}
+        st.markdown(f"""
+            <div style="text-align: center; margin-bottom: 25px; padding-top: 2vh;">
+                <img src="{LOGO_SRC}" style="height: 140px; object-fit: contain; filter: drop-shadow(0px 0px 15px rgba(88, 101, 242, 0.4));">
+                <h2 style='color: white; margin-top: 15px; margin-bottom: 2px; font-weight: 800; font-size: 2.2rem; letter-spacing: 1px;'>GOTAS DE LECHE</h2>
+                <p style='color: #64748b; font-size: 0.85rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;'>Sistema Maestro de Gestión</p>
+            </div>
+        """, unsafe_allow_html=True)
 
-    /* ── Labels ── */
-    [data-testid="stVerticalBlockBorderWrapper"] .stTextInput label p {{
-        color: #e2e8f0 !important;
-        font-size: 0.95rem !important;
-        font-weight: 500 !important;
-    }}
-
-    /* ── Campos de texto ── */
-    [data-testid="stVerticalBlockBorderWrapper"] .stTextInput input {{
-        background: #131e33 !important;
-        border: 1px solid #2a3550 !important;
-        border-radius: 10px !important;
-        color: #e2e8f0 !important;
-        font-size: 0.95rem !important;
-        height: 48px !important;
-    }}
-    [data-testid="stVerticalBlockBorderWrapper"] .stTextInput input:focus {{
-        border-color: #4f6ef7 !important;
-        box-shadow: 0 0 0 3px rgba(79,110,247,0.15) !important;
-    }}
-
-    /* ── Botón ingresar ── */
-    [data-testid="stVerticalBlockBorderWrapper"] .stButton button {{
-        background: linear-gradient(135deg, #4f6ef7 0%, #5b5bd6 100%) !important;
-        color: white !important;
-        font-weight: 700 !important;
-        font-size: 0.9rem !important;
-        letter-spacing: 0.1em !important;
-        border: none !important;
-        border-radius: 10px !important;
-        height: 50px !important;
-        box-shadow: 0 4px 20px rgba(79,110,247,0.4) !important;
-        transition: opacity 0.2s !important;
-    }}
-    [data-testid="stVerticalBlockBorderWrapper"] .stButton button:hover {{
-        opacity: 0.88 !important;
-    }}
-    </style>
-
-    <div style="text-align:center; margin-bottom:28px;">
-        <img src="{LOGO_SRC}" style="height:150px; object-fit:contain; filter:drop-shadow(0px 0px 18px rgba(88,101,242,0.45));">
-        <h2 style="color:#ffffff; margin-top:16px; margin-bottom:5px; font-weight:800; font-size:2rem; letter-spacing:2px;">GOTAS DE LECHE</h2>
-        <p style="color:#64748b; font-size:0.76rem; font-weight:600; letter-spacing:3px; text-transform:uppercase; margin:0;">Sistema Maestro de Gestión</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-    _, col_c, _ = st.columns([1, 2, 1])
-    with col_c:
         with st.container(border=True):
             username = st.text_input("Usuario", placeholder="Ingrese su usuario")
             password = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña")
+
             if st.button("INGRESAR AL SISTEMA", type="primary", use_container_width=True):
                 if not username or not password:
                     st.error("⚠️ Por favor, ingresa tu usuario y contraseña.")
