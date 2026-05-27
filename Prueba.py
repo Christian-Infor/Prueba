@@ -64,6 +64,15 @@ st.markdown("""
         font-weight: 700;
         line-height: 1;
     }
+    
+    /* Bloques de ficha detallados estilo formulario impreso */
+    .ficha-seccion-datos {
+        background-color: #1e293b;
+        border-left: 4px solid #3b82f6;
+        padding: 15px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -84,7 +93,27 @@ def verify_password(plain: str, stored) -> bool:
         return bcrypt.checkpw(plain.encode(), stored.encode())
     return plain == stored
 
+def clean_timestamp_to_date(raw_date) -> str:
+    if not raw_date or raw_date == "-":
+        return "-"
+    raw_str = str(raw_date).strip()
+    if 'T' in raw_str:
+        raw_str = raw_str.split('T')[0]
+    
+    if '-' in raw_str and not raw_str.startswith('-'):
+        try:
+            parts = raw_str.split('-')
+            if len(parts[0]) == 4:
+                dt = datetime.strptime(raw_str, "%Y-%m-%d")
+                return dt.strftime("%d/%m/%Y")
+        except:
+            pass
+    return raw_str
+
 def export_pdf_component(child_data):
+    f_ingreso_pdf = clean_timestamp_to_date(child_data.get('fecha_ingreso', '-'))
+    f_egreso_pdf = clean_timestamp_to_date(child_data.get('fecha_egreso', '-'))
+
     html_content = f"""
     <div id="pdf-container" style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; padding: 0; background: #ffffff; max-width: 820px; margin: auto; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden;">
         
@@ -111,32 +140,41 @@ def export_pdf_component(child_data):
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px;">
-                    <div><span style="color: #64748b; font-weight: 500;">Nombre Completo:</span> <br><strong style="color: #0f172a; font-size: 15px;">{child_data.get('nombre', '-')}</strong></div>
+                    <div style="grid-column: span 2;"><span style="color: #64748b; font-weight: 500;">Nombre Completo del Niño(a):</span> <br><strong style="color: #0f172a; font-size: 16px;">{child_data.get('nombre', '-')}</strong></div>
                     <div><span style="color: #64748b; font-weight: 500;">RUN / Identificación:</span> <br><strong style="color: #0f172a;">{child_data.get('rut', '-')}</strong></div>
                     <div><span style="color: #64748b; font-weight: 500;">Fecha de Nacimiento:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('nacimiento', '-')}</span></div>
                     <div><span style="color: #64748b; font-weight: 500;">Sexo:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('sexo', '-')}</span></div>
                     <div><span style="color: #64748b; font-weight: 500;">Peso al Nacer:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('peso_nacer', '-')}</span></div>
                     <div><span style="color: #64748b; font-weight: 500;">Vacunas al Día:</span> <br><span style="color: #334155; font-weight: 600;">{child_data.get('vacunas', '-')}</span></div>
                     <div><span style="color: #64748b; font-weight: 500;">Último Control Médico:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('control', '-')}</span></div>
-                    <div>&nbsp;</div>
-                    <div><span style="color: #64748b; font-weight: 500;">Fecha Ingreso Programa:</span> <br><span style="color: #16a34a; font-weight: bold;">{child_data.get('fecha_ingreso', '-')}</span></div>
-                    <div><span style="color: #64748b; font-weight: 500;">Fecha Estimada Egreso (2 años):</span> <br><span style="color: #dc2626; font-weight: bold;">{child_data.get('fecha_egreso', '-')}</span></div>
+                    <div><span style="color: #64748b; font-weight: 500;">Fecha Ingreso Programa:</span> <br><span style="color: #16a34a; font-weight: bold;">{f_ingreso_pdf}</span></div>
+                    <div><span style="color: #64748b; font-weight: 500;">Fecha Estimada Egreso:</span> <br><span style="color: #dc2626; font-weight: bold;">{f_egreso_pdf}</span></div>
                 </div>
             </div>
 
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin-bottom: 25px;">
                 <div style="display: flex; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #3b82f6; padding-bottom: 6px;">
                     <span style="font-size: 18px; margin-right: 8px;">🏠</span>
-                    <h3 style="margin: 0; color: #1e3a8a; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px;">2. Contexto Familiar y Personas Autorizadas</h3>
+                    <h3 style="margin: 0; color: #1e3a8a; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px;">2. Contexto Familiar (Descripción Profunda)</h3>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px;">
-                    <div><span style="color: #64748b; font-weight: 500;">Nombre de la Madre:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('madre', '-')}</span></div>
-                    <div><span style="color: #64748b; font-weight: 500;">Nombre del Padre:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('padre', '-')}</span></div>
-                    <div style="grid-column: span 2;"><span style="color: #64748b; font-weight: 500;">Dirección Particular:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('direccion', '-')}</span></div>
-                    <div><span style="color: #64748b; font-weight: 500;">Teléfono de Contacto:</span> <br><span style="color: #334155; font-weight: 600;">{child_data.get('telefono_madre', '-')}</span></div>
-                    <div>&nbsp;</div>
-                    <div style="grid-column: span 2;"><span style="color: #64748b; font-weight: 500;">Suplentes Autorizados:</span> <br><span style="color: #475569;">{child_data.get('suplentes', '-')}</span></div>
+                <div style="font-size: 14px; display: flex; flex-direction: column; gap: 14px;">
+                    <div style="border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px;">
+                        <span style="color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">Madre (Antecedentes, Escolaridad y Ocupación):</span> <br>
+                        <span style="color: #1e293b; font-size: 14px; line-height: 1.5; display: block; margin-top: 2px;">{child_data.get('madre', '-')}</span>
+                    </div>
+                    <div style="border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px;">
+                        <span style="color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">Padre (Antecedentes, Escolaridad y Ocupación):</span> <br>
+                        <span style="color: #1e293b; font-size: 14px; line-height: 1.5; display: block; margin-top: 2px;">{child_data.get('padre', '-')}</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div><span style="color: #64748b; font-weight: 500;">Teléfono de Contacto:</span> <br><strong style="color: #334155;">{child_data.get('telefono_madre', '-')}</strong></div>
+                        <div><span style="color: #64748b; font-weight: 500;">Dirección Particular:</span> <br><span style="color: #334155;">{child_data.get('direccion', '-')}</span></div>
+                    </div>
+                    <div style="background: #fff; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px;">
+                        <span style="color: #64748b; font-weight: 500;">Suplentes Autorizados para Retiro:</span> <br>
+                        <span style="color: #475569; font-weight: 500;">{child_data.get('suplentes', '-')}</span>
+                    </div>
                 </div>
             </div>
 
@@ -231,7 +269,7 @@ else:
     
     with st.sidebar:
         st.markdown(f"### 👤 {user['nombre']}")
-        st.caption(f"Operador authorized")
+        st.caption(f"Operador autorizado")
         st.divider()
         
         menu_choice = st.radio(
@@ -445,8 +483,8 @@ else:
                 ficha_vinculada = beneficiary["ficha"]
                 
                 opciones_retiro = []
-                if beneficiary.get("madre"): opciones_retiro.append(f"Madre: {beneficiary['madre']}")
-                if beneficiary.get("padre"): opciones_retiro.append(f"Padre: {beneficiary['padre']}")
+                if beneficiary.get("madre"): opciones_retiro.append(f"Madre: {beneficiary['madre'][:40]}...")
+                if beneficiary.get("padre"): opciones_retiro.append(f"Padre: {beneficiary['padre'][:40]}...")
                 if beneficiary.get("suplentes"): opciones_retiro.append(f"Suplentes: {beneficiary['suplentes']}")
                 opciones_retiro.append("Otro Suplente (No registrado)")
                 
@@ -575,29 +613,31 @@ else:
             with st.expander("➕ INSCRIBIR NUEVO BENEFICIARIO (MÁXIMO 210 FICHAS)", expanded=False):
                 with st.form("new_child_form"):
                     c1, c2, c3 = st.columns([2, 1.5, 1])
-                    name = c1.text_input("Nombre Completo *")
+                    name = c1.text_input("Nombre Completo del Niño(a) *")
                     rut = c2.text_input("RUN / Identificación *")
                     ficha = c3.number_input("N° Ficha Asignado", min_value=1, value=siguiente_ficha, step=1)
                     
                     cc1, cc2, cc3 = st.columns(3)
                     birth_date = cc1.text_input("Fecha Nacimiento (DD/MM/AAAA)")
                     sexo = cc2.selectbox("Sexo", ["Masculino", "Femenino"])
-                    peso_nacer = cc3.text_input("Peso al Nacer (ej: 3.250 kg)")
+                    peso_nacer = cc3.text_input("Peso al Nacer (ej: 3.935 kg)")
                     
                     cx1, cx2 = st.columns(2)
                     vacunas = cx1.selectbox("¿Vacunas al Día?", ["Sí", "No"])
-                    ultimo_control = cx2.text_input("Fecha de Último Control Médico (DD/MM/AAAA)")
+                    ultimo_control = cx2.text_input("Último Control Médico (ej: 30.03.26 / 3.820 kg)")
                     
                     st.markdown("---")
-                    st.markdown("##### 👥 Registro de Contactos e Independencia de Retiro")
-                    ccc1, ccc2, ccc3 = st.columns(3)
-                    mother = ccc1.text_input("Nombre de la Madre")
-                    father = ccc2.text_input("Nombre del Padre")
-                    phone = ccc3.text_input("Teléfono de Contacto")
-                    address = st.text_input("Dirección Particular")
+                    st.markdown("##### 👥 Registro de Núcleo Familiar (Fila completa para descripción profunda)")
+                    mother = st.text_area("Madre (Nombre, Nacionalidad, Estado Civil, Edad, Escolaridad, Ocupación)", placeholder="Ej: María Bernardita Tapia Cáceres, Chilena, soltera, 27 años...")
+                    father = st.text_area("Padre (Nombre, Nacionalidad, Estado Civil, Edad, Escolaridad, Ocupación)", placeholder="Ej: Jimmy Franco Saavedra Soto, Chileno, soltero, 33 años...")
+                    
+                    st.markdown("##### 📞 Contacto y Dirección")
+                    ccc1, ccc2 = st.columns(2)
+                    phone = ccc1.text_input("Teléfono de Contacto")
+                    address = ccc2.text_input("Dirección Particular")
                     
                     st.markdown("##### 🛡️ Suplentes Autorizados para Retiro")
-                    u_suplentes_new = st.text_input("Nombres de Suplentes Autorizados", placeholder="Ej: Juan Pérez (Tío), María Lorca (Abuela)")
+                    u_suplentes_new = st.text_input("Nombres de Suplentes Autorizados", placeholder="Ej: Harely Tapia Cáceres - Tía")
                     
                     social_history = st.text_area("Antecedentes Importantes / Historia Social")
                     
@@ -660,9 +700,9 @@ else:
                                     "responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1,
                                     "tipo": "EGRESO", "observaciones": f"Ficha {child['ficha']} dada de baja", "created_at": get_local_now(),
                                 }).execute()
-                                st.toast(f"✅ Ficha {child['ficha']} marked as Egresada.", icon="💼")
+                                st.toast(f"✅ Ficha {child['ficha']} marcada como Egresada.", icon="💼")
                                 time.sleep(0.5)
-                                r.rerun()
+                                st.rerun()
                             except Exception as e:
                                 st.error(f"Error al egresar: {e}")
                     st.write("---")
@@ -684,15 +724,16 @@ else:
                             u_vacunas = ecx1.selectbox("¿Vacunas al Día?", ["Sí", "No"], index=0 if child.get("vacunas") == "Sí" else 1)
                             u_control = ecx2.text_input("Último Control Médico", value=child.get("control", ""))
                             
-                            st.markdown("##### 👥 Contactos y Suplentes")
-                            eccc1, eccc2, eccc3 = st.columns(3)
-                            u_mother = eccc1.text_input("Nombre de la Madre", value=child.get("madre", ""))
-                            u_father = eccc2.text_input("Nombre del Padre", value=child.get("padre", ""))
-                            u_phone = eccc3.text_input("Teléfono", value=child.get("telefono_madre", ""))
-                            u_address = st.text_input("Dirección Particular", value=child.get("direccion", ""))
+                            st.markdown("##### 👥 Contexto Familiar (Edición Ampliada)")
+                            u_mother = st.text_area("Madre (Descripción profunda)", value=child.get("madre", ""))
+                            u_father = st.text_area("Padre (Descripción profunda)", value=child.get("padre", ""))
+                            
+                            st.markdown("##### 📞 Contacto y Dirección")
+                            eccc2, eccc3 = st.columns(2)
+                            u_phone = eccc2.text_input("Teléfono", value=child.get("telefono_madre", ""))
+                            u_address = eccc3.text_input("Dirección Particular", value=child.get("direccion", ""))
                             
                             u_suplentes_edit = st.text_input("Suplentes Autorizados", value=child.get("suplentes", ""))
-                            
                             u_social = st.text_area("Antecedentes / Historia Social", value=child.get("historia_social", ""))
                             
                             if st.form_submit_button("💾 GUARDAR CAMBIOS", type="primary", use_container_width=True):
@@ -721,6 +762,10 @@ else:
                                     except Exception as e:
                                         st.error(f"Error al actualizar la base de datos: {e}")
                     else:
+                        fecha_ingreso_clean = clean_timestamp_to_date(child.get('fecha_ingreso', '-'))
+                        fecha_egreso_clean = clean_timestamp_to_date(child.get('fecha_egreso', '-'))
+
+                        # Layout de Visualización adaptado a la ficha real
                         sub_c1, sub_c2 = st.columns(2)
                         with sub_c1:
                             st.markdown(f"**RUN:** `{child['rut']}`")
@@ -728,13 +773,21 @@ else:
                             st.markdown(f"**Peso al Nacer:** {child.get('peso_nacer', '-')}")
                             st.markdown(f"**Vacunas al Día:** `{child.get('vacunas', '-')}`")
                             st.markdown(f"**Último Control Médico:** {child.get('control', '-')}")
-                            st.markdown(f"**Dirección:** {child.get('direccion', '-')}")
                         with sub_c2:
-                            st.markdown(f"**Madre:** {child.get('madre', '-')} | **Padre:** {child.get('padre', '-')}")
-                            st.markdown(f"**Teléfono:** {child.get('telefono_madre', '-')}")
-                            st.markdown(f"**Fecha Ingreso:** `{child.get('fecha_ingreso', '-')}`")
-                            st.markdown(f"**Egreso Estimado (2 años):** `{child.get('fecha_egreso', '-')}`")
+                            st.markdown(f"**Fecha Ingreso:** `{fecha_ingreso_clean}`")
+                            st.markdown(f"**Egreso Estimado:** `{fecha_egreso_clean}`")
+                            st.markdown(f"**Teléfono:** `{child.get('telefono_madre', '-')}`")
+                            st.markdown(f"**Dirección:** {child.get('direccion', '-')}")
                             st.markdown(f"**Suplentes Autorizados:** {child.get('suplentes', '-')}")
+                        
+                        st.write("###")
+                        st.markdown('<div class="ficha-seccion-datos">', unsafe_allow_html=True)
+                        st.markdown(f"👩 **DATOS DE LA MADRE:** \n{child.get('madre', '-')}")
+                        st.markdown('</div>', unsafe_allow_html=True)
+                        
+                        st.markdown('<div class="ficha-seccion-datos">', unsafe_allow_html=True)
+                        st.markdown(f"👨 **DATOS DEL PADRE:** \n{child.get('padre', '-')}")
+                        st.markdown('</div>', unsafe_allow_html=True)
                         
                         st.write("###")
                         st.markdown("##### 📝 ANTECEDENTES GENERALES E HISTORIA SOCIAL")
