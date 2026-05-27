@@ -126,11 +126,11 @@ st.markdown("""
        SIDEBAR — RADIO COMO NAV
     ══════════════════════════════ */
     /* Ocultar el label del radio group */
-    section[data-testid="stSidebar"] .stRadio > label { display: none !important;
-    }
+    section[data-testid="stSidebar"] .stRadio > label { display: none !important; }
+
     /* Contenedor de opciones en columna */
-    section[data-testid="stSidebar"] .stRadio input[type="radio"] + div { 
-    display: none !important; 
+    section[data-testid="stSidebar"] .stRadio > div {
+        display: flex !important;
         flex-direction: column !important;
         gap: 2px !important;
         padding: 4px 0 !important;
