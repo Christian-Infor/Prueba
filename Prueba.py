@@ -31,20 +31,17 @@ st.markdown("""
         background-color: #060b13 !important;
     }
     
-    /* 
-       FORZAR CENTRADO ABSOLUTO (VERTICAL Y HORIZONTAL)
-       Afecta únicamente a la pantalla de Login (cuando no hay Sidebar)
-    */
+    /* FORZAR CENTRADO ABSOLUTO (VERTICAL Y HORIZONTAL) DEL CONTENEDOR NATIVO */
     .stApp:not(:has(div[data-testid="stSidebar"])) .stMainBlockContainer {
         max-width: 100% !important;
         padding: 0 !important;
         display: flex !important;
-        align-items: center !important; /* Centrado Vertical */
-        justify-content: center !important; /* Centrado Horizontal */
+        align-items: center !important; 
+        justify-content: center !important; 
         min-height: 100vh !important;
     }
     
-    /* ESTILIZACIÓN COMPACTA DEL CONTENEDOR DE LOGIN */
+    /* ESTILIZACIÓN COMPACTA DEL CONTENEDOR DE LOGIN (400PX DE ANCHO MAX) */
     .stApp:not(:has(div[data-testid="stSidebar"])) div[data-testid="stVerticalBlockBorderWrapper"] {
         background: rgba(13, 22, 41, 0.75) !important;
         backdrop-filter: blur(12px) !important;
@@ -52,21 +49,21 @@ st.markdown("""
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 16px !important;
         
-        /* Reducción drástica del ancho para que no se estire */
-        width: 420px !important; 
-        max-width: 90vw !important; /* Adaptable a pantallas más chicas si es necesario */
+        /* Ancho fijo controlado para evitar estiramientos */
+        width: 400px !important; 
+        max-width: 90vw !important; 
         
         padding: 10px !important;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
-        margin: 0 auto !important; /* Resetea márgenes molestos */
+        margin: 0 auto !important; 
     }
 
-    /* Eliminar padding extra interno de Streamlit */
+    /* Eliminar padding extra interno de los bloques de Streamlit */
     .stApp:not(:has(div[data-testid="stSidebar"])) div[data-testid="stVerticalBlockBorderWrapper"] > div {
         padding: 20px 25px !important;
     }
 
-    /* Estilo de los inputs dentro del login */
+    /* Estilo de las cajas de texto (Inputs) dentro del login */
     .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput div[data-baseweb="input"] {
         background-color: rgba(255, 255, 255, 0.03) !important;
         border: 1px solid rgba(255, 255, 255, 0.12) !important;
@@ -85,7 +82,7 @@ st.markdown("""
         margin-bottom: 4px !important;
     }
 
-    /* Botón de ingreso idéntico al diseño final */
+    /* Botón de ingreso moderno y extendido */
     .stApp:not(:has(div[data-testid="stSidebar"])) .stButton > button {
         background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%) !important;
         border: none !important;
@@ -105,7 +102,7 @@ st.markdown("""
         box-shadow: 0 6px 16px rgba(59, 130, 246, 0.45) !important;
     }
     
-    /* Modelos del Dashboard (Se mantienen intactos para cuando inicies sesión) */
+    /* Modelo de Tarjeta Unificado de tu Dashboard */
     .metric-card {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         border: 1px solid #334155;
@@ -129,6 +126,8 @@ st.markdown("""
         font-weight: 700;
         line-height: 1;
     }
+    
+    /* Bloques de ficha detallados estilo formulario impreso */
     .ficha-seccion-datos {
         background-color: #1e293b;
         border-left: 4px solid #3b82f6;
@@ -282,12 +281,12 @@ def init_supabase():
 supabase = init_supabase()
 
 # ─────────────────────────────────────────
-# 4. LOGIN TOTALMENTE ENCAPSULADO (MÉTODO SEGURO)
+# 4. LOGIN TOTALMENTE ENCAPSULADO CON CONTENEDOR NATIVO
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
     
-    # Usamos container con borde nativo para forzar la caja perfecta de Fase2_2.png
+    # El uso de border=True genera la envoltura estructural perfecta de Fase2.png
     with st.container(border=True):
         st.markdown(f"""
             <div style="text-align: center; margin-bottom: 10px;">
@@ -300,7 +299,7 @@ if "user" not in st.session_state:
         username = st.text_input("Usuario", placeholder="Ingrese su usuario")
         password = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña")
         
-        st.write("##") # Pequeño espacio estético interno
+        st.write("##") # Margen interno antes del submit
         
         if st.button("INGRESAR AL SISTEMA", type="primary", use_container_width=True):
             if not username or not password:
@@ -450,8 +449,7 @@ else:
                             }).execute()
                             
                             st.toast("✅ Inventario actualizado correctamente.", icon="📥")
-                            time.sleep(0.5)
-                            st.rerun()
+                            time.sleep(0.5); st.rerun()
                         except Exception as e:
                             st.error(f"Error crítico en la transacción: {e}")
 
@@ -546,8 +544,7 @@ else:
                                     }).execute()
                                 st.balloons()
                                 st.toast("Entrega asentada de manera exitosa en Sala de Atención.", icon="🎉")
-                                time.sleep(0.5)
-                                st.rerun()
+                                time.sleep(0.5); st.rerun()
                             except Exception as e: st.error(f"Error crítico guardando la entrega: {e}")
                                 
         with tab_resumen_stock:
