@@ -31,58 +31,47 @@ st.markdown("""
         background-color: #0b0f19 !important;
     }
     
-    /* Centrado vertical y horizontal de todo el bloque principal */
+    /* 1. SUBIR EL CONTENEDOR: Controlamos la altura desde arriba */
     .stApp:not(:has(div[data-testid="stSidebar"])) .stMainBlockContainer {
+        padding-top: 8vh !important; 
         max-width: 100% !important;
-        padding: 0 !important;
-        display: flex !important;
-        align-items: center !important; 
-        justify-content: center !important; 
-        min-height: 100vh !important;
     }
     
-    /* ── CAJA DE LOGIN ESTILO NEÓN ── */
+    /* 2. CAJA DE LOGIN CON BORDES NEÓN Y 3. MÁRGENES INTERNOS */
     .stApp:not(:has(div[data-testid="stSidebar"])) div[data-testid="stVerticalBlockBorderWrapper"] {
-        background: rgba(13, 22, 41, 0.4) !important; /* Fondo sutilmente transparente */
+        background: rgba(13, 22, 41, 0.4) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
         
-        /* Borde sutil azulado (no blanco) */
-        border: 1px solid rgba(59, 130, 246, 0.2) !important; 
+        /* Borde iluminado / Neón sutil */
+        border: 1px solid rgba(100, 150, 255, 0.4) !important; 
         border-radius: 16px !important;
         
-        /* Ancho controlado para que sea compacto */
-        width: 440px !important; 
-        max-width: 90vw !important; 
+        /* Sombras interna y externa para el efecto glow en la línea */
+        box-shadow: 0 0 20px rgba(96, 165, 250, 0.15), inset 0 0 10px rgba(96, 165, 250, 0.05) !important; 
         
-        padding: 15px !important;
-        
-        /* Resplandor neón exterior de la caja */
-        box-shadow: 0 0 40px rgba(59, 130, 246, 0.1) !important; 
+        /* Ajuste de márgenes internos (padding) para que no choque con los bordes */
+        padding: 35px 25px !important; 
         margin: 0 auto !important; 
-    }
-
-    .stApp:not(:has(div[data-testid="stSidebar"])) div[data-testid="stVerticalBlockBorderWrapper"] > div {
-        padding: 10px 20px !important;
     }
 
     /* ── INPUTS (Cajas de texto oscuras) ── */
     .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput div[data-baseweb="input"] {
-        background-color: rgba(10, 15, 30, 0.6) !important;
-        border: 1px solid rgba(59, 130, 246, 0.15) !important;
+        background-color: rgba(15, 23, 42, 0.8) !important; /* Más oscuro para contrastar */
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
         border-radius: 8px !important;
         color: white !important;
     }
     
     .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput div[data-baseweb="input"]:focus-within {
-        border-color: #4f46e5 !important;
-        box-shadow: 0 0 10px rgba(79, 70, 229, 0.4) !important; /* Brillo al escribir */
+        border-color: #60a5fa !important;
+        box-shadow: 0 0 10px rgba(96, 165, 250, 0.4) !important; /* Brillo al escribir */
     }
     
     .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput label {
         color: #e2e8f0 !important;
         font-weight: 500 !important;
-        margin-bottom: 4px !important;
+        margin-bottom: 6px !important;
     }
 
     /* ── BOTÓN CON EFECTO NEÓN FUERTE ── */
@@ -96,9 +85,9 @@ st.markdown("""
         padding: 12px 24px !important;
         border-radius: 8px !important;
         width: 100% !important;
-        margin-top: 5px !important;
+        margin-top: 15px !important;
         
-        /* Sombras para simular el destello Neón de tu imagen */
+        /* Sombras para simular el destello Neón */
         box-shadow: 0 0 15px rgba(59, 130, 246, 0.5), 0 0 30px rgba(79, 70, 229, 0.3) !important; 
         transition: all 0.3s ease !important;
     }
@@ -288,29 +277,28 @@ def init_supabase():
 supabase = init_supabase()
 
 # ─────────────────────────────────────────
-# 4. LOGIN (ESTRUCTURA IDÉNTICA A FASE 2)
+# 4. LOGIN (ESTRUCTURA EXACTA A FASE 2)
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
     
-    col1, col_mid, col3 = st.columns([1, 0.8, 1])
+    # Usamos columnas ajustadas para mantener el ancho ideal de la tarjeta
+    col1, col_mid, col3 = st.columns([1, 1.1, 1])
     
     with col_mid:
-        # LOGO Y TÍTULOS FUERA DEL RECUADRO (Más grandes y con brillo)
+        # LOGO Y TÍTULOS (Más grandes y con brillo exterior)
         st.markdown(f"""
-            <div style="text-align: center; margin-bottom: 25px; margin-top: 4vh;">
-                <img src="{LOGO_SRC}" style="height: 160px; object-fit: contain; filter: drop-shadow(0px 0px 18px rgba(96, 165, 250, 0.45));">
-                <h2 style='color: white; margin-top: 18px; margin-bottom: 4px; font-weight: 800; font-size: 2rem; letter-spacing: 1px;'>GOTAS DE LECHE</h2>
+            <div style="text-align: center; margin-bottom: 30px;">
+                <img src="{LOGO_SRC}" style="height: 150px; object-fit: contain; filter: drop-shadow(0px 0px 18px rgba(96, 165, 250, 0.45));">
+                <h2 style='color: white; margin-top: 20px; margin-bottom: 4px; font-weight: 800; font-size: 2.2rem; letter-spacing: 1px;'>GOTAS DE LECHE</h2>
                 <p style='color: #64748b; font-size: 0.9rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;'>Sistema Maestro de Gestión</p>
             </div>
         """, unsafe_allow_html=True)
         
-        # EL CONTENEDOR CON BORDE AHORA SOLO ENVUELVE LOS INPUTS Y EL BOTÓN
+        # CONTENEDOR CON BORDE (Solo envuelve los inputs y el botón)
         with st.container(border=True):
             username = st.text_input("Usuario", placeholder="Ingrese su usuario")
             password = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña")
-            
-            st.write("##") # Margen interno antes del submit
             
             if st.button("INGRESAR AL SISTEMA", type="primary", use_container_width=True):
                 if not username or not password:
