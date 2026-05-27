@@ -136,9 +136,7 @@ def export_pdf_component(child_data):
                     <div style="grid-column: span 2;"><span style="color: #64748b; font-weight: 500;">Dirección Particular:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('direccion', '-')}</span></div>
                     <div><span style="color: #64748b; font-weight: 500;">Teléfono de Contacto:</span> <br><span style="color: #334155; font-weight: 600;">{child_data.get('telefono_madre', '-')}</span></div>
                     <div>&nbsp;</div>
-                    <div><span style="color: #64748b; font-weight: 500;">Suplente Autorizado 1:</span> <br><span style="color: #475569;">{child_data.get('suplente_1', '-')}</span></div>
-                    <div><span style="color: #64748b; font-weight: 500;">Suplente Autorizado 2:</span> <br><span style="color: #475569;">{child_data.get('suplente_2', '-')}</span></div>
-                    <div><span style="color: #64748b; font-weight: 500;">Suplente Autorizado 3 (Cuarto):</span> <br><span style="color: #475569;">{child_data.get('suplente_3', '-')}</span></div>
+                    <div style="grid-column: span 2;"><span style="color: #64748b; font-weight: 500;">Suplentes Autorizados:</span> <br><span style="color: #475569;">{child_data.get('suplentes', '-')}</span></div>
                 </div>
             </div>
 
@@ -268,7 +266,6 @@ else:
             niños_activos = benef_res.count if benef_res.count else 0
             fichas_disponibles = max(0, MAX_FICHAS - niños_activos)
             
-            # 1. FILA SUPERIOR: RESUMEN DE OPERACIÓN E INFO INMEDIATA
             m1, m2, m3, m4 = st.columns(4)
             with m1:
                 st.markdown(f'<div class="metric-card"><div class="metric-label">Niños Activos</div><div class="metric-value">{niños_activos} <span style="font-size:1.1rem; color:#94a3b8;">/ {MAX_FICHAS}</span></div></div>', unsafe_allow_html=True)
@@ -279,16 +276,13 @@ else:
             with m4:
                 st.markdown(f'<div class="metric-card"><div class="metric-label">Bodega Central</div><div class="metric-value">{int(df["bodega"].sum())} <span style="font-size:1.1rem; color:#94a3b8;">unid</span></div></div>', unsafe_allow_html=True)
             
-            # Filtramos catálogo excluyendo "Ajuar" y "Otros"
             productos_filtrados = [item for item in stock_res.data if item["producto"].upper() not in ["AJUAR", "OTROS"]]
             
-            # 2. FILA INTERMEDIA: STOCK DE BODEGA
             st.write("###")
             st.markdown("### 📦 Stock de Bodega")
             cols_bodega = st.columns(3)
             for i, item in enumerate(productos_filtrados):
                 with cols_bodega[i % 3]:
-                    # Umbrales lógicos de alerta para Bodega Principal
                     if item["bodega"] <= 15:
                         color_valor = "#ef4444"
                         sub_label = '<span style="color:#ef4444; font-weight:bold; font-size:0.9rem;">🚨 CRÍTICO EN BODEGA</span>'
@@ -296,7 +290,7 @@ else:
                         color_valor = "#f59e0b"
                         sub_label = '<span style="color:#f59e0b; font-weight:bold; font-size:0.9rem;">⚠️ INVENTARIO GLOBAL BAJO</span>'
                     else:
-                        color_valor = "#60a5fa"  # Azul estables para bodega
+                        color_valor = "#60a5fa"
                         sub_label = '<span style="color:#10b981; font-weight:bold; font-size:0.9rem;">🏢 ALMACENADO</span>'
                         
                     st.markdown(f"""
@@ -313,13 +307,11 @@ else:
                         </div>
                     """, unsafe_allow_html=True)
 
-            # 3. FILA INFERIOR: INSUMOS SALA DE ATENCIÓN
             st.write("###")
             st.markdown("### ⚖️ Insumos Sala de Atención")
             cols_sala = st.columns(3)
             for i, item in enumerate(productos_filtrados):
                 with cols_sala[i % 3]:
-                    # Umbrales clínicos estrictos para la Sala de Atención inmediata
                     if item["sala"] <= 5:
                         color_valor = "#ef4444"
                         sub_label = '<span style="color:#ef4444; font-weight:bold; font-size:0.9rem;">🚨 CRÍTICO</span>'
@@ -455,9 +447,7 @@ else:
                 opciones_retiro = []
                 if beneficiary.get("madre"): opciones_retiro.append(f"Madre: {beneficiary['madre']}")
                 if beneficiary.get("padre"): opciones_retiro.append(f"Padre: {beneficiary['padre']}")
-                if beneficiary.get("suplente_1"): opciones_retiro.append(f"Suplente 1: {beneficiary['suplente_1']}")
-                if beneficiary.get("suplente_2"): opciones_retiro.append(f"Suplente 2: {beneficiary['suplente_2']}")
-                if beneficiary.get("suplente_3"): opciones_retiro.append(f"Suplente 3 (Cuarto): {beneficiary['suplente_3']}")
+                if beneficiary.get("suplentes"): opciones_retiro.append(f"Suplentes: {beneficiary['suplentes']}")
                 opciones_retiro.append("Otro Suplente (No registrado)")
                 
                 st.success(f"**Beneficiario:** {recipient_name} | **Ficha:** {ficha_vinculada} | **Último Control:** {beneficiary.get('ultimo_control','-')}", icon="👶")
@@ -607,10 +597,8 @@ else:
                     address = st.text_input("Dirección Particular")
                     
                     st.markdown("##### 🛡️ Suplentes Autorizados para Retiro")
-                    cs1, cs2, cs3 = st.columns(3)
-                    suplente_1 = cs1.text_input("Suplente Autorizado 1")
-                    suplente_2 = cs2.text_input("Suplente Autorizado 2")
-                    suplente_3 = cs3.text_input("Suplente Autorizado 3 (Cuarto Suplente)")
+                    # Unificado a tu columna exacta 'suplentes'
+                    u_suplentes_new = st.text_input("Nombres de Suplentes Autorizados", placeholder="Ej: Juan Pérez (Tío), María Lorca (Abuela)")
                     
                     social_history = st.text_area("Antecedentes Importantes / Historia Social")
                     
@@ -633,7 +621,7 @@ else:
                                         "nombre": name, "rut": rut, "ficha": ficha, "nacimiento": birth_date,
                                         "sexo": sexo, "peso_nacer": peso_nacer, "vacunas": vacunas, "ultimo_control": ultimo_control,
                                         "telefono_madre": phone, "direccion": address, "madre": mother, "padre": father,
-                                        "suplente_1": suplente_1, "suplente_2": suplente_2, "suplente_3": suplente_3,
+                                        "suplentes": u_suplentes_new,
                                         "historia_social": social_history, "estado": "Activo",
                                         "fecha_ingreso": string_ingreso, "fecha_egreso": string_egreso
                                     }).execute()
@@ -673,7 +661,7 @@ else:
                                     "responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1,
                                     "tipo": "EGRESO", "observaciones": f"Ficha {child['ficha']} dada de baja", "created_at": get_local_now(),
                                 }).execute()
-                                st.toast(f"✅ Ficha {child['ficha']} marcada como Egresada.", icon="💼")
+                                st.toast(f"✅ Ficha {child['ficha']} marked as Egresada.", icon="💼")
                                 time.sleep(0.5)
                                 st.rerun()
                             except Exception as e:
@@ -704,10 +692,8 @@ else:
                             u_phone = eccc3.text_input("Teléfono", value=child.get("telefono_madre", ""))
                             u_address = st.text_input("Dirección Particular", value=child.get("direccion", ""))
                             
-                            es1, es2, es3 = st.columns(3)
-                            u_sup1 = es1.text_input("Suplente 1", value=child.get("suplente_1", ""))
-                            u_sup2 = es2.text_input("Suplente 2", value=child.get("suplente_2", ""))
-                            u_sup3 = es3.text_input("Suplente 3", value=child.get("suplente_3", ""))
+                            # Input único sincronizado con la columna 'suplentes'
+                            u_suplentes_edit = st.text_input("Suplentes Autorizados", value=child.get("suplentes", ""))
                             
                             u_social = st.text_area("Antecedentes / Historia Social", value=child.get("historia_social", ""))
                             
@@ -721,7 +707,7 @@ else:
                                             "sexo": u_sexo, "peso_nacer": u_peso, "vacunas": u_vacunas,
                                             "ultimo_control": u_control, "madre": u_mother, "padre": u_father,
                                             "telefono_madre": u_phone, "direccion": u_address,
-                                            "suplente_1": u_sup1, "suplente_2": u_sup2, "suplente_3": u_sup3,
+                                            "suplentes": u_suplentes_edit,
                                             "historia_social": u_social
                                         }).eq("ficha", child["ficha"]).execute()
                                         
@@ -750,7 +736,8 @@ else:
                             st.markdown(f"**Teléfono:** {child.get('telefono_madre', '-')}")
                             st.markdown(f"**Fecha Ingreso:** `{child.get('fecha_ingreso', '-')}`")
                             st.markdown(f"**Egreso Estimado (2 años):** `{child.get('fecha_egreso', '-')}`")
-                            st.markdown(f"**Suplentes:** 1: {child.get('suplente_1','-')} | 2: {child.get('suplente_2','-')} | 3: {child.get('suplente_3','-')}")
+                            # Vista de lectura adaptada a la cadena única
+                            st.markdown(f"**Suplentes Autorizados:** {child.get('suplentes', '-')}")
                         
                         st.write("###")
                         st.markdown("##### 📝 ANTECEDENTES GENERALES E HISTORIA SOCIAL")
