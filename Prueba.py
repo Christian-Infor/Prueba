@@ -105,66 +105,73 @@ st.markdown("""
         letter-spacing: 0.01em;
     }
     .sidebar-user-role {
-        color: #93c5fd;
-        font-size: 0.75rem;
+        color: #64748b;
+        font-size: 0.78rem;
         font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        background: rgba(59,130,246,0.18);
-        display: inline-block;
-        padding: 2px 10px;
-        border-radius: 20px;
         margin-top: 4px;
     }
 
-    /* Botones de navegación del sidebar */
-    .nav-btn {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        width: 100%;
-        padding: 12px 20px;
-        margin: 2px 0;
-        background: transparent;
-        border: none;
-        border-left: 3px solid transparent;
-        color: #94a3b8;
-        font-size: 0.9rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.18s ease;
-        text-align: left;
-        letter-spacing: 0.01em;
-    }
-    .nav-btn:hover {
-        background: rgba(59,130,246,0.1);
-        color: #e2e8f0;
-        border-left-color: rgba(59,130,246,0.5);
-    }
-    .nav-btn.active {
-        background: rgba(59,130,246,0.15);
-        color: #60a5fa;
-        border-left-color: #3b82f6;
-        font-weight: 600;
-    }
-    .nav-icon { font-size: 1.1rem; width: 22px; text-align: center; }
+    /* ══════════════════════════════
+       SIDEBAR — RADIO COMO NAV
+    ══════════════════════════════ */
+    /* Ocultar el label del radio group */
+    section[data-testid="stSidebar"] .stRadio > label { display: none !important; }
 
-    /* Radio (oculto - usamos botones HTML) */
-    div[data-testid="stRadio"] { display: none !important; }
+    /* Contenedor de opciones en columna */
+    section[data-testid="stSidebar"] .stRadio > div {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 2px !important;
+        padding: 4px 0 !important;
+    }
 
-    /* Botón cerrar sesión */
-    .sidebar-logout button {
-        background: rgba(239, 68, 68, 0.1) !important;
-        color: #f87171 !important;
-        border: 1px solid rgba(239, 68, 68, 0.25) !important;
-        border-radius: 10px !important;
+    /* Cada opción del radio */
+    section[data-testid="stSidebar"] .stRadio > div > label {
+        display: flex !important;
+        align-items: center !important;
+        padding: 11px 20px !important;
+        border-left: 3px solid transparent !important;
+        border-radius: 0 !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+        color: #94a3b8 !important;
+        font-size: 0.88rem !important;
+        font-weight: 500 !important;
+        letter-spacing: 0.03em !important;
+        background: transparent !important;
+        margin: 0 !important;
+    }
+    section[data-testid="stSidebar"] .stRadio > div > label:hover {
+        background: rgba(59,130,246,0.08) !important;
+        color: #e2e8f0 !important;
+        border-left-color: rgba(59,130,246,0.35) !important;
+    }
+    /* Opción seleccionada */
+    section[data-testid="stSidebar"] .stRadio > div > label[data-checked="true"],
+    section[data-testid="stSidebar"] .stRadio > div > label:has(input:checked) {
+        background: rgba(59,130,246,0.12) !important;
+        color: #60a5fa !important;
+        border-left-color: #3b82f6 !important;
         font-weight: 600 !important;
-        font-size: 0.85rem !important;
+    }
+    /* Ocultar el círculo del radio */
+    section[data-testid="stSidebar"] .stRadio > div > label > div:first-child {
+        display: none !important;
+    }
+
+    /* Botón cerrar sesión en sidebar */
+    .sidebar-logout .stButton button {
+        background: rgba(239,68,68,0.08) !important;
+        color: #f87171 !important;
+        border: 1px solid rgba(239,68,68,0.2) !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 0.82rem !important;
         transition: all 0.2s !important;
     }
-    .sidebar-logout button:hover {
-        background: rgba(239, 68, 68, 0.2) !important;
-        border-color: rgba(239, 68, 68, 0.5) !important;
+    .sidebar-logout .stButton button:hover {
+        background: rgba(239,68,68,0.15) !important;
+        border-color: rgba(239,68,68,0.4) !important;
     }
 
     /* ══════════════════════════════
@@ -653,17 +660,8 @@ else:
     user = st.session_state.user
     MAX_FICHAS = 210
 
-    # ── Inicializar navegación en session_state ──
     if "menu_choice" not in st.session_state:
-        st.session_state.menu_choice = "📊 DASHBOARD"
-
-    NAV_ITEMS = [
-        ("📊", "DASHBOARD",        "📊 DASHBOARD"),
-        ("📦", "BODEGA CENTRAL",   "📦 BODEGA CENTRAL"),
-        ("⚖️", "SALA DE ATENCIÓN", "⚖️ SALA DE ATENCIÓN"),
-        ("👥", "GESTIÓN DE NIÑOS", "👥 GESTIÓN DE NIÑOS"),
-        ("📜", "HISTORIAL",        "📜 HISTORIAL"),
-    ]
+        st.session_state.menu_choice = "📊  DASHBOARD"
 
     with st.sidebar:
         # ── Header del sidebar ──
@@ -673,25 +671,22 @@ else:
                     <img src="{LOGO_SRC}" style="height:72px; object-fit:contain; mix-blend-mode:screen; filter:brightness(1.35);">
                 </div>
                 <div style="text-align:center; margin-top:12px;">
-                    <div class="sidebar-user-name">👤 {user['nombre']}</div>
+                    <div class="sidebar-user-name">{user['nombre']}</div>
                     <div class="sidebar-user-role">Operador Autorizado</div>
                 </div>
             </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("<div style='padding: 8px 0;'>", unsafe_allow_html=True)
+        st.markdown("<div style='padding: 6px 0 4px 0;'>", unsafe_allow_html=True)
 
-        # ── Botones de navegación ──
-        for icon, label, key in NAV_ITEMS:
-            is_active = st.session_state.menu_choice == key
-            css_class = "nav-btn active" if is_active else "nav-btn"
-            if st.button(
-                f"{icon}  {label}",
-                key=f"nav_{label}",
-                use_container_width=True,
-            ):
-                st.session_state.menu_choice = key
-                st.rerun()
+        # ── Navegación con radio estilizado ──
+        menu_choice_selected = st.radio(
+            "nav",
+            ["📊  DASHBOARD", "📦  BODEGA CENTRAL", "⚖️  SALA DE ATENCIÓN", "👥  GESTIÓN DE NIÑOS", "📜  HISTORIAL"],
+            label_visibility="collapsed",
+            key="menu_radio"
+        )
+        st.session_state.menu_choice = menu_choice_selected
 
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -712,27 +707,22 @@ else:
             </div>
         """, unsafe_allow_html=True)
 
-    menu_choice = st.session_state.menu_choice
+    menu_choice = st.session_state.get("menu_radio", "📊  DASHBOARD")
 
     # ── Helper: page header unificado ──
     def render_page_header(title: str, subtitle: str, badge: str = ""):
-        badge_html = f'<span class="page-header-badge">{badge}</span><br>' if badge else ""
-        st.markdown(f"""
-            <div class="page-header">
-                <div class="page-header-left">
-                    <h2>{title}</h2>
-                    <p>{subtitle}</p>
-                </div>
-                <div class="page-header-right">
-                    {badge_html}
-                    {datetime.now(CHILE_TZ).strftime("%d/%m/%Y")}<br>
-                    <span style="color:#334155;">{user['nombre']}</span>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+        fecha_hoy = datetime.now(CHILE_TZ).strftime("%d/%m/%Y")
+        nombre_usuario = user['nombre']
+        st.markdown(
+            f'<div class="page-header">'
+            f'<div class="page-header-left"><h2>{title}</h2><p>{subtitle}</p></div>'
+            f'<div class="page-header-right">{fecha_hoy}<br><span style="color:#475569;">{nombre_usuario}</span></div>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
 
     # 📊 PANEL: DASHBOARD
-    if menu_choice == "📊 DASHBOARD":
+    if menu_choice == "📊  DASHBOARD":
         render_page_header("Dashboard", "Resumen operacional en tiempo real", "SISTEMA ACTIVO")
         try:
             with st.spinner("Cargando métricas..."):
@@ -834,7 +824,7 @@ else:
                     """, unsafe_allow_html=True)
 
     # 📦 PANEL: BODEGA CENTRAL
-    elif menu_choice == "📦 BODEGA CENTRAL":
+    elif menu_choice == "📦  BODEGA CENTRAL":
         render_page_header("Bodega Central", "Gestión e inventario general de insumos")
         try:
             raw = supabase.table("stock").select("*").order("id").execute().data
@@ -896,7 +886,7 @@ else:
                             st.error("Error al procesar el movimiento. Intente nuevamente.")
 
     # ⚖️ PANEL: SALA DE ATENCIÓN
-    elif menu_choice == "⚖️ SALA DE ATENCIÓN":
+    elif menu_choice == "⚖️  SALA DE ATENCIÓN":
         render_page_header("Sala de Atención", "Despacho y control de insumos")
         
         tab_entrega, tab_resumen_stock = st.tabs(["📝 CONTROL DE ENTREGA (REGISTRAR)", "📊 RESUMEN DE INGRESOS Y SALIDAS"])
@@ -1042,7 +1032,7 @@ else:
                 st.dataframe(pd.DataFrame(resumen_productos), use_container_width=True, hide_index=True)
 
     # 👥 PANEL: GESTIÓN DE NIÑOS
-    elif menu_choice == "👥 GESTIÓN DE NIÑOS":
+    elif menu_choice == "👥  GESTIÓN DE NIÑOS":
         render_page_header("Padrón de Beneficiarios", "Gestión de fichas clínicas activas e historial de egresos")
         tab_active, tab_inactive = st.tabs(["🟢 NIÑOS ACTIVOS", "⚪ HISTORIAL DE EGRESOS"])
         
@@ -1296,7 +1286,7 @@ else:
                                 st.error("Error al re-incorporar el beneficiario. Intente nuevamente.")
 
     # 📜 PANEL: HISTORIAL
-    elif menu_choice == "📜 HISTORIAL":
+    elif menu_choice == "📜  HISTORIAL":
         render_page_header("Historial de Operaciones", "Registro completo de movimientos y transacciones")
         
         st.markdown('<div class="section-title">🔍 Filtros de Búsqueda</div>', unsafe_allow_html=True)
