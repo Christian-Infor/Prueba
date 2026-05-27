@@ -241,47 +241,49 @@ def init_supabase():
 supabase = init_supabase()
 
 # ─────────────────────────────────────────
-# 4. LOGIN MEJORADO (CON LOGO INTEGRADO EN MODO OSCURO)
+# 4. LOGIN MEJORADO (DISEÑO CENTRADO Y LOGO AGRANDADO)
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
-    _, col_mid, _ = st.columns([1, 1.5, 1])
-    with col_mid:
-        st.markdown('<div class="centered-login">', unsafe_allow_html=True)
-        
-        # LOGO OPTIMIZADO CON TRATAMIENTO DE MEZCLA DE PANTALLA CSS
-        st.markdown(f"""
-            <div style="display: flex; justify-content: center; margin-bottom: 10px;">
-                <img src="{LOGO_SRC}" style="
-                    height: 130px; 
-                    object-fit: contain; 
-                    mix-blend-mode: screen; 
-                    filter: brightness(1.4) drop-shadow(0px 4px 12px rgba(96, 165, 250, 0.4));
-                    border-radius: 0px;
-                ">
-            </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown("<h1 style='color:#60A5FA; font-size:2.6rem; margin-bottom:0px; font-weight:800; letter-spacing:1px;'>GOTAS DE LECHE</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='color:#94A3B8; font-size:1.1rem; margin-bottom:30px; letter-spacing:0.5px;'>Sistema Maestro de Gestión</p>", unsafe_allow_html=True)
-        
-        with st.form("login"):
-            username = st.text_input("Usuario", placeholder="👤 Ingrese su usuario")
-            password = st.text_input("Contraseña", type="password", placeholder="🔒 Ingrese su contraseña")
-            if st.form_submit_button("INGRESAR AL SISTEMA 🚀", use_container_width=True):
-                if not username or not password:
-                    st.error("Ingrese usuario y contraseña.")
-                else:
-                    try:
-                        res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
-                        if res.data and verify_password(password, res.data[0]["clave"]):
-                            st.session_state.user = res.data[0]
-                            st.rerun()
-                        else:
-                            st.error("Credenciales incorrectas.")
-                    except Exception as e:
-                        st.error(f"Error al verificar credenciales: {e}")
-        st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Contenedor principal centrado con máximo ancho definido
+    st.markdown('<div class="centered-login">', unsafe_allow_html=True)
+    
+    # Logo grande con efecto de sombra y filtro para fondos oscuros
+    st.markdown(f"""
+        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+            <img src="{LOGO_SRC}" style="
+                height: 280px; 
+                width: auto; 
+                object-fit: contain; 
+                mix-blend-mode: screen; 
+                filter: brightness(1.5) drop-shadow(0px 8px 15px rgba(96, 165, 250, 0.4));
+            ">
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Encabezados centrados
+    st.markdown("<h1 style='text-align: center; color:#60A5FA; font-size:3.2rem; margin-bottom:5px; font-weight:800; letter-spacing:1px;'>GOTAS DE LECHE</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align: center; color:#94A3B8; font-size:1.3rem; margin-bottom:40px; letter-spacing:0.5px;'>Sistema Maestro de Gestión</p>", unsafe_allow_html=True)
+    
+    # Formulario
+    with st.form("login"):
+        username = st.text_input("Usuario", placeholder="👤 Ingrese su usuario")
+        password = st.text_input("Contraseña", type="password", placeholder="🔒 Ingrese su contraseña")
+        if st.form_submit_button("INGRESAR AL SISTEMA 🚀", use_container_width=True):
+            if not username or not password:
+                st.error("Ingrese usuario y contraseña.")
+            else:
+                try:
+                    res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
+                    if res.data and verify_password(password, res.data[0]["clave"]):
+                        st.session_state.user = res.data[0]
+                        st.rerun()
+                    else:
+                        st.error("Credenciales incorrectas.")
+                except Exception as e:
+                    st.error(f"Error al verificar credenciales: {e}")
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────
 # 5. PANEL PRINCIPAL (SESIÓN ACTIVA)
