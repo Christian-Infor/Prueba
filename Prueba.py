@@ -48,9 +48,8 @@ st.markdown("""
         /* Efecto tubo de neón: Sombra exterior e interior del mismo tono */
         box-shadow: 0 0 20px rgba(88, 101, 242, 0.12), inset 0 0 10px rgba(88, 101, 242, 0.08) !important; 
         
-        /* Ancho estricto y centrado automático (sin usar st.columns) */
-        max-width: 420px !important; 
-        margin: 0 auto !important; 
+    /* Ancho estricto y centrado automático (sin usar st.columns) */
+        width: 100% !important;
     }
 
     /* Padding interno de la caja de login */
@@ -285,22 +284,23 @@ supabase = init_supabase()
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
-
-    _, col_mid, _ = st.columns([1, 0.8, 1])
-    with col_mid:
-
-        st.markdown(f"""
-            <div style="text-align: center; margin-bottom: 25px; padding-top: 2vh;">
-                <img src="{LOGO_SRC}" style="height: 140px; object-fit: contain; filter: drop-shadow(0px 0px 15px rgba(88, 101, 242, 0.4));">
-                <h2 style='color: white; margin-top: 15px; margin-bottom: 2px; font-weight: 800; font-size: 2.2rem; letter-spacing: 1px;'>GOTAS DE LECHE</h2>
-                <p style='color: #64748b; font-size: 0.85rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;'>Sistema Maestro de Gestión</p>
-            </div>
-        """, unsafe_allow_html=True)
-
+    
+    # LOGO Y TÍTULOS ALINEADOS (Controlado puramente por HTML y centrado automático)
+    st.markdown(f"""
+        <div style="text-align: center; margin-bottom: 25px; padding-top: 2vh;">
+            <img src="{LOGO_SRC}" style="height: 140px; object-fit: contain; filter: drop-shadow(0px 0px 15px rgba(88, 101, 242, 0.4));">
+            <h2 style='color: white; margin-top: 15px; margin-bottom: 2px; font-weight: 800; font-size: 2.2rem; letter-spacing: 1px;'>GOTAS DE LECHE</h2>
+            <p style='color: #64748b; font-size: 0.85rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;'>Sistema Maestro de Gestión</p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # CONTENEDOR CON BORDE centrado con columnas
+    _l, col_login, _r = st.columns([1.2, 2, 1.2])
+    with col_login:
         with st.container(border=True):
             username = st.text_input("Usuario", placeholder="Ingrese su usuario")
             password = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña")
-
+            
             if st.button("INGRESAR AL SISTEMA", type="primary", use_container_width=True):
                 if not username or not password:
                     st.error("⚠️ Por favor, ingresa tu usuario y contraseña.")
