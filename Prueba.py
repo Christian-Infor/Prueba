@@ -758,7 +758,7 @@ else:
             </div>
         """, unsafe_allow_html=True)
 
-    menu_choice = st.session_state.get("menu_radio", "📊  DASHBOARD")
+    menu_choice = st.session_state.get("menu_choice", "📊  DASHBOARD")
 
     # ── Helper: page header unificado ──
     def render_page_header(title: str, subtitle: str, badge: str = ""):
