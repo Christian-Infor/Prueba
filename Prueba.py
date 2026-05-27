@@ -40,6 +40,7 @@ st.markdown("""
         box-shadow: 0px 10px 30px rgba(0,0,0,0.5) !important;
     }
     
+    /* Modelo de Tarjeta Unificado */
     .metric-card {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         border: 1px solid #334155;
@@ -47,6 +48,7 @@ st.markdown("""
         padding: 24px;
         text-align: center;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        margin-bottom: 15px;
     }
     .metric-label {
         color: #94a3b8;
@@ -231,7 +233,7 @@ else:
     
     with st.sidebar:
         st.markdown(f"### 👤 {user['nombre']}")
-        st.caption(f"Operador autorizado")
+        st.caption(f"Operador authorized")
         st.divider()
         
         menu_choice = st.radio(
@@ -256,7 +258,7 @@ else:
         st.header("📊 Resumen de Operación e Info Inmediata", divider="blue")
         try:
             with st.spinner("Actualizando métricas..."):
-                stock_res = supabase.table("stock").select("*").execute()
+                stock_res = supabase.table("stock").select("*").order("producto").execute()
                 benef_res = supabase.table("beneficiarios").select("rut", count="exact").eq("estado", "Activo").execute()
         except Exception as e:
             st.error(f"Error al conectar con Supabase: {e}"); st.stop()
@@ -266,6 +268,7 @@ else:
             niños_activos = benef_res.count if benef_res.count else 0
             fichas_disponibles = max(0, MAX_FICHAS - niños_activos)
             
+            # 1. FILA SUPERIOR: RESUMEN DE OPERACIÓN E INFO INMEDIATA
             m1, m2, m3, m4 = st.columns(4)
             with m1:
                 st.markdown(f'<div class="metric-card"><div class="metric-label">Niños Activos</div><div class="metric-value">{niños_activos} <span style="font-size:1.1rem; color:#94a3b8;">/ {MAX_FICHAS}</span></div></div>', unsafe_allow_html=True)
@@ -276,35 +279,70 @@ else:
             with m4:
                 st.markdown(f'<div class="metric-card"><div class="metric-label">Bodega Central</div><div class="metric-value">{int(df["bodega"].sum())} <span style="font-size:1.1rem; color:#94a3b8;">unid</span></div></div>', unsafe_allow_html=True)
             
-            # INFO INMEDIATA: TRASLADADA DESDE SALA DE PESO
+            # Filtramos catálogo excluyendo "Ajuar" y "Otros"
+            productos_filtrados = [item for item in stock_res.data if item["producto"].upper() not in ["AJUAR", "OTROS"]]
+            
+            # 2. FILA INTERMEDIA: STOCK DE BODEGA
             st.write("###")
-            st.markdown("### 🚨 Estado Crítico de Insumos (Sala de Atención)")
-            cols_sala = st.columns(4)
-            for i, item in enumerate(stock_res.data):
-                with cols_sala[i % 4]:
-                    if item["sala"] <= 5:
-                        badge = f'<span style="background-color: #ef4444; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">🚨 CRÍTICO: {item["sala"]} ud.</span>'
-                    elif item["sala"] <= 15:
-                        badge = f'<span style="background-color: #f59e0b; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">⚠️ BAJO: {item["sala"]} ud.</span>'
+            st.markdown("### 📦 Stock de Bodega")
+            cols_bodega = st.columns(3)
+            for i, item in enumerate(productos_filtrados):
+                with cols_bodega[i % 3]:
+                    # Umbrales lógicos de alerta para Bodega Principal
+                    if item["bodega"] <= 15:
+                        color_valor = "#ef4444"
+                        sub_label = '<span style="color:#ef4444; font-weight:bold; font-size:0.9rem;">🚨 CRÍTICO EN BODEGA</span>'
+                    elif item["bodega"] <= 40:
+                        color_valor = "#f59e0b"
+                        sub_label = '<span style="color:#f59e0b; font-weight:bold; font-size:0.9rem;">⚠️ INVENTARIO GLOBAL BAJO</span>'
                     else:
-                        badge = f'<span style="background-color: #10b981; color: white; padding: 4px 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold;">📦 OK: {item["sala"]} ud.</span>'
-                    
+                        color_valor = "#60a5fa"  # Azul estables para bodega
+                        sub_label = '<span style="color:#10b981; font-weight:bold; font-size:0.9rem;">🏢 ALMACENADO</span>'
+                        
                     st.markdown(f"""
-                        <div class="metric-card" style="margin-bottom: 10px; border-top: 4px solid #3b82f6; padding:15px;">
-                            <div style="font-size:0.95rem; color: #f8fafc; font-weight:600; min-height:30px;">{item['producto']}</div>
-                            <div style="margin-top: 10px;">{badge}</div>
+                        <div class="metric-card">
+                            <div class="metric-label" style="font-size:1rem; min-height:40px; display:flex; align-items:center; justify-content:center;">
+                                {item['producto']}
+                            </div>
+                            <div class="metric-value" style="color: {color_valor};">
+                                {int(item['bodega'])} <span style="font-size:1.2rem; color:#94a3b8;">ud</span>
+                            </div>
+                            <div style="margin-top:10px;">
+                                {sub_label}
+                            </div>
                         </div>
                     """, unsafe_allow_html=True)
 
+            # 3. FILA INFERIOR: INSUMOS SALA DE ATENCIÓN
             st.write("###")
-            fig = px.bar(
-                df, x="producto", y="sala", text="sala",
-                title="Distribución de Stock Disponible en Sala de Atención",
-                labels={"sala": "Unidades", "producto": "Insumo"},
-                template="plotly_dark"
-            )
-            fig.update_traces(marker_color='#38bdf8', textposition='outside')
-            st.plotly_chart(fig, use_container_width=True)
+            st.markdown("### ⚖️ Insumos Sala de Atención")
+            cols_sala = st.columns(3)
+            for i, item in enumerate(productos_filtrados):
+                with cols_sala[i % 3]:
+                    # Umbrales clínicos estrictos para la Sala de Atención inmediata
+                    if item["sala"] <= 5:
+                        color_valor = "#ef4444"
+                        sub_label = '<span style="color:#ef4444; font-weight:bold; font-size:0.9rem;">🚨 CRÍTICO</span>'
+                    elif item["sala"] <= 15:
+                        color_valor = "#f59e0b"
+                        sub_label = '<span style="color:#f59e0b; font-weight:bold; font-size:0.9rem;">⚠️ INVENTARIO BAJO</span>'
+                    else:
+                        color_valor = "#10b981"
+                        sub_label = '<span style="color:#10b981; font-weight:bold; font-size:0.9rem;">📦 STOCK ESTABLE</span>'
+                    
+                    st.markdown(f"""
+                        <div class="metric-card">
+                            <div class="metric-label" style="font-size:1rem; min-height:40px; display:flex; align-items:center; justify-content:center;">
+                                {item['producto']}
+                            </div>
+                            <div class="metric-value" style="color: {color_valor};">
+                                {int(item['sala'])} <span style="font-size:1.2rem; color:#94a3b8;">ud</span>
+                            </div>
+                            <div style="margin-top:10px;">
+                                {sub_label}
+                            </div>
+                        </div>
+                    """, unsafe_allow_html=True)
 
     # 📦 PANEL: BODEGA CENTRAL
     elif menu_choice == "📦 BODEGA CENTRAL":
@@ -368,7 +406,7 @@ else:
                         except Exception as e:
                             st.error(f"Error crítico en la transacción: {e}")
 
-    # ⚖️ PANEL: SALA DE ATENCIÓN (UNIFICADO)
+    # ⚖️ PANEL: SALA DE ATENCIÓN
     elif menu_choice == "⚖️ SALA DE ATENCIÓN":
         st.header("⚖️ Sala de Atención - Despacho y Control", divider="blue")
         
@@ -382,7 +420,6 @@ else:
         with tab_entrega:
             metodo_busqueda = st.radio("Buscar beneficiario por:", ["N° de Ficha 📋", "RUN / Identificación 🪪"], horizontal=True)
             
-            # Variables de control vacías
             recipient_name = ""
             ficha_vinculada = 0
             opciones_retiro = ["--"]
@@ -411,12 +448,10 @@ else:
                     except Exception as e:
                         st.error(f"Error: {e}")
             
-            # Si se encontró un beneficiario, armamos su lista independiente de receptores
             if beneficiary:
                 recipient_name = beneficiary["nombre"]
                 ficha_vinculada = beneficiary["ficha"]
                 
-                # Armamos las opciones basadas estrictamente en su ficha
                 opciones_retiro = []
                 if beneficiary.get("madre"): opciones_retiro.append(f"Madre: {beneficiary['madre']}")
                 if beneficiary.get("padre"): opciones_retiro.append(f"Padre: {beneficiary['padre']}")
@@ -428,12 +463,11 @@ else:
                 st.success(f"**Beneficiario:** {recipient_name} | **Ficha:** {ficha_vinculada} | **Último Control:** {beneficiary.get('ultimo_control','-')}", icon="👶")
 
             st.write("###")
-            product_options = ["--"] + [x["producto"] for x in stock_data]
+            product_options = ["--"] + [x["producto"] for x in stock_data if x["producto"].upper() not in ["AJUAR", "OTROS"]]
             
             with st.form("delivery_master_form"):
                 st.markdown("##### 📦 Desglose Obligatorio de Insumos (Se deben registrar exactamente 3 ítems)")
                 
-                # Forzamos exactamente 3 ítems visuales en pantalla
                 col_p1, col_q1 = st.columns([3, 1])
                 with col_p1: prod_1 = st.selectbox("Insumo 1", product_options, key="p1")
                 with col_q1: qty_1 = st.number_input("Cant 1", min_value=0, step=1, key="q1")
@@ -449,18 +483,16 @@ else:
                 st.divider()
                 st.markdown("##### 👤 Control de Retiro Autorizado")
                 quien_retira_tipo = st.selectbox("Persona que retira de la ficha:", opciones_retiro)
-                
                 nombre_firma_especifico = st.text_input("Nombre completo de quien recibe físicamente (Firma digital):", placeholder="Escriba el nombre de la persona que se lleva los insumos")
                 
                 if st.form_submit_button("🔥 CONVALIDAR Y REGISTRAR ENTREGA", type="primary", use_container_width=True):
-                    # Validación estricta: los 3 campos son obligatorios
                     items_validados = [(prod_1, qty_1), (prod_2, qty_2), (prod_3, qty_3)]
                     any_empty = any(p == "--" or q <= 0 for p, q in items_validados)
                     
                     if ficha_vinculada == 0:
                         st.error("Operación abortada: Debe identificar primero a un beneficiario activo mediante Ficha o RUN.")
                     elif any_empty:
-                        st.error("❌ ERROR DE CAMPO OBLIGATORIO: Las voluntarias deben registrar obligatoriamente los 3 ítems de insumos con cantidades mayores a cero para poder convalidar la entrega.")
+                        st.error("❌ ERROR DE CAMPO OBLIGATORIO: Las voluntarias deben registrar obligatoriamente los 3 ítems de insumos con cantidades mayores a cero.")
                     elif not nombre_firma_especifico:
                         st.error("❌ ERROR DE CAMPO OBLIGATORIO: Debe ingresar el nombre completo de la persona que recibe físicamente.")
                     else:
@@ -468,7 +500,7 @@ else:
                         for p_name, qty in items_validados:
                             item = next((x for x in stock_data if x["producto"] == p_name), None)
                             if not item:
-                                errors_stock.append(f"El producto '{p_name}' no existe en el catálogo.")
+                                errors_stock.append(f"El producto '{p_name}' no existe.")
                             elif item["sala"] < qty:
                                 errors_stock.append(f"Falta Stock para '{p_name}'. En sala: {item['sala']} | Solicitado: {qty}.")
                                 
@@ -479,7 +511,6 @@ else:
                                 detalle_receptor = f"{quien_retira_tipo} (Recibe: {nombre_firma_especifico})"
                                 for p_name, qty in items_validados:
                                     item = next(x for x in stock_data if x["producto"] == p_name)
-                                    # Descuento explícito en INT nativo
                                     supabase.table("stock").update({"sala": int(item["sala"] - qty)}).eq("id", int(item["id"])).execute()
                                     
                                     supabase.table("historial").insert({
@@ -496,7 +527,6 @@ else:
                                 
         with tab_resumen_stock:
             st.markdown("### 📊 Resumen Estadístico de Cargas en Sala de Atención")
-            st.caption("Balance total de cuánto ha recibido la sala (traslados) versus cuánto ha entregado a beneficiarios.")
             
             try:
                 historial_completo = supabase.table("historial").select("*").execute().data
@@ -505,15 +535,14 @@ else:
                 df_h = pd.DataFrame()
                 
             if df_h.empty:
-                st.info("No hay transacciones registradas para computar resúmenes.")
+                st.info("No hay transacciones registradas.")
             else:
                 resumen_productos = []
                 for p in stock_data:
                     p_name = p["producto"]
+                    if p_name.upper() in ["AJUAR", "OTROS"]: continue
                     
-                    # Sumamos lo que ha entrado a sala (TRASLADO A SALA)
                     entradas = df_h[(df_h["producto"] == p_name) & (df_h["tipo"] == "TRASLADO A SALA")]["cantidad"].astype(int).sum()
-                    # Sumamos lo que ha salido de sala (ENTREGA)
                     salidas = df_h[(df_h["producto"] == p_name) & (df_h["tipo"] == "ENTREGA")]["cantidad"].astype(int).sum()
                     
                     resumen_productos.append({
@@ -575,7 +604,6 @@ else:
                     mother = ccc1.text_input("Nombre de la Madre")
                     father = ccc2.text_input("Nombre del Padre")
                     phone = ccc3.text_input("Teléfono de Contacto")
-                    
                     address = st.text_input("Dirección Particular")
                     
                     st.markdown("##### 🛡️ Suplentes Autorizados para Retiro")
@@ -591,9 +619,8 @@ else:
                             st.error("Campos obligatorios faltantes: Nombre y RUN son requeridos.")
                         else:
                             try:
-                                # Cálculo automático de egreso a 2 años aproximados
                                 f_ingreso_dt = datetime.now(CHILE_TZ)
-                                f_egreso_dt = f_ingreso_dt + timedelta(days=730) # 2 años app
+                                f_egreso_dt = f_ingreso_dt + timedelta(days=730)
                                 
                                 string_ingreso = f_ingreso_dt.strftime("%d/%m/%Y")
                                 string_egreso = f_egreso_dt.strftime("%d/%m/%Y")
@@ -610,7 +637,7 @@ else:
                                         "historia_social": social_history, "estado": "Activo",
                                         "fecha_ingreso": string_ingreso, "fecha_egreso": string_egreso
                                     }).execute()
-                                    st.success("Registro clínico-social creado exitosamente con egreso estimado a 2 años.")
+                                    st.success("Registro clínico-social creado exitosamente.")
                                     time.sleep(0.5)
                                     st.rerun()
                             except Exception as e:
@@ -708,11 +735,10 @@ else:
                             except Exception as e:
                                 st.error(f"Error: {e}")
 
-    # 📜 PANEL: HISTORIAL (BÚSQUEDA POR FECHA Y FILTROS)
+    # 📜 PANEL: HISTORIAL
     elif menu_choice == "📜 HISTORIAL":
         st.header("📜 Historial de Operaciones y Movimientos", divider="blue")
         
-        # FILTRO AVANZADO DE BÚSQUEDA POR RANGO DE FECHAS
         st.markdown("##### 🔍 Búsqueda Avanzada por Filtros de Fecha")
         c_f1, c_f2 = st.columns(2)
         with c_f1:
@@ -740,7 +766,6 @@ else:
                 except:
                     pass
             
-            # Filtrado por rango de fecha seleccionado por la voluntaria
             df_historial_general = df_historial_general[
                 (df_historial_general["created_at_dt"].dt.date >= fecha_inicio) & 
                 (df_historial_general["created_at_dt"].dt.date <= fecha_fin)
@@ -757,7 +782,7 @@ else:
                 df_filtrado = df_historial_general
             
             if df_filtrado.empty:
-                st.warning("No se encontraron registros bajo el rango de fechas u operación seleccionado.")
+                st.warning("No se encontraron registros.")
             else:
                 df_filtrado["observaciones"] = df_filtrado["observaciones"].fillna("Movimiento interno de stock")
                 df_render = df_filtrado[["Fecha y Hora ⏰", "tipo", "producto", "cantidad", "responsable", "observaciones"]].rename(
