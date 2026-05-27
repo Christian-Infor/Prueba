@@ -31,31 +31,15 @@ st.markdown("""
         background-color: #060b13 !important;
     }
     
-    /* FORZAR CENTRADO ABSOLUTO (VERTICAL Y HORIZONTAL) DEL CONTENEDOR NATIVO */
-    .stApp:not(:has(div[data-testid="stSidebar"])) .stMainBlockContainer {
-        max-width: 100% !important;
-        padding: 0 !important;
-        display: flex !important;
-        align-items: center !important; 
-        justify-content: center !important; 
-        min-height: 100vh !important;
-    }
-    
-    /* ESTILIZACIÓN COMPACTA DEL CONTENEDOR DE LOGIN (400PX DE ANCHO MAX) */
+    /* ESTILIZACIÓN COMPACTA DEL CONTENEDOR DE LOGIN (Glassmorphism) */
     .stApp:not(:has(div[data-testid="stSidebar"])) div[data-testid="stVerticalBlockBorderWrapper"] {
         background: rgba(13, 22, 41, 0.75) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 16px !important;
-        
-        /* Ancho fijo controlado para evitar estiramientos */
-        width: 400px !important; 
-        max-width: 90vw !important; 
-        
-        padding: 10px !important;
+        padding: 15px !important;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
-        margin: 0 auto !important; 
     }
 
     /* Eliminar padding extra interno de los bloques de Streamlit */
@@ -281,39 +265,45 @@ def init_supabase():
 supabase = init_supabase()
 
 # ─────────────────────────────────────────
-# 4. LOGIN TOTALMENTE ENCAPSULADO CON CONTENEDOR NATIVO
+# 4. LOGIN CON ANCHO CONTROLADO Y CENTRADO
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
     
-    # El uso de border=True genera la envoltura estructural perfecta de Fase2.png
-    with st.container(border=True):
-        st.markdown(f"""
-            <div style="text-align: center; margin-bottom: 10px;">
-                <img src="{LOGO_SRC}" style="height: 110px; object-fit: contain; filter: drop-shadow(0px 4px 12px rgba(96, 165, 250, 0.3));">
-                <h2 style='color: white; margin-top: 15px; margin-bottom: 2px; font-weight: 700; font-size: 1.6rem; letter-spacing: 1px;'>GOTAS DE LECHE</h2>
-                <p style='color: #64748b; font-size: 0.85rem; font-weight: 600; letter-spacing: 1.5px; margin-bottom: 25px;'>SISTEMA MAESTRO DE GESTIÓN</p>
-            </div>
-        """, unsafe_allow_html=True)
+    # RESTAURAMOS LAS COLUMNAS PARA FORZAR EL TAMAÑO CORRECTO EN MODO WIDE
+    # Las columnas laterales vacías comprimen el centro para que no se estire.
+    col1, col_mid, col3 = st.columns([1, 0.7, 1])
+    
+    with col_mid:
+        st.write("<br><br><br><br>", unsafe_allow_html=True) # Espacio para centrarlo visualmente en la altura de la pantalla
         
-        username = st.text_input("Usuario", placeholder="Ingrese su usuario")
-        password = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña")
-        
-        st.write("##") # Margen interno antes del submit
-        
-        if st.button("INGRESAR AL SISTEMA", type="primary", use_container_width=True):
-            if not username or not password:
-                st.error("⚠️ Por favor, ingresa tu usuario y contraseña.")
-            else:
-                try:
-                    res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
-                    if res.data and verify_password(password, res.data[0]["clave"]):
-                        st.session_state.user = res.data[0]
-                        st.rerun()
-                    else:
-                        st.error("❌ Credenciales incorrectas.")
-                except Exception as e:
-                    st.error(f"Error al verificar credenciales: {e}")
+        with st.container(border=True):
+            st.markdown(f"""
+                <div style="text-align: center; margin-bottom: 10px;">
+                    <img src="{LOGO_SRC}" style="height: 110px; object-fit: contain; filter: drop-shadow(0px 4px 12px rgba(96, 165, 250, 0.3));">
+                    <h2 style='color: white; margin-top: 15px; margin-bottom: 2px; font-weight: 700; font-size: 1.6rem; letter-spacing: 1px;'>GOTAS DE LECHE</h2>
+                    <p style='color: #64748b; font-size: 0.85rem; font-weight: 600; letter-spacing: 1.5px; margin-bottom: 25px;'>SISTEMA MAESTRO DE GESTIÓN</p>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            username = st.text_input("Usuario", placeholder="Ingrese su usuario")
+            password = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña")
+            
+            st.write("##") # Margen interno antes del submit
+            
+            if st.button("INGRESAR AL SISTEMA", type="primary", use_container_width=True):
+                if not username or not password:
+                    st.error("⚠️ Por favor, ingresa tu usuario y contraseña.")
+                else:
+                    try:
+                        res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
+                        if res.data and verify_password(password, res.data[0]["clave"]):
+                            st.session_state.user = res.data[0]
+                            st.rerun()
+                        else:
+                            st.error("❌ Credenciales incorrectas.")
+                    except Exception as e:
+                        st.error(f"Error al verificar credenciales: {e}")
 
 # ─────────────────────────────────────────
 # 5. PANEL PRINCIPAL (SESIÓN ACTIVA)
