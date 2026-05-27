@@ -26,79 +26,79 @@ st.markdown("""
     <style>
     html, body, [class*="st-"] { font-size: 1.1rem !important; }
     
-    /* Fondo global oscuro profundo */
+    /* Fondo global ultraroscuro (azul medianoche casi negro) para el Login */
     .stApp:not(:has(div[data-testid="stSidebar"])) {
-        background-color: #080b12 !important;
+        background-color: #090A0F !important;
     }
     
-    /* 1. SUBIR EL CONTENEDOR */
+    /* Bajar un poco el contenido desde el techo */
     .stApp:not(:has(div[data-testid="stSidebar"])) .stMainBlockContainer {
-        padding-top: 5vh !important; 
+        padding-top: 6vh !important; 
         max-width: 100% !important;
     }
     
-    /* 2. CAJA DE LOGIN CON COLOR PROFUNDO Y BORDE NEÓN FINO */
+    /* ── CAJA DE LOGIN (ESTILO FASE 2 EXACTO) ── */
     .stApp:not(:has(div[data-testid="stSidebar"])) div[data-testid="stVerticalBlockBorderWrapper"] {
-        /* Fondo azul oscuro profundo que hace resaltar la línea exterior */
-        background: #0d121e !important; 
+        background-color: #11141E !important; /* Fondo azul noche de la tarjeta */
         
-        /* Borde base sólido color azul intermedio */
-        border: 1.5px solid #2e3b5e !important; 
-        border-radius: 14px !important;
+        /* Borde fino color Blurple (Azul/Violeta) semitransparente */
+        border: 1px solid rgba(88, 101, 242, 0.35) !important; 
+        border-radius: 12px !important;
         
-        /* Efecto NEÓN: Múltiples sombras para simular luz emitiéndose del borde */
-        box-shadow: 
-            0 0 8px rgba(96, 165, 250, 0.2),   /* Resplandor inmediato suave */
-            0 0 25px rgba(59, 130, 246, 0.15), /* Resplandor medio difuso */
-            inset 0 0 15px rgba(96, 165, 250, 0.05) /* Resplandor interno sutil */
-            !important; 
+        /* Efecto tubo de neón: Sombra exterior e interior del mismo tono */
+        box-shadow: 0 0 20px rgba(88, 101, 242, 0.12), inset 0 0 10px rgba(88, 101, 242, 0.08) !important; 
         
-        /* Ajuste de márgenes internos */
-        padding: 30px 25px !important; 
+        /* Ancho estricto y centrado automático (sin usar st.columns) */
+        max-width: 420px !important; 
         margin: 0 auto !important; 
     }
 
-    /* ── INPUTS (Cajas de texto más oscuras para contrastar el fondo de la caja) ── */
+    /* Padding interno de la caja de login */
+    .stApp:not(:has(div[data-testid="stSidebar"])) div[data-testid="stVerticalBlockBorderWrapper"] > div {
+        padding: 25px 30px !important;
+    }
+
+    /* ── INPUTS (Cajas de texto más oscuras que la tarjeta) ── */
     .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput div[data-baseweb="input"] {
-        background-color: #06090e !important; 
-        border: 1px solid #1e293b !important;
+        background-color: #0D1017 !important; 
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
         border-radius: 6px !important;
         color: white !important;
     }
     
     .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput div[data-baseweb="input"]:focus-within {
-        border-color: #60a5fa !important;
-        box-shadow: 0 0 0 1px #60a5fa !important; 
+        border-color: #5865F2 !important;
+        box-shadow: 0 0 0 1px #5865F2 !important; 
     }
     
     .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput label {
-        color: #e2e8f0 !important;
-        font-weight: 600 !important;
-        font-size: 0.95rem !important;
-        margin-bottom: 6px !important;
+        color: #f8fafc !important;
+        font-weight: 500 !important;
+        font-size: 0.9rem !important;
+        margin-bottom: 4px !important;
     }
 
-    /* ── BOTÓN CON LILA/AZUL VIBRANTE ── */
+    /* ── BOTÓN COLOR BLURPLE EXACTO ── */
     .stApp:not(:has(div[data-testid="stSidebar"])) .stButton > button {
-        background: #4f46e5 !important; /* Color base sólido parecido a tu imagen */
+        background-color: #5865F2 !important; /* Tono sólido vibrante de tu imagen */
         border: none !important;
         color: white !important;
         font-weight: 600 !important;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         padding: 12px 24px !important;
-        border-radius: 8px !important;
+        border-radius: 6px !important;
         width: 100% !important;
-        margin-top: 20px !important;
+        margin-top: 15px !important;
         
-        /* Resplandor sutil del botón */
-        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4) !important; 
-        transition: all 0.3s ease !important;
+        /* Brillo sutil del botón */
+        box-shadow: 0 4px 14px rgba(88, 101, 242, 0.3) !important; 
+        transition: all 0.2s ease-in-out !important;
     }
     
     .stApp:not(:has(div[data-testid="stSidebar"])) .stButton > button:hover {
-        background: #4338ca !important;
-        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6) !important; 
+        background-color: #4752C4 !important;
+        box-shadow: 0 6px 20px rgba(88, 101, 242, 0.5) !important; 
         transform: translateY(-1px);
     }
     
@@ -281,41 +281,38 @@ def init_supabase():
 supabase = init_supabase()
 
 # ─────────────────────────────────────────
-# 4. LOGIN (ESTRUCTURA EXACTA A FASE 2)
+# 4. LOGIN (ESTRUCTURA EXACTA A FASE 2 SIN ST.COLUMNS)
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
     
-    col1, col_mid, col3 = st.columns([1, 1.1, 1])
+    # LOGO Y TÍTULOS ALINEADOS (Controlado puramente por HTML y centrado automático)
+    st.markdown(f"""
+        <div style="text-align: center; margin-bottom: 25px; padding-top: 2vh;">
+            <img src="{LOGO_SRC}" style="height: 140px; object-fit: contain; filter: drop-shadow(0px 0px 15px rgba(88, 101, 242, 0.4));">
+            <h2 style='color: white; margin-top: 15px; margin-bottom: 2px; font-weight: 800; font-size: 2.2rem; letter-spacing: 1px;'>GOTAS DE LECHE</h2>
+            <p style='color: #64748b; font-size: 0.85rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;'>Sistema Maestro de Gestión</p>
+        </div>
+    """, unsafe_allow_html=True)
     
-    with col_mid:
-        # LOGO Y TÍTULOS 
-        st.markdown(f"""
-            <div style="text-align: center; margin-bottom: 30px;">
-                <img src="{LOGO_SRC}" style="height: 150px; object-fit: contain; filter: drop-shadow(0px 0px 18px rgba(96, 165, 250, 0.45));">
-                <h2 style='color: white; margin-top: 20px; margin-bottom: 4px; font-weight: 800; font-size: 2.2rem; letter-spacing: 1px;'>GOTAS DE LECHE</h2>
-                <p style='color: #64748b; font-size: 0.9rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;'>Sistema Maestro de Gestión</p>
-            </div>
-        """, unsafe_allow_html=True)
+    # CONTENEDOR CON BORDE (El CSS se encarga de limitar el ancho a 420px y de centrarlo)
+    with st.container(border=True):
+        username = st.text_input("Usuario", placeholder="Ingrese su usuario")
+        password = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña")
         
-        # CONTENEDOR CON BORDE (Con colores ajustados en el CSS de arriba)
-        with st.container(border=True):
-            username = st.text_input("Usuario", placeholder="Ingrese su usuario")
-            password = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña")
-            
-            if st.button("INGRESAR AL SISTEMA", type="primary", use_container_width=True):
-                if not username or not password:
-                    st.error("⚠️ Por favor, ingresa tu usuario y contraseña.")
-                else:
-                    try:
-                        res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
-                        if res.data and verify_password(password, res.data[0]["clave"]):
-                            st.session_state.user = res.data[0]
-                            st.rerun()
-                        else:
-                            st.error("❌ Credenciales incorrectas.")
-                    except Exception as e:
-                        st.error(f"Error al verificar credenciales: {e}")
+        if st.button("INGRESAR AL SISTEMA", type="primary", use_container_width=True):
+            if not username or not password:
+                st.error("⚠️ Por favor, ingresa tu usuario y contraseña.")
+            else:
+                try:
+                    res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
+                    if res.data and verify_password(password, res.data[0]["clave"]):
+                        st.session_state.user = res.data[0]
+                        st.rerun()
+                    else:
+                        st.error("❌ Credenciales incorrectas.")
+                except Exception as e:
+                    st.error(f"Error al verificar credenciales: {e}")
 
 # ─────────────────────────────────────────
 # 5. PANEL PRINCIPAL (SESIÓN ACTIVA)
