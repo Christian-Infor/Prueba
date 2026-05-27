@@ -285,22 +285,88 @@ supabase = init_supabase()
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
-    
-    # LOGO Y TÍTULOS ALINEADOS (Controlado puramente por HTML y centrado automático)
+
+    # CSS exclusivo del login
+    st.markdown("""
+    <style>
+    /* Centrar todo el bloque del login */
+    .login-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding-top: 5vh;
+    }
+    /* Caja del formulario */
+    .login-box {
+        width: 100%;
+        max-width: 560px;
+        background: #0e1525;
+        border: 1px solid #2a3550;
+        border-radius: 18px;
+        padding: 36px 40px 32px 40px;
+        margin-top: 28px;
+    }
+    /* Labels */
+    .login-box .stTextInput label {
+        color: #e2e8f0 !important;
+        font-size: 0.95rem !important;
+        font-weight: 500 !important;
+        margin-bottom: 6px !important;
+    }
+    /* Campos de texto */
+    .login-box .stTextInput input {
+        background: #131e33 !important;
+        border: 1px solid #2a3550 !important;
+        border-radius: 10px !important;
+        color: #e2e8f0 !important;
+        font-size: 0.95rem !important;
+        padding: 12px 14px !important;
+        height: 48px !important;
+    }
+    .login-box .stTextInput input:focus {
+        border-color: #4f6ef7 !important;
+        box-shadow: 0 0 0 3px rgba(79,110,247,0.15) !important;
+    }
+    /* Botón ingresar */
+    .login-box .stButton button {
+        background: linear-gradient(135deg, #4f6ef7 0%, #5b5bd6 100%) !important;
+        color: white !important;
+        font-weight: 700 !important;
+        font-size: 0.95rem !important;
+        letter-spacing: 0.08em !important;
+        border: none !important;
+        border-radius: 10px !important;
+        height: 50px !important;
+        margin-top: 6px !important;
+        transition: opacity 0.2s !important;
+        box-shadow: 0 4px 20px rgba(79,110,247,0.4) !important;
+    }
+    .login-box .stButton button:hover {
+        opacity: 0.9 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Logo y títulos
     st.markdown(f"""
-        <div style="text-align: center; margin-bottom: 25px; padding-top: 2vh;">
-            <img src="{LOGO_SRC}" style="height: 140px; object-fit: contain; filter: drop-shadow(0px 0px 15px rgba(88, 101, 242, 0.4));">
-            <h2 style='color: white; margin-top: 15px; margin-bottom: 2px; font-weight: 800; font-size: 2.2rem; letter-spacing: 1px;'>GOTAS DE LECHE</h2>
-            <p style='color: #64748b; font-size: 0.85rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;'>Sistema Maestro de Gestión</p>
+        <div class="login-wrapper">
+            <img src="{LOGO_SRC}" style="height:150px; object-fit:contain; filter:drop-shadow(0px 0px 18px rgba(88,101,242,0.45));">
+            <h2 style="color:#ffffff; margin-top:18px; margin-bottom:4px; font-weight:800; font-size:2rem; letter-spacing:2px; text-align:center;">GOTAS DE LECHE</h2>
+            <p style="color:#64748b; font-size:0.78rem; font-weight:600; letter-spacing:2.5px; text-transform:uppercase; text-align:center; margin:0;">Sistema Maestro de Gestión</p>
         </div>
     """, unsafe_allow_html=True)
-    
-    # CONTENEDOR CON BORDE (El CSS se encarga de limitar el ancho a 420px y de centrarlo)
-    with st.container(border=True):
-        username = st.text_input("Usuario", placeholder="Ingrese su usuario")
-        password = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña")
-        
-        if st.button("INGRESAR AL SISTEMA", type="primary", use_container_width=True):
+
+    # Columnas para centrar la caja
+    _, col_c, _ = st.columns([1, 2, 1])
+    with col_c:
+        st.markdown('<div class="login-box">', unsafe_allow_html=True)
+        username = st.text_input("Usuario", placeholder="Ingrese su usuario", label_visibility="visible")
+        password = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña", label_visibility="visible")
+        login_btn = st.button("INGRESAR AL SISTEMA", type="primary", use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        if login_btn:
             if not username or not password:
                 st.error("⚠️ Por favor, ingresa tu usuario y contraseña.")
             else:
