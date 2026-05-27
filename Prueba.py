@@ -28,36 +28,55 @@ st.markdown("""
     
     /* Fondo global oscuro e inmersivo para el Login */
     .stApp:not(:has(div[data-testid="stSidebar"])) {
-        background-color: #060b13 !important;
+        background-color: #0b0f19 !important;
     }
     
-    /* ESTILIZACIÓN COMPACTA DEL CONTENEDOR DE LOGIN (Glassmorphism) */
+    /* Centrado vertical y horizontal de todo el bloque principal */
+    .stApp:not(:has(div[data-testid="stSidebar"])) .stMainBlockContainer {
+        max-width: 100% !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important; 
+        justify-content: center !important; 
+        min-height: 100vh !important;
+    }
+    
+    /* ── CAJA DE LOGIN ESTILO NEÓN ── */
     .stApp:not(:has(div[data-testid="stSidebar"])) div[data-testid="stVerticalBlockBorderWrapper"] {
-        background: rgba(13, 22, 41, 0.75) !important;
+        background: rgba(13, 22, 41, 0.4) !important; /* Fondo sutilmente transparente */
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        
+        /* Borde sutil azulado (no blanco) */
+        border: 1px solid rgba(59, 130, 246, 0.2) !important; 
         border-radius: 16px !important;
+        
+        /* Ancho controlado para que sea compacto */
+        width: 440px !important; 
+        max-width: 90vw !important; 
+        
         padding: 15px !important;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+        
+        /* Resplandor neón exterior de la caja */
+        box-shadow: 0 0 40px rgba(59, 130, 246, 0.1) !important; 
+        margin: 0 auto !important; 
     }
 
-    /* Eliminar padding extra interno de los bloques de Streamlit */
     .stApp:not(:has(div[data-testid="stSidebar"])) div[data-testid="stVerticalBlockBorderWrapper"] > div {
-        padding: 20px 25px !important;
+        padding: 10px 20px !important;
     }
 
-    /* Estilo de las cajas de texto (Inputs) dentro del login */
+    /* ── INPUTS (Cajas de texto oscuras) ── */
     .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput div[data-baseweb="input"] {
-        background-color: rgba(255, 255, 255, 0.03) !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        background-color: rgba(10, 15, 30, 0.6) !important;
+        border: 1px solid rgba(59, 130, 246, 0.15) !important;
         border-radius: 8px !important;
         color: white !important;
     }
     
     .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput div[data-baseweb="input"]:focus-within {
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 1px #3b82f6 !important;
+        border-color: #4f46e5 !important;
+        box-shadow: 0 0 10px rgba(79, 70, 229, 0.4) !important; /* Brillo al escribir */
     }
     
     .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput label {
@@ -66,9 +85,9 @@ st.markdown("""
         margin-bottom: 4px !important;
     }
 
-    /* Botón de ingreso moderno y extendido */
+    /* ── BOTÓN CON EFECTO NEÓN FUERTE ── */
     .stApp:not(:has(div[data-testid="stSidebar"])) .stButton > button {
-        background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%) !important;
+        background: linear-gradient(90deg, #4f46e5 0%, #3b82f6 100%) !important;
         border: none !important;
         color: white !important;
         font-weight: 600 !important;
@@ -77,16 +96,20 @@ st.markdown("""
         padding: 12px 24px !important;
         border-radius: 8px !important;
         width: 100% !important;
-        margin-top: 15px !important;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
+        margin-top: 5px !important;
+        
+        /* Sombras para simular el destello Neón de tu imagen */
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.5), 0 0 30px rgba(79, 70, 229, 0.3) !important; 
+        transition: all 0.3s ease !important;
     }
     
     .stApp:not(:has(div[data-testid="stSidebar"])) .stButton > button:hover {
         opacity: 0.95 !important;
-        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.45) !important;
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.7), 0 0 40px rgba(79, 70, 229, 0.5) !important; 
+        transform: translateY(-1px);
     }
     
-    /* Modelo de Tarjeta Unificado de tu Dashboard */
+    /* ── Modelo de Tarjetas del Dashboard ── */
     .metric-card {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         border: 1px solid #334155;
@@ -111,7 +134,7 @@ st.markdown("""
         line-height: 1;
     }
     
-    /* Bloques de ficha detallados estilo formulario impreso */
+    /* Bloques de ficha detallados */
     .ficha-seccion-datos {
         background-color: #1e293b;
         border-left: 4px solid #3b82f6;
@@ -265,27 +288,25 @@ def init_supabase():
 supabase = init_supabase()
 
 # ─────────────────────────────────────────
-# 4. LOGIN CON ANCHO CONTROLADO Y CENTRADO
+# 4. LOGIN (ESTRUCTURA IDÉNTICA A FASE 2)
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
     
-    # RESTAURAMOS LAS COLUMNAS PARA FORZAR EL TAMAÑO CORRECTO EN MODO WIDE
-    # Las columnas laterales vacías comprimen el centro para que no se estire.
-    col1, col_mid, col3 = st.columns([1, 0.7, 1])
+    col1, col_mid, col3 = st.columns([1, 0.8, 1])
     
     with col_mid:
-        st.write("<br><br><br><br>", unsafe_allow_html=True) # Espacio para centrarlo visualmente en la altura de la pantalla
+        # LOGO Y TÍTULOS FUERA DEL RECUADRO (Más grandes y con brillo)
+        st.markdown(f"""
+            <div style="text-align: center; margin-bottom: 25px; margin-top: 4vh;">
+                <img src="{LOGO_SRC}" style="height: 160px; object-fit: contain; filter: drop-shadow(0px 0px 18px rgba(96, 165, 250, 0.45));">
+                <h2 style='color: white; margin-top: 18px; margin-bottom: 4px; font-weight: 800; font-size: 2rem; letter-spacing: 1px;'>GOTAS DE LECHE</h2>
+                <p style='color: #64748b; font-size: 0.9rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;'>Sistema Maestro de Gestión</p>
+            </div>
+        """, unsafe_allow_html=True)
         
+        # EL CONTENEDOR CON BORDE AHORA SOLO ENVUELVE LOS INPUTS Y EL BOTÓN
         with st.container(border=True):
-            st.markdown(f"""
-                <div style="text-align: center; margin-bottom: 10px;">
-                    <img src="{LOGO_SRC}" style="height: 110px; object-fit: contain; filter: drop-shadow(0px 4px 12px rgba(96, 165, 250, 0.3));">
-                    <h2 style='color: white; margin-top: 15px; margin-bottom: 2px; font-weight: 700; font-size: 1.6rem; letter-spacing: 1px;'>GOTAS DE LECHE</h2>
-                    <p style='color: #64748b; font-size: 0.85rem; font-weight: 600; letter-spacing: 1.5px; margin-bottom: 25px;'>SISTEMA MAESTRO DE GESTIÓN</p>
-                </div>
-            """, unsafe_allow_html=True)
-            
             username = st.text_input("Usuario", placeholder="Ingrese su usuario")
             password = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña")
             
