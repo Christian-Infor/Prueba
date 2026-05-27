@@ -11,7 +11,7 @@ import streamlit.components.v1 as components
 # ─────────────────────────────────────────
 # 0. CONFIGURACIÓN DEL LOGO OFICIAL (URL DIRECTA)
 # ─────────────────────────────────────────
-LOGO_SRC = "https://i.ibb.co/rP59M7v/descarga.png"
+LOGO_SRC = "https://i.ibb.co/nNxy2zyt/Gd-L-removebg-preview.png"
 
 # ─────────────────────────────────────────
 # 1. CONFIGURACIÓN DE PÁGINA Y ESTILOS
@@ -241,17 +241,30 @@ def init_supabase():
 supabase = init_supabase()
 
 # ─────────────────────────────────────────
-# 4. LOGIN CLÁSICO CENTRADO CON LOGO OFICIAL INTERNET
+# 4. LOGIN MEJORADO (CON LOGO INTEGRADO EN MODO OSCURO)
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
     _, col_mid, _ = st.columns([1, 1.5, 1])
     with col_mid:
         st.markdown('<div class="centered-login">', unsafe_allow_html=True)
-        # Cargamos el logo desde ImgBB
-        st.markdown(f'<img src="{LOGO_SRC}" style="height:120px; margin-bottom:20px; filter: drop-shadow(0px 4px 8px rgba(0,0,0,0.3)); border-radius:12px;">', unsafe_allow_html=True)
-        st.markdown("<h1 style='color:#60A5FA; font-size:2.8rem; margin-bottom:5px;'>GOTAS DE LECHE</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='color:#94A3B8; margin-bottom:30px;'>Sistema Maestro de Gestión</p>", unsafe_allow_html=True)
+        
+        # LOGO OPTIMIZADO CON TRATAMIENTO DE MEZCLA DE PANTALLA CSS
+        st.markdown(f"""
+            <div style="display: flex; justify-content: center; margin-bottom: 10px;">
+                <img src="{LOGO_SRC}" style="
+                    height: 130px; 
+                    object-fit: contain; 
+                    mix-blend-mode: screen; 
+                    filter: brightness(1.4) drop-shadow(0px 4px 12px rgba(96, 165, 250, 0.4));
+                    border-radius: 0px;
+                ">
+            </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<h1 style='color:#60A5FA; font-size:2.6rem; margin-bottom:0px; font-weight:800; letter-spacing:1px;'>GOTAS DE LECHE</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#94A3B8; font-size:1.1rem; margin-bottom:30px; letter-spacing:0.5px;'>Sistema Maestro de Gestión</p>", unsafe_allow_html=True)
+        
         with st.form("login"):
             username = st.text_input("Usuario", placeholder="👤 Ingrese su usuario")
             password = st.text_input("Contraseña", type="password", placeholder="🔒 Ingrese su contraseña")
@@ -278,8 +291,12 @@ else:
     MAX_FICHAS = 210
     
     with st.sidebar:
-        # Mini logo en la parte superior del menú lateral
-        st.markdown(f'<div style="text-align:center;"><img src="{LOGO_SRC}" style="height:65px; margin-bottom:10px; border-radius:8px;"></div>', unsafe_allow_html=True)
+        # Mini logo integrado mediante CSS en el menú lateral
+        st.markdown(f"""
+            <div style="text-align:center; margin-bottom:10px;">
+                <img src="{LOGO_SRC}" style="height:65px; object-fit:contain; mix-blend-mode:screen; filter:brightness(1.3);">
+            </div>
+        """, unsafe_allow_html=True)
         st.markdown(f"### 👤 {user['nombre']}")
         st.caption(f"Operador autorizado")
         st.divider()
@@ -887,7 +904,7 @@ else:
             df_historial_general["Fecha y Hora ⏰"] = df_historial_general["created_at_dt"].dt.strftime("%d/%m/%Y %H:%M")
             
             tipos_disponibles = ["TODOS"] + list(df_historial_general["tipo"].unique()) if not df_historial_general.empty else ["TODOS"]
-            filtro_tipo = st.selectbox("Filtrar por tipo de operación:", tipos_disponibles)
+            filtro_tipo = st.selectbox("Filtrar por tipo de operation:", tipos_disponibles)
             
             if filtro_tipo != "TODOS" and not df_historial_general.empty:
                 df_filtrado = df_historial_general[df_historial_general["tipo"] == filtro_tipo]
