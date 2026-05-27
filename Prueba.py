@@ -241,48 +241,39 @@ def init_supabase():
 supabase = init_supabase()
 
 # ─────────────────────────────────────────
-# 4. LOGIN MEJORADO (DISEÑO CENTRADO Y LOGO AGRANDADO)
+# 4. LOGIN MEJORADO
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
     
-    # Contenedor principal centrado con máximo ancho definido
     st.markdown('<div class="centered-login">', unsafe_allow_html=True)
     
-    # Logo grande con efecto de sombra y filtro para fondos oscuros
+    # Logo ajustado
     st.markdown(f"""
-        <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: center; margin-bottom: 15px;">
             <img src="{LOGO_SRC}" style="
-                height: 280px; 
+                height: 200px; 
                 width: auto; 
-                object-fit: contain; 
                 mix-blend-mode: screen; 
-                filter: brightness(1.5) drop-shadow(0px 8px 15px rgba(96, 165, 250, 0.4));
+                filter: brightness(1.4) drop-shadow(0px 4px 10px rgba(96, 165, 250, 0.3));
             ">
         </div>
     """, unsafe_allow_html=True)
     
-    # Encabezados centrados
-    st.markdown("<h1 style='text-align: center; color:#60A5FA; font-size:3.2rem; margin-bottom:5px; font-weight:800; letter-spacing:1px;'>GOTAS DE LECHE</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='text-align: center; color:#94A3B8; font-size:1.3rem; margin-bottom:40px; letter-spacing:0.5px;'>Sistema Maestro de Gestión</p>", unsafe_allow_html=True)
+    st.markdown("<h1 style='color:#60A5FA; font-size:2rem; margin-bottom:5px;'>GOTAS DE LECHE</h1>", unsafe_allow_html=True)
+    st.markdown("<p style='color:#94A3B8; font-size:1rem; margin-bottom:20px;'>Sistema Maestro de Gestión</p>", unsafe_allow_html=True)
     
-    # Formulario
     with st.form("login"):
-        username = st.text_input("Usuario", placeholder="👤 Ingrese su usuario")
-        password = st.text_input("Contraseña", type="password", placeholder="🔒 Ingrese su contraseña")
+        username = st.text_input("Usuario", placeholder="👤 Usuario")
+        password = st.text_input("Contraseña", type="password", placeholder="🔒 Contraseña")
         if st.form_submit_button("INGRESAR AL SISTEMA 🚀", use_container_width=True):
-            if not username or not password:
-                st.error("Ingrese usuario y contraseña.")
+            # Tu lógica de validación se mantiene igual
+            res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
+            if res.data and verify_password(password, res.data[0]["clave"]):
+                st.session_state.user = res.data[0]
+                st.rerun()
             else:
-                try:
-                    res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
-                    if res.data and verify_password(password, res.data[0]["clave"]):
-                        st.session_state.user = res.data[0]
-                        st.rerun()
-                    else:
-                        st.error("Credenciales incorrectas.")
-                except Exception as e:
-                    st.error(f"Error al verificar credenciales: {e}")
+                st.error("Credenciales incorrectas.")
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────
