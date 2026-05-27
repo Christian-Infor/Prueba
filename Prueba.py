@@ -1389,21 +1389,31 @@ else:
                     )
             
             if filtro_tipo != "TODOS" and not df_historial_general.empty:
-                df_filtrado = df_historial_general[df_historial_general["tipo"] == filtro_tipo]
+                # CORRECCIÓN: Se agrega .copy() para crear una copia independiente
+                df_filtrado = df_historial_general[df_historial_general["tipo"] == filtro_tipo].copy()
             else:
-                df_filtrado = df_historial_general
+                # CORRECCIÓN: Se agrega .copy() para mantener consistencia
+                df_filtrado = df_historial_general.copy()
             
             if df_filtrado.empty:
                 st.warning("No se encontraron registros.")
             else:
+                # Ahora que df_filtrado es una copia, esta operación es segura
                 df_filtrado["observaciones"] = df_filtrado["observaciones"].fillna("Movimiento interno de stock")
+                
                 df_render = df_filtrado[["Fecha y Hora ⏰", "tipo", "producto", "cantidad", "responsable", "observaciones"]].rename(
                     columns={
-                        "tipo": "Tipo de Operación ⚙️", "producto": "Insumo / Alimento 🥛",
-                        "cantidad": "Cantidad 🔢", "responsable": "Responsable 👤", "observaciones": "Detalle / Observación 📝"
+                        "tipo": "Tipo de Operación ⚙️", 
+                        "producto": "Insumo / Alimento 🥛",
+                        "cantidad": "Cantidad 🔢", 
+                        "responsable": "Responsable 👤", 
+                        "observaciones": "Detalle / Observación 📝"
                     }
                 )
+                
                 st.dataframe(
-                    df_render, use_container_width=True, hide_index=True,
+                    df_render, 
+                    use_container_width=True, 
+                    hide_index=True,
                     column_config={"Cantidad 🔢": st.column_config.NumberColumn(format="%d unidades 📦")}
                 )
