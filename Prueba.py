@@ -26,57 +26,61 @@ st.markdown("""
     <style>
     html, body, [class*="st-"] { font-size: 1.1rem !important; }
     
-    /* Fondo global oscuro e inmersivo para el Login */
+    /* Fondo global oscuro profundo */
     .stApp:not(:has(div[data-testid="stSidebar"])) {
-        background-color: #0b0f19 !important;
+        background-color: #080b12 !important;
     }
     
-    /* 1. SUBIR EL CONTENEDOR: Controlamos la altura desde arriba */
+    /* 1. SUBIR EL CONTENEDOR */
     .stApp:not(:has(div[data-testid="stSidebar"])) .stMainBlockContainer {
-        padding-top: 8vh !important; 
+        padding-top: 5vh !important; 
         max-width: 100% !important;
     }
     
-    /* 2. CAJA DE LOGIN CON BORDES NEÓN Y 3. MÁRGENES INTERNOS */
+    /* 2. CAJA DE LOGIN CON COLOR PROFUNDO Y BORDE NEÓN FINO */
     .stApp:not(:has(div[data-testid="stSidebar"])) div[data-testid="stVerticalBlockBorderWrapper"] {
-        background: rgba(13, 22, 41, 0.4) !important;
-        backdrop-filter: blur(12px) !important;
-        -webkit-backdrop-filter: blur(12px) !important;
+        /* Fondo azul oscuro profundo que hace resaltar la línea exterior */
+        background: #0d121e !important; 
         
-        /* Borde iluminado / Neón sutil */
-        border: 1px solid rgba(100, 150, 255, 0.4) !important; 
-        border-radius: 16px !important;
+        /* Borde base sólido color azul intermedio */
+        border: 1.5px solid #2e3b5e !important; 
+        border-radius: 14px !important;
         
-        /* Sombras interna y externa para el efecto glow en la línea */
-        box-shadow: 0 0 20px rgba(96, 165, 250, 0.15), inset 0 0 10px rgba(96, 165, 250, 0.05) !important; 
+        /* Efecto NEÓN: Múltiples sombras para simular luz emitiéndose del borde */
+        box-shadow: 
+            0 0 8px rgba(96, 165, 250, 0.2),   /* Resplandor inmediato suave */
+            0 0 25px rgba(59, 130, 246, 0.15), /* Resplandor medio difuso */
+            inset 0 0 15px rgba(96, 165, 250, 0.05) /* Resplandor interno sutil */
+            !important; 
         
-        /* Ajuste de márgenes internos (padding) para que no choque con los bordes */
-        padding: 35px 25px !important; 
+        /* Ajuste de márgenes internos */
+        padding: 30px 25px !important; 
         margin: 0 auto !important; 
     }
 
-    /* ── INPUTS (Cajas de texto oscuras) ── */
+    /* ── INPUTS (Cajas de texto más oscuras para contrastar el fondo de la caja) ── */
     .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput div[data-baseweb="input"] {
-        background-color: rgba(15, 23, 42, 0.8) !important; /* Más oscuro para contrastar */
-        border: 1px solid rgba(59, 130, 246, 0.3) !important;
-        border-radius: 8px !important;
+        background-color: #06090e !important; 
+        border: 1px solid #1e293b !important;
+        border-radius: 6px !important;
         color: white !important;
     }
     
     .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput div[data-baseweb="input"]:focus-within {
         border-color: #60a5fa !important;
-        box-shadow: 0 0 10px rgba(96, 165, 250, 0.4) !important; /* Brillo al escribir */
+        box-shadow: 0 0 0 1px #60a5fa !important; 
     }
     
     .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput label {
         color: #e2e8f0 !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
         margin-bottom: 6px !important;
     }
 
-    /* ── BOTÓN CON EFECTO NEÓN FUERTE ── */
+    /* ── BOTÓN CON LILA/AZUL VIBRANTE ── */
     .stApp:not(:has(div[data-testid="stSidebar"])) .stButton > button {
-        background: linear-gradient(90deg, #4f46e5 0%, #3b82f6 100%) !important;
+        background: #4f46e5 !important; /* Color base sólido parecido a tu imagen */
         border: none !important;
         color: white !important;
         font-weight: 600 !important;
@@ -85,16 +89,16 @@ st.markdown("""
         padding: 12px 24px !important;
         border-radius: 8px !important;
         width: 100% !important;
-        margin-top: 15px !important;
+        margin-top: 20px !important;
         
-        /* Sombras para simular el destello Neón */
-        box-shadow: 0 0 15px rgba(59, 130, 246, 0.5), 0 0 30px rgba(79, 70, 229, 0.3) !important; 
+        /* Resplandor sutil del botón */
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4) !important; 
         transition: all 0.3s ease !important;
     }
     
     .stApp:not(:has(div[data-testid="stSidebar"])) .stButton > button:hover {
-        opacity: 0.95 !important;
-        box-shadow: 0 0 20px rgba(59, 130, 246, 0.7), 0 0 40px rgba(79, 70, 229, 0.5) !important; 
+        background: #4338ca !important;
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6) !important; 
         transform: translateY(-1px);
     }
     
@@ -282,11 +286,10 @@ supabase = init_supabase()
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
     
-    # Usamos columnas ajustadas para mantener el ancho ideal de la tarjeta
     col1, col_mid, col3 = st.columns([1, 1.1, 1])
     
     with col_mid:
-        # LOGO Y TÍTULOS (Más grandes y con brillo exterior)
+        # LOGO Y TÍTULOS 
         st.markdown(f"""
             <div style="text-align: center; margin-bottom: 30px;">
                 <img src="{LOGO_SRC}" style="height: 150px; object-fit: contain; filter: drop-shadow(0px 0px 18px rgba(96, 165, 250, 0.45));">
@@ -295,7 +298,7 @@ if "user" not in st.session_state:
             </div>
         """, unsafe_allow_html=True)
         
-        # CONTENEDOR CON BORDE (Solo envuelve los inputs y el botón)
+        # CONTENEDOR CON BORDE (Con colores ajustados en el CSS de arriba)
         with st.container(border=True):
             username = st.text_input("Usuario", placeholder="Ingrese su usuario")
             password = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña")
