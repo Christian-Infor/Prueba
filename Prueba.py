@@ -31,27 +31,39 @@ st.markdown("""
         background-color: #060b13 !important;
     }
     
-    /* ESTILIZACIÓN QUIRÚRGICA DEL CONTENEDOR DE LOGIN (Fase2_2.png) */
-    div[data-testid="stFormSubmitButton"] {
-        text-align: center !important;
+    /* 
+       FORZAR CENTRADO ABSOLUTO (VERTICAL Y HORIZONTAL)
+       Afecta únicamente a la pantalla de Login (cuando no hay Sidebar)
+    */
+    .stApp:not(:has(div[data-testid="stSidebar"])) .stMainBlockContainer {
+        max-width: 100% !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important; /* Centrado Vertical */
+        justify-content: center !important; /* Centrado Horizontal */
+        min-height: 100vh !important;
     }
     
-    /* Selecciona el st.container con borde del formulario de login */
+    /* ESTILIZACIÓN COMPACTA DEL CONTENEDOR DE LOGIN */
     .stApp:not(:has(div[data-testid="stSidebar"])) div[data-testid="stVerticalBlockBorderWrapper"] {
         background: rgba(13, 22, 41, 0.75) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 16px !important;
-        max-width: 480px !important;
-        margin: 12vh auto 0 auto !important;
-        padding: 10px 15px !important;
+        
+        /* Reducción drástica del ancho para que no se estire */
+        width: 420px !important; 
+        max-width: 90vw !important; /* Adaptable a pantallas más chicas si es necesario */
+        
+        padding: 10px !important;
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
+        margin: 0 auto !important; /* Resetea márgenes molestos */
     }
 
-    /* Eliminar padding extra interno de Streamlit para que quede compacto */
+    /* Eliminar padding extra interno de Streamlit */
     .stApp:not(:has(div[data-testid="stSidebar"])) div[data-testid="stVerticalBlockBorderWrapper"] > div {
-        padding: 15px !important;
+        padding: 20px 25px !important;
     }
 
     /* Estilo de los inputs dentro del login */
@@ -93,7 +105,7 @@ st.markdown("""
         box-shadow: 0 6px 16px rgba(59, 130, 246, 0.45) !important;
     }
     
-    /* Modelo de Tarjeta Unificado de tu Dashboard */
+    /* Modelos del Dashboard (Se mantienen intactos para cuando inicies sesión) */
     .metric-card {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         border: 1px solid #334155;
@@ -117,8 +129,6 @@ st.markdown("""
         font-weight: 700;
         line-height: 1;
     }
-    
-    /* Bloques de ficha detallados */
     .ficha-seccion-datos {
         background-color: #1e293b;
         border-left: 4px solid #3b82f6;
