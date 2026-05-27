@@ -129,6 +129,9 @@ st.markdown("""
     section[data-testid="stSidebar"] .stRadio > label { display: none !important; }
 
     /* Contenedor de opciones en columna */
+    section[data-testid="stSidebar"] .stRadio input[type="radio"] + div { 
+    display: none !important; 
+}
     section[data-testid="stSidebar"] .stRadio > div {
         display: flex !important;
         flex-direction: column !important;
