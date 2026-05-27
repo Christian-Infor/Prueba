@@ -117,7 +117,7 @@ def export_pdf_component(child_data):
                     <div><span style="color: #64748b; font-weight: 500;">Sexo:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('sexo', '-')}</span></div>
                     <div><span style="color: #64748b; font-weight: 500;">Peso al Nacer:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('peso_nacer', '-')}</span></div>
                     <div><span style="color: #64748b; font-weight: 500;">Vacunas al Día:</span> <br><span style="color: #334155; font-weight: 600;">{child_data.get('vacunas', '-')}</span></div>
-                    <div><span style="color: #64748b; font-weight: 500;">Último Control Médico:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('ultimo_control', '-')}</span></div>
+                    <div><span style="color: #64748b; font-weight: 500;">Último Control Médico:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('control', '-')}</span></div>
                     <div>&nbsp;</div>
                     <div><span style="color: #64748b; font-weight: 500;">Fecha Ingreso Programa:</span> <br><span style="color: #16a34a; font-weight: bold;">{child_data.get('fecha_ingreso', '-')}</span></div>
                     <div><span style="color: #64748b; font-weight: 500;">Fecha Estimada Egreso (2 años):</span> <br><span style="color: #dc2626; font-weight: bold;">{child_data.get('fecha_egreso', '-')}</span></div>
@@ -450,7 +450,7 @@ else:
                 if beneficiary.get("suplentes"): opciones_retiro.append(f"Suplentes: {beneficiary['suplentes']}")
                 opciones_retiro.append("Otro Suplente (No registrado)")
                 
-                st.success(f"**Beneficiario:** {recipient_name} | **Ficha:** {ficha_vinculada} | **Último Control:** {beneficiary.get('ultimo_control','-')}", icon="👶")
+                st.success(f"**Beneficiario:** {recipient_name} | **Ficha:** {ficha_vinculada} | **Último Control:** {beneficiary.get('control','-')}", icon="👶")
 
             st.write("###")
             product_options = ["--"] + [x["producto"] for x in stock_data if x["producto"].upper() not in ["AJUAR", "OTROS"]]
@@ -597,7 +597,6 @@ else:
                     address = st.text_input("Dirección Particular")
                     
                     st.markdown("##### 🛡️ Suplentes Autorizados para Retiro")
-                    # Unificado a tu columna exacta 'suplentes'
                     u_suplentes_new = st.text_input("Nombres de Suplentes Autorizados", placeholder="Ej: Juan Pérez (Tío), María Lorca (Abuela)")
                     
                     social_history = st.text_area("Antecedentes Importantes / Historia Social")
@@ -619,7 +618,7 @@ else:
                                 else:
                                     supabase.table("beneficiarios").insert({
                                         "nombre": name, "rut": rut, "ficha": ficha, "nacimiento": birth_date,
-                                        "sexo": sexo, "peso_nacer": peso_nacer, "vacunas": vacunas, "ultimo_control": ultimo_control,
+                                        "sexo": sexo, "peso_nacer": peso_nacer, "vacunas": vacunas, "control": ultimo_control,
                                         "telefono_madre": phone, "direccion": address, "madre": mother, "padre": father,
                                         "suplentes": u_suplentes_new,
                                         "historia_social": social_history, "estado": "Activo",
@@ -663,7 +662,7 @@ else:
                                 }).execute()
                                 st.toast(f"✅ Ficha {child['ficha']} marked as Egresada.", icon="💼")
                                 time.sleep(0.5)
-                                st.rerun()
+                                r.rerun()
                             except Exception as e:
                                 st.error(f"Error al egresar: {e}")
                     st.write("---")
@@ -683,7 +682,7 @@ else:
                             
                             ecx1, ecx2 = st.columns(2)
                             u_vacunas = ecx1.selectbox("¿Vacunas al Día?", ["Sí", "No"], index=0 if child.get("vacunas") == "Sí" else 1)
-                            u_control = ecx2.text_input("Último Control Médico", value=child.get("ultimo_control", ""))
+                            u_control = ecx2.text_input("Último Control Médico", value=child.get("control", ""))
                             
                             st.markdown("##### 👥 Contactos y Suplentes")
                             eccc1, eccc2, eccc3 = st.columns(3)
@@ -692,7 +691,6 @@ else:
                             u_phone = eccc3.text_input("Teléfono", value=child.get("telefono_madre", ""))
                             u_address = st.text_input("Dirección Particular", value=child.get("direccion", ""))
                             
-                            # Input único sincronizado con la columna 'suplentes'
                             u_suplentes_edit = st.text_input("Suplentes Autorizados", value=child.get("suplentes", ""))
                             
                             u_social = st.text_area("Antecedentes / Historia Social", value=child.get("historia_social", ""))
@@ -705,7 +703,7 @@ else:
                                         supabase.table("beneficiarios").update({
                                             "nombre": u_name, "rut": u_rut, "nacimiento": u_birth,
                                             "sexo": u_sexo, "peso_nacer": u_peso, "vacunas": u_vacunas,
-                                            "ultimo_control": u_control, "madre": u_mother, "padre": u_father,
+                                            "control": u_control, "madre": u_mother, "padre": u_father,
                                             "telefono_madre": u_phone, "direccion": u_address,
                                             "suplentes": u_suplentes_edit,
                                             "historia_social": u_social
@@ -729,14 +727,13 @@ else:
                             st.markdown(f"**Fecha Nacimiento:** {child.get('nacimiento', '-')}")
                             st.markdown(f"**Peso al Nacer:** {child.get('peso_nacer', '-')}")
                             st.markdown(f"**Vacunas al Día:** `{child.get('vacunas', '-')}`")
-                            st.markdown(f"**Último Control Médico:** {child.get('ultimo_control', '-')}")
+                            st.markdown(f"**Último Control Médico:** {child.get('control', '-')}")
                             st.markdown(f"**Dirección:** {child.get('direccion', '-')}")
                         with sub_c2:
                             st.markdown(f"**Madre:** {child.get('madre', '-')} | **Padre:** {child.get('padre', '-')}")
                             st.markdown(f"**Teléfono:** {child.get('telefono_madre', '-')}")
                             st.markdown(f"**Fecha Ingreso:** `{child.get('fecha_ingreso', '-')}`")
                             st.markdown(f"**Egreso Estimado (2 años):** `{child.get('fecha_egreso', '-')}`")
-                            # Vista de lectura adaptada a la cadena única
                             st.markdown(f"**Suplentes Autorizados:** {child.get('suplentes', '-')}")
                         
                         st.write("###")
