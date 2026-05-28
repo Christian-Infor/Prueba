@@ -410,7 +410,7 @@ else:
                 if st.form_submit_button("PROCESAR OPERACIÓN", type="primary", use_container_width=True):
                     row = df_inventory[df_inventory["producto"] == product_name].iloc[0]
                     if movement_type == "Traslado a Sala" and row["bodega"] < quantity:
-                        st.error(f"⚠️ Stock insuficiente en bodega principal. Disponibles únicamente {row['bodega']} unidades.")
+                        st.error(f"⚠️ Stock insuficiente en bodega principal. Disponibles: {row['bodega']} unidades.")
                     else:
                         try:
                             cant_operacion = int(quantity)
@@ -418,25 +418,29 @@ else:
                             sala_actual = int(row["sala"])
                             id_registro = int(row["id"])
 
-                            # Realizamos el cálculo
+                            # Actualización de stock
                             if movement_type == "Ingreso a Bodega":
                                 supabase.table("stock").update({"bodega": bodega_actual + cant_operacion}).eq("id", id_registro).execute()
                             else:
                                 supabase.table("stock").update({"bodega": bodega_actual - cant_operacion, "sala": sala_actual + cant_operacion}).eq("id", id_registro).execute()
                             
-                            # 🔴 CORRECCIÓN AQUÍ: Forzamos el texto de observación y usamos la hora local
-                            observacion_texto = f"Traslado manual: {movement_type}"
+                            # 🔴 REGISTRO CON HORA LOCAL DE CHILE Y OBSERVACIÓN ASEGURADA
+                            # Usamos 'replace(microsecond=0)' para que el formato sea limpio
+                            ahora_chile = datetime.now(CHILE_TZ).replace(microsecond=0)
+                            
+                            # Forzamos una cadena de texto clara para el detalle
+                            detalle = f"Operación realizada: {movement_type} de {cant_operacion} unidades."
                             
                             supabase.table("historial").insert({
                                 "responsable": user["nombre"], 
                                 "producto": product_name,
                                 "cantidad": cant_operacion, 
                                 "tipo": movement_type.upper(), 
-                                "observaciones": observacion_texto, # Ya no será null
-                                "created_at": datetime.now(CHILE_TZ).isoformat() # Formato ISO estricto para Supabase
+                                "observaciones": detalle, # Esto evita el null
+                                "created_at": ahora_chile.isoformat() 
                             }).execute()
                             
-                            st.toast("✅ Inventario actualizado correctamente.", icon="📥")
+                            st.toast("✅ Inventario y registro actualizados.", icon="📥")
                             time.sleep(0.5); st.rerun()
                         except Exception as e:
                             st.error(f"Error crítico en la transacción: {e}")
