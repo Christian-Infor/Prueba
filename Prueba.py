@@ -790,8 +790,15 @@ else:
         if not datos_historial: 
             st.info("No hay movimientos registrados.")
         else:
+            else:
             df = pd.DataFrame(datos_historial)
-            df["dt"] = pd.to_datetime(df["created_at"])
+            
+            # 🔴 CORRECCIÓN AQUÍ: 'errors="coerce"' convierte los errores en nulos (NaT)
+            # en lugar de hacer que la aplicación se caiga.
+            df["dt"] = pd.to_datetime(df["created_at"], errors="coerce")
+            
+            # Eliminamos los registros donde la fecha quedó nula por seguridad
+            df = df.dropna(subset=["dt"])
             
             # Lógica de filtrado
             if tipo_busqueda == "Por Mes completo":
