@@ -283,12 +283,11 @@ def init_supabase():
 supabase = init_supabase()
 
 # ─────────────────────────────────────────
-# 4. LOGIN DIRECTO (ESTILO FASE 2)
+# 4. LOGIN (ESTILO FASE 2)
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
     
-    # Logo y texto centrados
     st.markdown(f"""
         <div style="text-align: center; margin-bottom: 25px;">
             <img src="{LOGO_SRC}" style="height: 140px; object-fit: contain; filter: drop-shadow(0px 0px 15px rgba(88, 101, 242, 0.4));">
@@ -562,7 +561,7 @@ else:
                     if p_name.upper() in ["AJUAR", "OTROS"]: continue
                     entradas = df_h[(df_h["producto"] == p_name) & (df_h["tipo"] == "TRASLADO A SALA")]["cantidad"].astype(int).sum()
                     salidas = df_h[(df_h["producto"] == p_name) & (df_h["tipo"] == "ENTREGA")]["cantidad"].astype(int).sum()
-                    resumen_productos.append({"Insumo / Alimento": p_name, "Total Recibido (Cargado) 📥": entradas, "Total Entregado (Despachado) 📤": salidas, "Stock Disponible Neto ⚖️": p["sala"]})
+                    resumen_productos.append({"Insumo / Alimento": p_name, "Insumos Recibidos (Desde Bodega) 📥": entradas, "Total Entregado 📤": salidas, "Saldo Disponible ⚖️": p["sala"]})
                 st.dataframe(pd.DataFrame(resumen_productos), use_container_width=True, hide_index=True)
 
     # 👥 PANEL: GESTIÓN DE NIÑOS
