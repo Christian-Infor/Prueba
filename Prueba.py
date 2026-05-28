@@ -151,9 +151,30 @@ def export_pdf_component(child_data):
     f_ingreso_pdf = clean_timestamp_to_date(child_data.get('fecha_ingreso', '-'))
     f_egreso_pdf = clean_timestamp_to_date(child_data.get('fecha_egreso', '-'))
 
-    html_content = f"""
-    <div id="pdf-container" style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; padding: 0; background: #ffffff; max-width: 820px; margin: auto; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden;">
+    # 1. Función interna para evitar que el texto se corte entre hojas
+    def format_text_for_pdf(text, default_text="No se registran antecedentes adicionales."):
+        if not text or str(text).strip() == '-' or str(text).strip() == '': 
+            return f'<div style="page-break-inside: avoid; break-inside: avoid;">{default_text}</div>'
         
+        lines = str(text).split('\n')
+        html_lines = []
+        for line in lines:
+            if line.strip() == '':
+                html_lines.append('<div style="height: 10px;"></div>')
+            else:
+                # Cada línea es un bloque que NO se puede cortar por la mitad
+                html_lines.append(f'<div style="page-break-inside: avoid; break-inside: avoid; margin-bottom: 4px;">{line}</div>')
+        return "".join(html_lines)
+
+    # 2. Aplicamos la función a los textos largos
+    html_madre = format_text_for_pdf(child_data.get('madre', ''), "-")
+    html_padre = format_text_for_pdf(child_data.get('padre', ''), "-")
+    html_historia = format_text_for_pdf(child_data.get('historia_social', ''))
+
+    html_content = f"""
+    <div id="pdf-container" style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; padding: 0; background: #ffffff; max-width: 820px; margin: auto; display: flex; flex-direction: column;">
+        
+        <!-- HEADER INSTITUCIONAL -->
         <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 30px 40px; color: white; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 20px;">
                 <img src="{LOGO_SRC}" style="height: 65px; width: auto; object-fit: contain; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.15));" alt="Logo">
@@ -168,9 +189,11 @@ def export_pdf_component(child_data):
             </div>
         </div>
 
-        <div style="padding: 30px 40px;">
+        <!-- CONTENIDO PRINCIPAL (Expande automáticamente) -->
+        <div style="flex-grow: 1; padding: 30px 40px;">
             <div style="text-align: right; font-size: 12px; color: #64748b; margin-bottom: 20px; font-style: italic;">Fecha de Emisión: {get_local_date()}</div>
             
+            <!-- SECCIÓN 1: DATOS CLÍNICOS -->
             <div style="page-break-inside: avoid; break-inside: avoid; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                 <div style="display: flex; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">
                     <h3 style="margin: 0; color: #1e3a8a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">1. Identificación y Datos Clínicos</h3>
@@ -188,6 +211,7 @@ def export_pdf_component(child_data):
                 </div>
             </div>
 
+            <!-- SECCIÓN 2: CONTEXTO FAMILIAR -->
             <div style="page-break-inside: avoid; break-inside: avoid; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                 <div style="display: flex; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">
                     <h3 style="margin: 0; color: #1e3a8a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">2. Contexto Familiar</h3>
@@ -195,11 +219,11 @@ def export_pdf_component(child_data):
                 <div style="font-size: 13px; display: flex; flex-direction: column; gap: 16px;">
                     <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
                         <span style="color: #1e3a8a; font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px;">Antecedentes de la Madre:</span> <br>
-                        <span style="color: #334155; line-height: 1.6; display: block; margin-top: 4px;">{child_data.get('madre', '-')}</span>
+                        <div style="color: #334155; line-height: 1.6; margin-top: 4px;">{html_madre}</div>
                     </div>
                     <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
                         <span style="color: #1e3a8a; font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px;">Antecedentes del Padre:</span> <br>
-                        <span style="color: #334155; line-height: 1.6; display: block; margin-top: 4px;">{child_data.get('padre', '-')}</span>
+                        <div style="color: #334155; line-height: 1.6; margin-top: 4px;">{html_padre}</div>
                     </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; background: #f8fafc; padding: 14px; border-radius: 6px;">
                         <div><span style="color: #64748b; font-weight: 600; font-size: 11px;">TELÉFONO DE CONTACTO:</span> <br><strong style="color: #0f172a;">{child_data.get('telefono_madre', '-')}</strong></div>
@@ -209,32 +233,51 @@ def export_pdf_component(child_data):
                 </div>
             </div>
 
+            <!-- SECCIÓN 3: HISTORIA SOCIAL -->
             <div style="page-break-inside: avoid; break-inside: avoid; margin-bottom: 30px;">
                 <div style="display: flex; align-items: center; margin-bottom: 12px; border-bottom: 2px solid #10b981; padding-bottom: 8px;">
                     <h3 style="margin: 0; color: #065f46; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">3. Historia Social y Antecedentes Generales</h3>
                 </div>
-                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #10b981; padding: 16px; border-radius: 6px; font-size: 13px; color: #334155; line-height: 1.6; white-space: pre-wrap;">{child_data.get('historia_social', 'No se registran antecedentes adicionales.')}</div>
-            </div>
-
-            <div style="page-break-inside: avoid; break-inside: avoid; margin-top: 60px; display: flex; justify-content: space-between; padding: 0 20px;">
-                <div style="width: 40%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 10px; font-size: 12px; color: #475569;"><strong style="color: #0f172a;">Firma Asistente Social</strong><br>Gotas de Leche</div>
-                <div style="width: 40%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 10px; font-size: 12px; color: #475569;"><strong style="color: #0f172a;">Validación Interna</strong><br>Revisión Documental</div>
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #10b981; padding: 16px; border-radius: 6px; font-size: 13px; color: #334155; line-height: 1.6;">
+                    {html_historia}
+                </div>
             </div>
         </div>
+
+        <!-- FIRMAS (Forzadas siempre al final del documento) -->
+        <div style="page-break-inside: avoid; break-inside: avoid; margin-top: auto; display: flex; justify-content: space-between; padding: 0 60px 50px 60px;">
+            <div style="width: 40%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 10px; font-size: 12px; color: #475569;"><strong style="color: #0f172a;">Firma Asistente Social</strong><br>Gotas de Leche</div>
+            <div style="width: 40%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 10px; font-size: 12px; color: #475569;"><strong style="color: #0f172a;">Validación Interna</strong><br>Revisión Documental</div>
+        </div>
+        
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         window.onload = function() {{
-            var element = document.getElementById('pdf-container');
-            var opt = {{
-                margin:       [10, 5, 10, 5],
-                filename:     'Ficha_GotaDeLeche_{child_data.get('ficha', '_')}.pdf',
-                image:        {{ type: 'jpeg', quality: 0.98 }},
-                html2canvas:  {{ scale: 2, useCORS: true, logging: false }},
-                jsPDF:        {{ unit: 'mm', format: 'letter', orientation: 'portrait' }},
-                pagebreak:    {{ mode: ['avoid-all', 'css', 'legacy'] }}
-            }};
-            html2pdf().set(opt).from(element).save();
+            setTimeout(function() {{
+                var element = document.getElementById('pdf-container');
+                
+                // MAGIA: Calcula si el documento es de 1 o 2 hojas para tirar las firmas al piso
+                var pageHeight = 1020; 
+                var currentHeight = element.offsetHeight;
+                
+                if (currentHeight > pageHeight) {{
+                    var totalPages = Math.ceil(currentHeight / pageHeight);
+                    element.style.minHeight = (totalPages * pageHeight) + 'px';
+                }} else {{
+                    element.style.minHeight = pageHeight + 'px';
+                }}
+
+                var opt = {{
+                    margin:       [10, 5, 10, 5],
+                    filename:     'Ficha_GotaDeLeche_{child_data.get("ficha", "_")}.pdf',
+                    image:        {{ type: 'jpeg', quality: 0.98 }},
+                    html2canvas:  {{ scale: 2, useCORS: true, logging: false }},
+                    jsPDF:        {{ unit: 'mm', format: 'letter', orientation: 'portrait' }},
+                    pagebreak:    {{ mode: ['css', 'legacy'] }}
+                }};
+                html2pdf().set(opt).from(element).save();
+            }}, 600); // Pequeña espera para que las reglas CSS matemáticas funcionen perfecto
         }}
     </script>
     """
