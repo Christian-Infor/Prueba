@@ -114,8 +114,9 @@ st.markdown("""
 # ─────────────────────────────────────────
 CHILE_TZ = pytz.timezone("America/Santiago")
 
+# 🔴 CORRECCIÓN CLAVE 1: Retornar siempre la hora exacta en formato seguro para la BD.
 def get_local_now() -> str:
-    return datetime.now(CHILE_TZ).isoformat()
+    return datetime.now(CHILE_TZ).strftime("%Y-%m-%d %H:%M:%S")
 
 def get_local_date() -> str:
     return datetime.now(CHILE_TZ).strftime("%d/%m/%Y")
@@ -153,7 +154,6 @@ def export_pdf_component(child_data):
     html_content = f"""
     <div id="pdf-container" style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; padding: 0; background: #ffffff; max-width: 820px; margin: auto; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden;">
         
-        <!-- HEADER INSTITUCIONAL -->
         <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 30px 40px; color: white; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 20px;">
                 <img src="{LOGO_SRC}" style="height: 65px; width: auto; object-fit: contain; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.15));" alt="Logo">
@@ -171,7 +171,6 @@ def export_pdf_component(child_data):
         <div style="padding: 30px 40px;">
             <div style="text-align: right; font-size: 12px; color: #64748b; margin-bottom: 20px; font-style: italic;">Fecha de Emisión: {get_local_date()}</div>
             
-            <!-- SECCIÓN 1: DATOS CLÍNICOS -->
             <div style="page-break-inside: avoid; break-inside: avoid; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                 <div style="display: flex; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">
                     <h3 style="margin: 0; color: #1e3a8a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">1. Identificación y Datos Clínicos</h3>
@@ -189,7 +188,6 @@ def export_pdf_component(child_data):
                 </div>
             </div>
 
-            <!-- SECCIÓN 2: CONTEXTO FAMILIAR -->
             <div style="page-break-inside: avoid; break-inside: avoid; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                 <div style="display: flex; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">
                     <h3 style="margin: 0; color: #1e3a8a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">2. Contexto Familiar</h3>
@@ -211,7 +209,6 @@ def export_pdf_component(child_data):
                 </div>
             </div>
 
-            <!-- SECCIÓN 3: HISTORIA SOCIAL -->
             <div style="page-break-inside: avoid; break-inside: avoid; margin-bottom: 30px;">
                 <div style="display: flex; align-items: center; margin-bottom: 12px; border-bottom: 2px solid #10b981; padding-bottom: 8px;">
                     <h3 style="margin: 0; color: #065f46; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">3. Historia Social y Antecedentes Generales</h3>
@@ -219,7 +216,6 @@ def export_pdf_component(child_data):
                 <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #10b981; padding: 16px; border-radius: 6px; font-size: 13px; color: #334155; line-height: 1.6; white-space: pre-wrap;">{child_data.get('historia_social', 'No se registran antecedentes adicionales.')}</div>
             </div>
 
-            <!-- FIRMAS -->
             <div style="page-break-inside: avoid; break-inside: avoid; margin-top: 60px; display: flex; justify-content: space-between; padding: 0 20px;">
                 <div style="width: 40%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 10px; font-size: 12px; color: #475569;"><strong style="color: #0f172a;">Firma Asistente Social</strong><br>Gotas de Leche</div>
                 <div style="width: 40%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 10px; font-size: 12px; color: #475569;"><strong style="color: #0f172a;">Validación Interna</strong><br>Revisión Documental</div>
@@ -424,11 +420,7 @@ else:
                             else:
                                 supabase.table("stock").update({"bodega": bodega_actual - cant_operacion, "sala": sala_actual + cant_operacion}).eq("id", id_registro).execute()
                             
-                            # 🔴 REGISTRO CON HORA LOCAL DE CHILE Y OBSERVACIÓN ASEGURADA
-                            # Usamos 'replace(microsecond=0)' para que el formato sea limpio
-                            ahora_chile = datetime.now(CHILE_TZ).replace(microsecond=0)
-                            
-                            # Forzamos una cadena de texto clara para el detalle
+                            # 🔴 CORRECCIÓN CLAVE 2: Forzamos una cadena de texto clara para el detalle y usamos get_local_now()
                             detalle = f"Operación realizada: {movement_type} de {cant_operacion} unidades."
                             
                             supabase.table("historial").insert({
@@ -437,7 +429,7 @@ else:
                                 "cantidad": cant_operacion, 
                                 "tipo": movement_type.upper(), 
                                 "observaciones": detalle, # Esto evita el null
-                                "created_at": ahora_chile.isoformat() 
+                                "created_at": get_local_now() 
                             }).execute()
                             
                             st.toast("✅ Inventario y registro actualizados.", icon="📥")
@@ -567,8 +559,9 @@ else:
             df_entregas_global = pd.DataFrame(todo_el_historial) if todo_el_historial else pd.DataFrame()
             if not df_entregas_global.empty:
                 df_entregas_global["created_at"] = pd.to_datetime(df_entregas_global["created_at"], errors="coerce")
+                # 🔴 CORRECCIÓN CLAVE 3: Forzar UTC antes de convertir a Chile en el visualizador del Padrón
                 if df_entregas_global["created_at"].dt.tz is None:
-                    df_entregas_global["created_at"] = df_entregas_global["created_at"].dt.tz_localize(CHILE_TZ)
+                    df_entregas_global["created_at"] = df_entregas_global["created_at"].dt.tz_localize('UTC').dt.tz_convert(CHILE_TZ)
                 else:
                     df_entregas_global["created_at"] = df_entregas_global["created_at"].dt.tz_convert(CHILE_TZ)
         except: df_entregas_global = pd.DataFrame()
@@ -753,7 +746,7 @@ else:
                                 time.sleep(0.5); st.rerun()
                             except Exception as e: st.error(f"Error: {e}")
 
-  # 📜 PANEL: HISTORIAL
+    # 📜 PANEL: HISTORIAL
     elif menu_choice == "📜 HISTORIAL":
         st.header("📜 Historial de Operaciones", divider="blue")
         
@@ -788,7 +781,10 @@ else:
             st.info("No hay movimientos registrados.")
         else:
             df = pd.DataFrame(datos_historial)
+            
+            # 🔴 CORRECCIÓN CLAVE 4: Forzar la zona horaria a Chile en el visualizador del Historial
             df["dt"] = pd.to_datetime(df["created_at"], errors="coerce")
+            df["dt"] = df["dt"].apply(lambda x: x.tz_localize('UTC').tz_convert(CHILE_TZ) if x.tzinfo is None else x.tz_convert(CHILE_TZ))
             df = df.dropna(subset=["dt"])
             
             if tipo_busqueda == "Por Mes completo":
