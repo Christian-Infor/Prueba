@@ -2,5 +2,6 @@ streamlit
 pandas
 supabase
 plotly
-pytz
 bcrypt
+pytz
+openpyxl
