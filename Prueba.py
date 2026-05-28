@@ -747,23 +747,33 @@ else:
                                 time.sleep(0.5); st.rerun()
                             except Exception as e: st.error(f"Error: {e}")
 
-   # 📜 PANEL: HISTORIAL (MODIFICADO CON FILTRO POR DÍA)
+  # 📜 PANEL: HISTORIAL (CON MEMORIA DE ESTADO Y DÍA PRESENTE)
     elif menu_choice == "📜 HISTORIAL":
         st.header("📜 Historial de Operaciones", divider="blue")
         
-        # Nueva opción para elegir el tipo de búsqueda
-        tipo_busqueda = st.radio("¿Cómo desea buscar?", ["Por Mes completo", "Por Día específico"], horizontal=True)
+        # Inicializamos estados para que "recuerde" la preferencia al volver
+        if "tipo_busqueda" not in st.session_state:
+            st.session_state.tipo_busqueda = "Por Día específico"
+        if "fecha_seleccionada" not in st.session_state:
+            st.session_state.fecha_seleccionada = datetime.now(CHILE_TZ).date()
+
+        # Filtros
+        tipo_busqueda = st.radio("¿Cómo desea buscar?", ["Por Mes completo", "Por Día específico"], 
+                                 index=0 if st.session_state.tipo_busqueda == "Por Mes completo" else 1)
         
+        st.session_state.tipo_busqueda = tipo_busqueda
+
         if tipo_busqueda == "Por Mes completo":
             col1, col2 = st.columns(2)
             meses = {
                 "Enero": 1, "Febrero": 2, "Marzo": 3, "Abril": 4, "Mayo": 5, "Junio": 6,
                 "Julio": 7, "Agosto": 8, "Septiembre": 9, "Octubre": 10, "Noviembre": 11, "Diciembre": 12
             }
-            with col1: seleccion_mes = st.selectbox("Seleccione el MES:", list(meses.keys()))
-            with col2: seleccion_anio = st.selectbox("Seleccione el AÑO:", [2026, 2025])
+            with col1: seleccion_mes = st.selectbox("Seleccione el MES:", list(meses.keys()), index=datetime.now(CHILE_TZ).month - 1)
+            with col2: seleccion_anio = st.selectbox("Seleccione el AÑO:", [2026, 2025], index=0)
         else:
-            fecha_dia = st.date_input("Seleccione el DÍA específico:")
+            fecha_dia = st.date_input("Seleccione el DÍA específico:", value=st.session_state.fecha_seleccionada)
+            st.session_state.fecha_seleccionada = fecha_dia
 
         try:
             with st.spinner("Consultando..."): 
@@ -782,8 +792,8 @@ else:
                 df_filtrado = df[(df["dt"].dt.month == meses[seleccion_mes]) & (df["dt"].dt.year == seleccion_anio)].copy()
                 titulo_alerta = f"No hay registros para {seleccion_mes} de {seleccion_anio}."
             else:
-                df_filtrado = df[df["dt"].dt.date == fecha_dia].copy()
-                titulo_alerta = f"No hay registros para el día {fecha_dia.strftime('%d/%m/%Y')}."
+                df_filtrado = df[df["dt"].dt.date == st.session_state.fecha_seleccionada].copy()
+                titulo_alerta = f"No hay registros para el día {st.session_state.fecha_seleccionada.strftime('%d/%m/%Y')}."
             
             if df_filtrado.empty: 
                 st.warning(titulo_alerta)
