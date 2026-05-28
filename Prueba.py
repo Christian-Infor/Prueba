@@ -98,7 +98,7 @@ st.markdown("""
         line-height: 1;
     }
     
-    /* Bloques de ficha detallados */
+    /* Bloques de ficha detallados en la UI */
     .ficha-seccion-datos {
         background-color: #1e293b;
         border-left: 4px solid #3b82f6;
@@ -115,7 +115,6 @@ st.markdown("""
 CHILE_TZ = pytz.timezone("America/Santiago")
 
 def get_local_now() -> str:
-    # Enviamos la hora en formato ISO 8601 con el timezone explícito (-04:00)
     return datetime.now(CHILE_TZ).isoformat()
 
 def get_local_date() -> str:
@@ -144,12 +143,17 @@ def clean_timestamp_to_date(raw_date) -> str:
             pass
     return raw_str
 
+# ─────────────────────────────────────────
+# PDF EXPORT (REDISEÑO FORMAL Y ORDENADO)
+# ─────────────────────────────────────────
 def export_pdf_component(child_data):
     f_ingreso_pdf = clean_timestamp_to_date(child_data.get('fecha_ingreso', '-'))
     f_egreso_pdf = clean_timestamp_to_date(child_data.get('fecha_egreso', '-'))
 
     html_content = f"""
     <div id="pdf-container" style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; padding: 0; background: #ffffff; max-width: 820px; margin: auto; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden;">
+        
+        <!-- HEADER INSTITUCIONAL -->
         <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 30px 40px; color: white; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 20px;">
                 <img src="{LOGO_SRC}" style="height: 65px; width: auto; object-fit: contain; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.15));" alt="Logo">
@@ -163,59 +167,62 @@ def export_pdf_component(child_data):
                 <div style="font-size: 15px; font-weight: bold; color: #1e3a8a; background: #ffffff; padding: 6px 16px; border-radius: 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: inline-block;">Ficha N° {child_data.get('ficha', '-')}</div>
             </div>
         </div>
-        <div style="padding: 40px;">
-            <div style="text-align: right; font-size: 12px; color: #64748b; margin-bottom: 25px; font-style: italic;">Fecha de Emisión: {get_local_date()}</div>
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin-bottom: 25px;">
-                <div style="display: flex; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #3b82f6; padding-bottom: 6px;">
-                    <span style="font-size: 18px; margin-right: 8px;">👶</span>
-                    <h3 style="margin: 0; color: #1e3a8a; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px;">1. Identificación y Datos Clínicos</h3>
+
+        <div style="padding: 30px 40px;">
+            <div style="text-align: right; font-size: 12px; color: #64748b; margin-bottom: 20px; font-style: italic;">Fecha de Emisión: {get_local_date()}</div>
+            
+            <!-- SECCIÓN 1: DATOS CLÍNICOS -->
+            <div style="page-break-inside: avoid; break-inside: avoid; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">
+                    <h3 style="margin: 0; color: #1e3a8a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">1. Identificación y Datos Clínicos</h3>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px;">
-                    <div style="grid-column: span 2;"><span style="color: #64748b; font-weight: 500;">Nombre Completo del Niño(a):</span> <br><strong style="color: #0f172a; font-size: 16px;">{child_data.get('nombre', '-')}</strong></div>
-                    <div><span style="color: #64748b; font-weight: 500;">RUN / Identificación:</span> <br><strong style="color: #0f172a;">{child_data.get('rut', '-')}</strong></div>
-                    <div><span style="color: #64748b; font-weight: 500;">Fecha de Nacimiento:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('nacimiento', '-')}</span></div>
-                    <div><span style="color: #64748b; font-weight: 500;">Sexo:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('sexo', '-')}</span></div>
-                    <div><span style="color: #64748b; font-weight: 500;">Peso al Nacer:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('peso_nacer', '-')}</span></div>
-                    <div><span style="color: #64748b; font-weight: 500;">Vacunas al Día:</span> <br><span style="color: #334155; font-weight: 600;">{child_data.get('vacunas', '-')}</span></div>
-                    <div><span style="color: #64748b; font-weight: 500;">Último Control Médico:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('control', '-')}</span></div>
-                    <div><span style="color: #64748b; font-weight: 500;">Fecha Ingreso Programa:</span> <br><span style="color: #16a34a; font-weight: bold;">{f_ingreso_pdf}</span></div>
-                    <div><span style="color: #64748b; font-weight: 500;">Fecha Estimada Egreso:</span> <br><span style="color: #dc2626; font-weight: bold;">{f_egreso_pdf}</span></div>
-                </div>
-            </div>
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 20px; margin-bottom: 25px;">
-                <div style="display: flex; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #3b82f6; padding-bottom: 6px;">
-                    <span style="font-size: 18px; margin-right: 8px;">🏠</span>
-                    <h3 style="margin: 0; color: #1e3a8a; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px;">2. Contexto Familiar (Descripción Profunda)</h3>
-                </div>
-                <div style="font-size: 14px; display: flex; flex-direction: column; gap: 14px;">
-                    <div style="border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px;">
-                        <span style="color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">Madre (Antecedentes, Escolaridad y Ocupación):</span> <br>
-                        <span style="color: #1e293b; font-size: 14px; line-height: 1.5; display: block; margin-top: 2px;">{child_data.get('madre', '-')}</span>
-                    </div>
-                    <div style="border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px;">
-                        <span style="color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">Padre (Antecedentes, Escolaridad y Ocupación):</span> <br>
-                        <span style="color: #1e293b; font-size: 14px; line-height: 1.5; display: block; margin-top: 2px;">{child_data.get('padre', '-')}</span>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                        <div><span style="color: #64748b; font-weight: 500;">Teléfono de Contacto:</span> <br><strong style="color: #334155;">{child_data.get('telefono_madre', '-')}</strong></div>
-                        <div><span style="color: #64748b; font-weight: 500;">Dirección Particular:</span> <br><span style="color: #334155;">{child_data.get('direccion', '-')}</span></div>
-                    </div>
-                    <div style="background: #fff; border: 1px solid #e2e8f0; padding: 10px; border-radius: 6px;">
-                        <span style="color: #64748b; font-weight: 500;">Suplentes Autorizados para Retiro:</span> <br>
-                        <span style="color: #475569; font-weight: 500;">{child_data.get('suplentes', '-')}</span>
-                    </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 13px;">
+                    <div style="grid-column: span 2;"><span style="color: #64748b; font-weight: 600;">NOMBRE COMPLETO DEL NIÑO(A):</span> <br><strong style="color: #0f172a; font-size: 15px;">{child_data.get('nombre', '-')}</strong></div>
+                    <div><span style="color: #64748b; font-weight: 600;">RUN / IDENTIFICACIÓN:</span> <br><strong style="color: #0f172a;">{child_data.get('rut', '-')}</strong></div>
+                    <div><span style="color: #64748b; font-weight: 600;">FECHA DE NACIMIENTO:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('nacimiento', '-')}</span></div>
+                    <div><span style="color: #64748b; font-weight: 600;">SEXO:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('sexo', '-')}</span></div>
+                    <div><span style="color: #64748b; font-weight: 600;">PESO AL NACER:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('peso_nacer', '-')}</span></div>
+                    <div><span style="color: #64748b; font-weight: 600;">VACUNAS AL DÍA:</span> <br><span style="color: #334155; font-weight: 600;">{child_data.get('vacunas', '-')}</span></div>
+                    <div><span style="color: #64748b; font-weight: 600;">ÚLTIMO CONTROL MÉDICO:</span> <br><span style="color: #334155; font-weight: 500;">{child_data.get('control', '-')}</span></div>
+                    <div><span style="color: #64748b; font-weight: 600;">FECHA INGRESO PROGRAMA:</span> <br><span style="color: #16a34a; font-weight: bold;">{f_ingreso_pdf}</span></div>
+                    <div><span style="color: #64748b; font-weight: 600;">FECHA ESTIMADA EGRESO:</span> <br><span style="color: #dc2626; font-weight: bold;">{f_egreso_pdf}</span></div>
                 </div>
             </div>
-            <div style="margin-bottom: 40px;">
-                <div style="display: flex; align-items: center; margin-bottom: 12px; border-bottom: 2px solid #10b981; padding-bottom: 6px;">
-                    <span style="font-size: 18px; margin-right: 8px;">📝</span>
-                    <h3 style="margin: 0; color: #065f46; font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px;">3. Historia Social y Antecedentes</h3>
+
+            <!-- SECCIÓN 2: CONTEXTO FAMILIAR -->
+            <div style="page-break-inside: avoid; break-inside: avoid; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">
+                    <h3 style="margin: 0; color: #1e3a8a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">2. Contexto Familiar</h3>
                 </div>
-                <div style="background: #f0fdf4; border-left: 5px solid #10b981; padding: 20px; font-size: 14px; line-height: 1.6; white-space: pre-wrap;">{child_data.get('historia_social', 'No se registran antecedentes adicionales.')}</div>
+                <div style="font-size: 13px; display: flex; flex-direction: column; gap: 16px;">
+                    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+                        <span style="color: #1e3a8a; font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px;">Antecedentes de la Madre:</span> <br>
+                        <span style="color: #334155; line-height: 1.6; display: block; margin-top: 4px;">{child_data.get('madre', '-')}</span>
+                    </div>
+                    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
+                        <span style="color: #1e3a8a; font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px;">Antecedentes del Padre:</span> <br>
+                        <span style="color: #334155; line-height: 1.6; display: block; margin-top: 4px;">{child_data.get('padre', '-')}</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; background: #f8fafc; padding: 14px; border-radius: 6px;">
+                        <div><span style="color: #64748b; font-weight: 600; font-size: 11px;">TELÉFONO DE CONTACTO:</span> <br><strong style="color: #0f172a;">{child_data.get('telefono_madre', '-')}</strong></div>
+                        <div><span style="color: #64748b; font-weight: 600; font-size: 11px;">DIRECCIÓN PARTICULAR:</span> <br><span style="color: #0f172a;">{child_data.get('direccion', '-')}</span></div>
+                        <div style="grid-column: span 2; margin-top: 4px;"><span style="color: #64748b; font-weight: 600; font-size: 11px;">SUPLENTES AUTORIZADOS PARA RETIRO:</span> <br><span style="color: #0f172a; font-weight: 500;">{child_data.get('suplentes', '-')}</span></div>
+                    </div>
+                </div>
             </div>
-            <div style="margin-top: 70px; display: flex; justify-content: space-between; padding: 0 20px;">
-                <div style="width: 42%; text-align: center; border-top: 1.5px dashed #cbd5e1; padding-top: 10px; font-size: 12px; color: #64748b;"><br><strong style="color: #334155;">Firma Asistente Social</strong></div>
-                <div style="width: 42%; text-align: center; border-top: 1.5px dashed #cbd5e1; padding-top: 10px; font-size: 12px; color: #64748b;"><br><strong style="color: #334155;">Validación Interna</strong></div>
+
+            <!-- SECCIÓN 3: HISTORIA SOCIAL -->
+            <div style="page-break-inside: avoid; break-inside: avoid; margin-bottom: 30px;">
+                <div style="display: flex; align-items: center; margin-bottom: 12px; border-bottom: 2px solid #10b981; padding-bottom: 8px;">
+                    <h3 style="margin: 0; color: #065f46; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">3. Historia Social y Antecedentes Generales</h3>
+                </div>
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #10b981; padding: 16px; border-radius: 6px; font-size: 13px; color: #334155; line-height: 1.6; white-space: pre-wrap;">{child_data.get('historia_social', 'No se registran antecedentes adicionales.')}</div>
+            </div>
+
+            <!-- FIRMAS -->
+            <div style="page-break-inside: avoid; break-inside: avoid; margin-top: 60px; display: flex; justify-content: space-between; padding: 0 20px;">
+                <div style="width: 40%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 10px; font-size: 12px; color: #475569;"><strong style="color: #0f172a;">Firma Asistente Social</strong><br>Gotas de Leche</div>
+                <div style="width: 40%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 10px; font-size: 12px; color: #475569;"><strong style="color: #0f172a;">Validación Interna</strong><br>Revisión Documental</div>
             </div>
         </div>
     </div>
@@ -224,11 +231,12 @@ def export_pdf_component(child_data):
         window.onload = function() {{
             var element = document.getElementById('pdf-container');
             var opt = {{
-                margin:       [8, 4, 8, 4],
+                margin:       [10, 5, 10, 5],
                 filename:     'Ficha_GotaDeLeche_{child_data.get('ficha', '_')}.pdf',
                 image:        {{ type: 'jpeg', quality: 0.98 }},
                 html2canvas:  {{ scale: 2, useCORS: true, logging: false }},
-                jsPDF:        {{ unit: 'mm', format: 'letter', orientation: 'portrait' }}
+                jsPDF:        {{ unit: 'mm', format: 'letter', orientation: 'portrait' }},
+                pagebreak:    {{ mode: ['avoid-all', 'css', 'legacy'] }}
             }};
             html2pdf().set(opt).from(element).save();
         }}
@@ -586,8 +594,8 @@ else:
                     ultimo_control = cx2.text_input("Último Control Médico (ej: 30.03.26 / 3.820 kg)")
                     
                     st.markdown("---")
-                    mother = st.text_area("Madre (Nombre, Nacionalidad, Estado Civil, Edad, Escolaridad, Ocupación)")
-                    father = st.text_area("Padre (Nombre, Nacionalidad, Estado Civil, Edad, Escolaridad, Ocupación)")
+                    mother = st.text_area("Datos de la Madre (Nacionalidad, Edad, Escolaridad, Ocupación)")
+                    father = st.text_area("Datos del Padre (Nacionalidad, Edad, Escolaridad, Ocupación)")
                     
                     ccc1, ccc2 = st.columns(2)
                     phone = ccc1.text_input("Teléfono de Contacto")
@@ -661,8 +669,8 @@ else:
                             u_vacunas = ecx1.selectbox("¿Vacunas al Día?", ["Sí", "No"], index=0 if child.get("vacunas") == "Sí" else 1)
                             u_control = ecx2.text_input("Último Control Médico", value=child.get("control", ""))
                             
-                            u_mother = st.text_area("Madre (Descripción profunda)", value=child.get("madre", ""))
-                            u_father = st.text_area("Padre (Descripción profunda)", value=child.get("padre", ""))
+                            u_mother = st.text_area("Datos de la Madre (Nacionalidad, Edad, Escolaridad, Ocupación)", value=child.get("madre", ""))
+                            u_father = st.text_area("Datos del Padre (Nacionalidad, Edad, Escolaridad, Ocupación)", value=child.get("padre", ""))
                             
                             eccc2, eccc3 = st.columns(2)
                             u_phone = eccc2.text_input("Teléfono", value=child.get("telefono_madre", ""))
@@ -699,10 +707,10 @@ else:
                         
                         st.write("###")
                         st.markdown('<div class="ficha-seccion-datos">', unsafe_allow_html=True)
-                        st.markdown(f"👩 **DATOS DE LA MADRE:** \n{child.get('madre', '-')}")
+                        st.markdown(f"👩 **ANTECEDENTES DE LA MADRE:** \n{child.get('madre', '-')}")
                         st.markdown('</div>', unsafe_allow_html=True)
                         st.markdown('<div class="ficha-seccion-datos">', unsafe_allow_html=True)
-                        st.markdown(f"👨 **DATOS DEL PADRE:** \n{child.get('padre', '-')}")
+                        st.markdown(f"👨 **ANTECEDENTES DEL PADRE:** \n{child.get('padre', '-')}")
                         st.markdown('</div>', unsafe_allow_html=True)
                         
                         st.write("###")
