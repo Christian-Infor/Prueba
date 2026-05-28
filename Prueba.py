@@ -747,21 +747,24 @@ else:
                                 time.sleep(0.5); st.rerun()
                             except Exception as e: st.error(f"Error: {e}")
 
-   # 📜 PANEL: HISTORIAL
+   # 📜 PANEL: HISTORIAL (MODIFICADO CON FILTRO POR DÍA)
     elif menu_choice == "📜 HISTORIAL":
         st.header("📜 Historial de Operaciones", divider="blue")
         
-        # Filtros amigables en español
-        col1, col2 = st.columns(2)
-        meses = {
-            "Enero": 1, "Febrero": 2, "Marzo": 3, "Abril": 4, "Mayo": 5, "Junio": 6,
-            "Julio": 7, "Agosto": 8, "Septiembre": 9, "Octubre": 10, "Noviembre": 11, "Diciembre": 12
-        }
-        with col1:
-            seleccion_mes = st.selectbox("Seleccione el MES:", list(meses.keys()))
-        with col2:
-            seleccion_anio = st.selectbox("Seleccione el AÑO:", [2026, 2025])
-            
+        # Nueva opción para elegir el tipo de búsqueda
+        tipo_busqueda = st.radio("¿Cómo desea buscar?", ["Por Mes completo", "Por Día específico"], horizontal=True)
+        
+        if tipo_busqueda == "Por Mes completo":
+            col1, col2 = st.columns(2)
+            meses = {
+                "Enero": 1, "Febrero": 2, "Marzo": 3, "Abril": 4, "Mayo": 5, "Junio": 6,
+                "Julio": 7, "Agosto": 8, "Septiembre": 9, "Octubre": 10, "Noviembre": 11, "Diciembre": 12
+            }
+            with col1: seleccion_mes = st.selectbox("Seleccione el MES:", list(meses.keys()))
+            with col2: seleccion_anio = st.selectbox("Seleccione el AÑO:", [2026, 2025])
+        else:
+            fecha_dia = st.date_input("Seleccione el DÍA específico:")
+
         try:
             with st.spinner("Consultando..."): 
                 datos_historial = supabase.table("historial").select("*").order("id", desc=True).execute().data
@@ -774,11 +777,16 @@ else:
             df = pd.DataFrame(datos_historial)
             df["dt"] = pd.to_datetime(df["created_at"])
             
-            # Filtrar por mes y año seleccionado
-            df_filtrado = df[(df["dt"].dt.month == meses[seleccion_mes]) & (df["dt"].dt.year == seleccion_anio)].copy()
+            # Lógica de filtrado
+            if tipo_busqueda == "Por Mes completo":
+                df_filtrado = df[(df["dt"].dt.month == meses[seleccion_mes]) & (df["dt"].dt.year == seleccion_anio)].copy()
+                titulo_alerta = f"No hay registros para {seleccion_mes} de {seleccion_anio}."
+            else:
+                df_filtrado = df[df["dt"].dt.date == fecha_dia].copy()
+                titulo_alerta = f"No hay registros para el día {fecha_dia.strftime('%d/%m/%Y')}."
             
             if df_filtrado.empty: 
-                st.warning(f"No hay registros para {seleccion_mes} de {seleccion_anio}.")
+                st.warning(titulo_alerta)
             else:
                 df_filtrado["Fecha"] = df_filtrado["dt"].dt.strftime("%d/%m/%Y %H:%M")
                 st.dataframe(
