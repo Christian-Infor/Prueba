@@ -151,109 +151,89 @@ def export_pdf_component(child_data):
     f_ingreso_pdf = clean_timestamp_to_date(child_data.get('fecha_ingreso', '-'))
     f_egreso_pdf = clean_timestamp_to_date(child_data.get('fecha_egreso', '-'))
 
-    # Truco maestro 1: Separar textos largos en bloques independientes para que la "tijera" del PDF no corte letras por la mitad
-    def format_paragraphs(text, default="No se registran antecedentes."):
-        if not text or str(text).strip() in ['-', '']:
-            return f'<div style="page-break-inside: avoid; margin-bottom: 8px;">{default}</div>'
-        lines = str(text).split('\n')
-        # Cada salto de línea es una mini-caja protegida
-        return "".join([f'<div style="page-break-inside: avoid; margin-bottom: 8px; text-align: justify; line-height: 1.5;">{line.strip()}</div>' for line in lines if line.strip()])
-
-    html_madre = format_paragraphs(child_data.get('madre', '-'))
-    html_padre = format_paragraphs(child_data.get('padre', '-'))
-    html_historia = format_paragraphs(child_data.get('historia_social', ''))
+    # Formateo ultra simple: convertimos saltos de línea en <br> nativos. Cero cajas restrictivas.
+    html_madre = str(child_data.get('madre', '-')).replace('\n', '<br>')
+    html_padre = str(child_data.get('padre', '-')).replace('\n', '<br>')
+    html_historia = str(child_data.get('historia_social', 'No se registran antecedentes adicionales.')).replace('\n', '<br>')
 
     html_content = f"""
-    <div id="pdf-container" style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; background: #ffffff; max-width: 800px; margin: 0 auto; padding: 20px;">
+    <div id="pdf-container" style="font-family: Arial, sans-serif; color: #1e293b; background: #ffffff; padding: 0;">
         
-        <table style="width: 100%; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; border-radius: 8px 8px 0 0; border-spacing: 0; padding: 20px;">
+        <table style="width: 100%; background-color: #1e3a8a; color: white; border-collapse: collapse; margin-bottom: 20px;">
             <tr>
-                <td style="width: 15%; text-align: center; vertical-align: middle;">
-                    <img src="{LOGO_SRC}" style="height: 60px; max-width: 100%; object-fit: contain;">
+                <td style="padding: 20px; width: 15%; text-align: center;">
+                    <img src="{LOGO_SRC}" style="height: 60px;">
                 </td>
-                <td style="width: 50%; vertical-align: middle; padding-left: 15px;">
-                    <h1 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: 0.5px;">GOTAS DE LECHE</h1>
-                    <p style="margin: 4px 0 0 0; color: #bfdbfe; font-size: 11px; font-weight: 600; text-transform: uppercase;">Ficha Oficial del Beneficiario</p>
+                <td style="padding: 20px 10px; width: 50%;">
+                    <h1 style="margin: 0; font-size: 24px;">GOTAS DE LECHE</h1>
+                    <p style="margin: 4px 0 0 0; font-size: 11px; text-transform: uppercase;">Ficha Oficial del Beneficiario</p>
                 </td>
-                <td style="width: 35%; text-align: right; vertical-align: middle; padding-right: 10px;">
-                    <div style="font-size: 11px; color: #93c5fd; font-weight: bold; text-transform: uppercase; margin-bottom: 6px;">Documento Clínico - Social</div>
-                    <div style="font-size: 14px; font-weight: bold; color: #1e3a8a; background: #ffffff; padding: 6px 12px; border-radius: 20px; display: inline-block;">Ficha N° {child_data.get('ficha', '-')}</div>
+                <td style="padding: 20px; width: 35%; text-align: right;">
+                    <div style="font-size: 11px; margin-bottom: 6px; text-transform: uppercase;">Documento Clínico - Social</div>
+                    <div style="font-size: 14px; font-weight: bold; color: #1e3a8a; background: white; padding: 6px 12px; border-radius: 4px; display: inline-block;">Ficha N° {child_data.get('ficha', '-')}</div>
                 </td>
             </tr>
         </table>
 
-        <div style="padding: 20px;">
-            <div style="text-align: right; font-size: 12px; color: #64748b; margin-bottom: 20px; font-style: italic;">Fecha de Emisión: {get_local_date()}</div>
+        <div style="padding: 0 30px;">
+            <p style="text-align: right; font-size: 12px; color: #64748b; margin-bottom: 20px; font-style: italic;">Fecha de Emisión: {get_local_date()}</p>
             
-            <div style="page-break-inside: avoid; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
-                <h3 style="margin: 0 0 15px 0; color: #1e3a8a; font-size: 14px; text-transform: uppercase; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">1. Identificación y Datos Clínicos</h3>
-                
-                <table style="width: 100%; font-size: 13px; border-spacing: 0; line-height: 1.5;">
-                    <tr>
-                        <td colspan="2" style="padding-bottom: 12px;">
-                            <span style="color: #64748b; font-weight: 600;">NOMBRE COMPLETO DEL NIÑO(A):</span><br>
-                            <strong style="color: #0f172a; font-size: 15px;">{child_data.get('nombre', '-')}</strong>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="width: 50%; padding-bottom: 12px;"><span style="color: #64748b; font-weight: 600;">RUN / IDENTIFICACIÓN:</span><br><strong style="color: #0f172a;">{child_data.get('rut', '-')}</strong></td>
-                        <td style="width: 50%; padding-bottom: 12px;"><span style="color: #64748b; font-weight: 600;">FECHA DE NACIMIENTO:</span><br><span style="color: #334155;">{child_data.get('nacimiento', '-')}</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding-bottom: 12px;"><span style="color: #64748b; font-weight: 600;">SEXO:</span><br><span style="color: #334155;">{child_data.get('sexo', '-')}</span></td>
-                        <td style="padding-bottom: 12px;"><span style="color: #64748b; font-weight: 600;">PESO AL NACER:</span><br><span style="color: #334155;">{child_data.get('peso_nacer', '-')}</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding-bottom: 12px;"><span style="color: #64748b; font-weight: 600;">VACUNAS AL DÍA:</span><br><span style="color: #334155; font-weight: bold;">{child_data.get('vacunas', '-')}</span></td>
-                        <td style="padding-bottom: 12px;"><span style="color: #64748b; font-weight: 600;">ÚLTIMO CONTROL MÉDICO:</span><br><span style="color: #334155;">{child_data.get('control', '-')}</span></td>
-                    </tr>
-                    <tr>
-                        <td style="padding-bottom: 12px;"><span style="color: #64748b; font-weight: 600;">FECHA INGRESO PROGRAMA:</span><br><span style="color: #16a34a; font-weight: bold;">{f_ingreso_pdf}</span></td>
-                        <td style="padding-bottom: 12px;"><span style="color: #64748b; font-weight: 600;">FECHA ESTIMADA EGRESO:</span><br><span style="color: #dc2626; font-weight: bold;">{f_egreso_pdf}</span></td>
-                    </tr>
-                </table>
+            <h3 style="color: #1e3a8a; font-size: 14px; text-transform: uppercase; border-bottom: 2px solid #3b82f6; padding-bottom: 5px; margin-bottom: 15px;">1. Identificación y Datos Clínicos</h3>
+            <table style="width: 100%; font-size: 13px; border-collapse: collapse; margin-bottom: 30px;">
+                <tr>
+                    <td colspan="2" style="padding-bottom: 12px;"><b>NOMBRE COMPLETO DEL NIÑO(A):</b> <br> {child_data.get('nombre', '-')}</td>
+                </tr>
+                <tr>
+                    <td style="width: 50%; padding-bottom: 12px;"><b>RUN / IDENTIFICACIÓN:</b> <br> {child_data.get('rut', '-')}</td>
+                    <td style="width: 50%; padding-bottom: 12px;"><b>FECHA DE NACIMIENTO:</b> <br> {child_data.get('nacimiento', '-')}</td>
+                </tr>
+                <tr>
+                    <td style="padding-bottom: 12px;"><b>SEXO:</b> <br> {child_data.get('sexo', '-')}</td>
+                    <td style="padding-bottom: 12px;"><b>PESO AL NACER:</b> <br> {child_data.get('peso_nacer', '-')}</td>
+                </tr>
+                <tr>
+                    <td style="padding-bottom: 12px;"><b>VACUNAS AL DÍA:</b> <br> {child_data.get('vacunas', '-')}</td>
+                    <td style="padding-bottom: 12px;"><b>ÚLTIMO CONTROL MÉDICO:</b> <br> {child_data.get('control', '-')}</td>
+                </tr>
+                <tr>
+                    <td style="padding-bottom: 12px; color: #16a34a;"><b>FECHA INGRESO PROGRAMA:</b> <br> {f_ingreso_pdf}</td>
+                    <td style="padding-bottom: 12px; color: #dc2626;"><b>FECHA ESTIMADA EGRESO:</b> <br> {f_egreso_pdf}</td>
+                </tr>
+            </table>
+
+            <h3 style="color: #1e3a8a; font-size: 14px; text-transform: uppercase; border-bottom: 2px solid #3b82f6; padding-bottom: 5px; margin-bottom: 15px;">2. Contexto Familiar</h3>
+            <div style="font-size: 13px; margin-bottom: 15px; line-height: 1.5;">
+                <b style="text-transform: uppercase; color: #1e3a8a;">Antecedentes de la Madre:</b><br>
+                {html_madre}
+            </div>
+            <div style="font-size: 13px; margin-bottom: 20px; line-height: 1.5;">
+                <b style="text-transform: uppercase; color: #1e3a8a;">Antecedentes del Padre:</b><br>
+                {html_padre}
+            </div>
+            
+            <table style="width: 100%; font-size: 12px; background-color: #f8fafc; border-collapse: collapse; margin-bottom: 30px;">
+                <tr>
+                    <td style="width: 50%; padding: 12px;"><b>TELÉFONO DE CONTACTO:</b> <br> {child_data.get('telefono_madre', '-')}</td>
+                    <td style="width: 50%; padding: 12px;"><b>DIRECCIÓN PARTICULAR:</b> <br> {child_data.get('direccion', '-')}</td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="padding: 12px; border-top: 1px solid #e2e8f0;"><b>SUPLENTES AUTORIZADOS PARA RETIRO:</b> <br> {child_data.get('suplentes', '-')}</td>
+                </tr>
+            </table>
+
+            <h3 style="color: #065f46; font-size: 14px; text-transform: uppercase; border-bottom: 2px solid #10b981; padding-bottom: 5px; margin-bottom: 15px;">3. Historia Social y Antecedentes Generales</h3>
+            <div style="font-size: 13px; line-height: 1.6; text-align: justify; margin-bottom: 40px; color: #334155;">
+                {html_historia}
             </div>
 
-            <div style="page-break-inside: avoid; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
-                <h3 style="margin: 0 0 15px 0; color: #1e3a8a; font-size: 14px; text-transform: uppercase; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">2. Contexto Familiar</h3>
-                
-                <div style="font-size: 13px; color: #334155;">
-                    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 12px;">
-                        <strong style="color: #1e3a8a; text-transform: uppercase; font-size: 12px;">Antecedentes de la Madre:</strong><br>
-                        <div style="margin-top: 6px;">{html_madre}</div>
-                    </div>
-                    <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 12px;">
-                        <strong style="color: #1e3a8a; text-transform: uppercase; font-size: 12px;">Antecedentes del Padre:</strong><br>
-                        <div style="margin-top: 6px;">{html_padre}</div>
-                    </div>
-                    
-                    <table style="width: 100%; background: #f8fafc; padding: 14px; border-radius: 6px; font-size: 12px;">
-                        <tr>
-                            <td style="width: 50%; padding-bottom: 8px;"><span style="color: #64748b; font-weight: 600;">TELÉFONO DE CONTACTO:</span><br><strong style="color: #0f172a;">{child_data.get('telefono_madre', '-')}</strong></td>
-                            <td style="width: 50%; padding-bottom: 8px;"><span style="color: #64748b; font-weight: 600;">DIRECCIÓN PARTICULAR:</span><br><span style="color: #0f172a;">{child_data.get('direccion', '-')}</span></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2"><span style="color: #64748b; font-weight: 600;">SUPLENTES AUTORIZADOS PARA RETIRO:</span><br><span style="color: #0f172a; font-weight: 500;">{child_data.get('suplentes', '-')}</span></td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-
-            <div style="margin-bottom: 20px;">
-                <h3 style="margin: 0 0 15px 0; color: #065f46; font-size: 14px; text-transform: uppercase; border-bottom: 2px solid #10b981; padding-bottom: 8px;">3. Historia Social y Antecedentes Generales</h3>
-                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #10b981; padding: 16px; border-radius: 6px; font-size: 13px; color: #334155;">
-                    {html_historia}
-                </div>
-            </div>
-
-            <table style="width: 100%; margin-top: 80px; page-break-inside: avoid; border-spacing: 0;">
+            <table style="width: 100%; margin-top: 50px; border-collapse: collapse; page-break-inside: avoid;">
                 <tr>
                     <td style="width: 40%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 10px; font-size: 12px; color: #475569;">
-                        <strong style="color: #0f172a;">Firma Asistente Social</strong><br>Gotas de Leche
+                        <b style="color: #0f172a;">Firma Asistente Social</b><br>Gotas de Leche
                     </td>
                     <td style="width: 20%;"></td>
                     <td style="width: 40%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 10px; font-size: 12px; color: #475569;">
-                        <strong style="color: #0f172a;">Validación Interna</strong><br>Revisión Documental
+                        <b style="color: #0f172a;">Validación Interna</b><br>Revisión Documental
                     </td>
                 </tr>
             </table>
@@ -266,16 +246,15 @@ def export_pdf_component(child_data):
             setTimeout(function() {{
                 var element = document.getElementById('pdf-container');
                 var opt = {{
-                    // Truco maestro 3: El número "20" abajo obliga a la hoja a dejar 2 cms de espacio en blanco siempre.
-                    margin:       [15, 10, 20, 10], 
+                    margin:       [15, 10, 20, 10], // Margen inferior de 2cm asegurado
                     filename:     'Ficha_GotaDeLeche_{child_data.get("ficha", "_")}.pdf',
                     image:        {{ type: 'jpeg', quality: 1.0 }},
                     html2canvas:  {{ scale: 2, useCORS: true, logging: false }},
                     jsPDF:        {{ unit: 'mm', format: 'letter', orientation: 'portrait' }},
-                    pagebreak:    {{ mode: ['avoid-all', 'css', 'legacy'] }}
+                    pagebreak:    {{ mode: ['css'] }} // Permitimos que la hoja se corte de forma natural
                 }};
                 html2pdf().set(opt).from(element).save();
-            }}, 800);
+            }}, 600);
         }}
     </script>
     """
