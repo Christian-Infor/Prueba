@@ -146,7 +146,6 @@ st.markdown("""
 CHILE_TZ = pytz.timezone("America/Santiago")
 
 def get_local_now() -> str:
-    # Enviamos la hora en formato ISO 8601 con el timezone explícito (-04:00)
     return datetime.now(CHILE_TZ).isoformat()
 
 def get_local_date() -> str:
@@ -284,7 +283,7 @@ def init_supabase():
 supabase = init_supabase()
 
 # ─────────────────────────────────────────
-# 4. LOGIN
+# 4. LOGIN (ESTILO FASE 2)
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
@@ -334,7 +333,7 @@ else:
         
         menu_choice = st.radio(
             "MENÚ PRINCIPAL", 
-            ["📊 DASHBOARD", "📦 BODEGA CENTRAL", "⚖️ SALA DE ATENCIÓN", "👥 GESTIÓN DE NIÑOS", "📜 HISTORIAL"],
+            ["📊 PANEL PRINCIPAL", "📦 BODEGA CENTRAL", "⚖️ SALA DE ATENCIÓN", "👥 GESTIÓN DE NIÑOS", "📜 HISTORIAL"],
             label_visibility="collapsed"
         )
         
@@ -343,8 +342,8 @@ else:
             st.session_state.clear()
             st.rerun()
 
-    # 📊 PANEL: DASHBOARD
-    if menu_choice == "📊 DASHBOARD":
+    # 📊 PANEL PRINCIPAL
+    if menu_choice == "📊 PANEL PRINCIPAL":
         st.header("📊 Resumen de Operación e Info Inmediata", divider="blue")
         try:
             with st.spinner("Actualizando métricas..."):
@@ -625,7 +624,6 @@ else:
                                 f_ingreso_dt = datetime.now(CHILE_TZ)
                                 f_egreso_dt = f_ingreso_dt + timedelta(days=730)
                                 
-                                # 🔴 CORRECCIÓN: Formato universal ISO para la base de datos (YYYY-MM-DD)
                                 string_ingreso = f_ingreso_dt.strftime("%Y-%m-%d")
                                 string_egreso = f_egreso_dt.strftime("%Y-%m-%d")
                                 
