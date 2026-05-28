@@ -7,6 +7,7 @@ import bcrypt
 import pytz
 from datetime import datetime, timedelta
 import streamlit.components.v1 as components
+import io
 
 # ─────────────────────────────────────────
 # 0. CONFIGURACIÓN DEL LOGO OFICIAL (URL DIRECTA)
@@ -153,7 +154,6 @@ def export_pdf_component(child_data):
     html_content = f"""
     <div id="pdf-container" style="font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; padding: 0; background: #ffffff; max-width: 820px; margin: auto; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); overflow: hidden;">
         
-        <!-- HEADER INSTITUCIONAL -->
         <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); padding: 30px 40px; color: white; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 20px;">
                 <img src="{LOGO_SRC}" style="height: 65px; width: auto; object-fit: contain; filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.15));" alt="Logo">
@@ -171,7 +171,6 @@ def export_pdf_component(child_data):
         <div style="padding: 30px 40px;">
             <div style="text-align: right; font-size: 12px; color: #64748b; margin-bottom: 20px; font-style: italic;">Fecha de Emisión: {get_local_date()}</div>
             
-            <!-- SECCIÓN 1: DATOS CLÍNICOS -->
             <div style="page-break-inside: avoid; break-inside: avoid; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                 <div style="display: flex; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">
                     <h3 style="margin: 0; color: #1e3a8a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">1. Identificación y Datos Clínicos</h3>
@@ -189,7 +188,6 @@ def export_pdf_component(child_data):
                 </div>
             </div>
 
-            <!-- SECCIÓN 2: CONTEXTO FAMILIAR -->
             <div style="page-break-inside: avoid; break-inside: avoid; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
                 <div style="display: flex; align-items: center; margin-bottom: 15px; border-bottom: 2px solid #3b82f6; padding-bottom: 8px;">
                     <h3 style="margin: 0; color: #1e3a8a; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">2. Contexto Familiar</h3>
@@ -211,7 +209,6 @@ def export_pdf_component(child_data):
                 </div>
             </div>
 
-            <!-- SECCIÓN 3: HISTORIA SOCIAL -->
             <div style="page-break-inside: avoid; break-inside: avoid; margin-bottom: 30px;">
                 <div style="display: flex; align-items: center; margin-bottom: 12px; border-bottom: 2px solid #10b981; padding-bottom: 8px;">
                     <h3 style="margin: 0; color: #065f46; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">3. Historia Social y Antecedentes Generales</h3>
@@ -219,7 +216,6 @@ def export_pdf_component(child_data):
                 <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #10b981; padding: 16px; border-radius: 6px; font-size: 13px; color: #334155; line-height: 1.6; white-space: pre-wrap;">{child_data.get('historia_social', 'No se registran antecedentes adicionales.')}</div>
             </div>
 
-            <!-- FIRMAS -->
             <div style="page-break-inside: avoid; break-inside: avoid; margin-top: 60px; display: flex; justify-content: space-between; padding: 0 20px;">
                 <div style="width: 40%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 10px; font-size: 12px; color: #475569;"><strong style="color: #0f172a;">Firma Asistente Social</strong><br>Gotas de Leche</div>
                 <div style="width: 40%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 10px; font-size: 12px; color: #475569;"><strong style="color: #0f172a;">Validación Interna</strong><br>Revisión Documental</div>
@@ -552,17 +548,20 @@ else:
                     salidas = df_h[(df_h["producto"] == p_name) & (df_h["tipo"] == "ENTREGA")]["cantidad"].astype(int).sum()
                     resumen_productos.append({"Insumo / Alimento": p_name, "Insumos Recibidos (Desde Bodega) 📥": entradas, "Total Entregado 📤": salidas, "Saldo Disponible ⚖️": p["sala"]})
                 
-                # 🔴 MEJORA: Generación de tabla y botón de descarga a Excel (Formato LatAm)
+                # 🔴 MEJORA: Generación de tabla y botón de descarga a Excel (.xlsx) real
                 df_resumen = pd.DataFrame(resumen_productos)
                 st.dataframe(df_resumen, use_container_width=True, hide_index=True)
                 
                 st.write("###")
-                csv_resumen = df_resumen.to_csv(index=False, sep=';').encode('utf-8-sig')
+                buffer_resumen = io.BytesIO()
+                with pd.ExcelWriter(buffer_resumen, engine='openpyxl') as writer:
+                    df_resumen.to_excel(writer, index=False, sheet_name='Resumen Sala')
+                
                 st.download_button(
-                    label="📊 Descargar Resumen para Excel (.csv)",
-                    data=csv_resumen,
-                    file_name=f"Resumen_Sala_{datetime.now(CHILE_TZ).strftime('%d_%m_%Y')}.csv",
-                    mime="text/csv",
+                    label="📊 Descargar Resumen en Excel (.xlsx)",
+                    data=buffer_resumen.getvalue(),
+                    file_name=f"Resumen_Sala_{datetime.now(CHILE_TZ).strftime('%d_%m_%Y')}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     type="primary"
                 )
 
@@ -659,7 +658,6 @@ else:
                         if st.button(f"✏️ Editar Datos", key=f"btn_edit_{child['ficha']}", use_container_width=True):
                             st.session_state[edit_key] = not st.session_state[edit_key]; st.rerun()
                     with btn_col3:
-                        # 🔴 MEJORA: Popover de seguridad para confirmar con contraseña
                         with st.popover("❌ Registrar Egreso", use_container_width=True):
                             st.markdown("**🔒 Seguridad: Confirmar Acción**")
                             pass_confirm = st.text_input("Ingrese su contraseña para autorizar la baja:", type="password", key=f"pass_egr_{child['ficha']}")
@@ -825,7 +823,6 @@ else:
             else:
                 df_filtrado["Fecha"] = df_filtrado["dt"].dt.strftime("%d/%m/%Y %H:%M")
                 
-                # 🔴 MEJORA: Preparamos la tabla para mostrar y para descargar
                 df_mostrar = df_filtrado[["Fecha", "tipo", "producto", "cantidad", "responsable", "observaciones"]].rename(columns={
                         "tipo": "Operación", 
                         "producto": "Insumo", 
@@ -837,11 +834,16 @@ else:
                 st.dataframe(df_mostrar, use_container_width=True, hide_index=True)
                 
                 st.write("###")
-                csv_historial = df_mostrar.to_csv(index=False, sep=';').encode('utf-8-sig')
+                
+                # 🔴 MEJORA: Descarga de Excel REAL (.xlsx) para el historial
+                buffer_historial = io.BytesIO()
+                with pd.ExcelWriter(buffer_historial, engine='openpyxl') as writer:
+                    df_mostrar.to_excel(writer, index=False, sheet_name='Historial')
+                
                 st.download_button(
-                    label="📥 Descargar Historial para Excel (.csv)",
-                    data=csv_historial,
-                    file_name=f"Historial_Operaciones_{datetime.now(CHILE_TZ).strftime('%d_%m_%Y')}.csv",
-                    mime="text/csv",
+                    label="📥 Descargar Historial en Excel (.xlsx)",
+                    data=buffer_historial.getvalue(),
+                    file_name=f"Historial_Operaciones_{datetime.now(CHILE_TZ).strftime('%d_%m_%Y')}.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     type="primary"
                 )
