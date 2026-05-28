@@ -352,37 +352,31 @@ else:
             
             productos_filtrados = [item for item in stock_res.data if item["producto"].upper() not in ["AJUAR", "OTROS"]]
             
+            # 📦 STOCK DE BODEGA NORMALIZADO
             st.write("###")
             st.markdown("### 📦 Stock de Bodega")
             cols_bodega = st.columns(3)
             for i, item in enumerate(productos_filtrados):
                 with cols_bodega[i % 3]:
-                    if item["bodega"] <= 15:
-                        color_valor = "#ef4444"
-                        sub_label = '<span style="color:#ef4444; font-weight:bold; font-size:0.9rem;">🚨 CRÍTICO EN BODEGA</span>'
-                    elif item["bodega"] <= 40:
-                        color_valor = "#f59e0b"
-                        sub_label = '<span style="color:#f59e0b; font-weight:bold; font-size:0.9rem;">⚠️ INVENTARIO GLOBAL BAJO</span>'
-                    else:
-                        color_valor = "#60a5fa"
-                        sub_label = '<span style="color:#10b981; font-weight:bold; font-size:0.9rem;">🏢 ALMACENADO</span>'
-                    st.markdown(f'<div class="metric-card"><div class="metric-label" style="font-size:1rem; min-height:40px; display:flex; align-items:center; justify-content:center;">{item["producto"]}</div><div class="metric-value" style="color: {color_valor};">{int(item["bodega"])} <span style="font-size:1.2rem; color:#94a3b8;">ud</span></div><div style="margin-top:10px;">{sub_label}</div></div>', unsafe_allow_html=True)
+                    st.markdown(f'''
+                        <div class="metric-card">
+                            <div class="metric-label" style="font-size:1rem; min-height:40px; display:flex; align-items:center; justify-content:center;">{item["producto"]}</div>
+                            <div class="metric-value" style="color: #38bdf8;">{int(item["bodega"])} <span style="font-size:1.2rem; color:#94a3b8;">ud</span></div>
+                        </div>
+                    ''', unsafe_allow_html=True)
 
+            # ⚖️ INSUMOS SALA NORMALIZADOS
             st.write("###")
             st.markdown("### ⚖️ Insumos Sala de Atención")
             cols_sala = st.columns(3)
             for i, item in enumerate(productos_filtrados):
                 with cols_sala[i % 3]:
-                    if item["sala"] <= 5:
-                        color_valor = "#ef4444"
-                        sub_label = '<span style="color:#ef4444; font-weight:bold; font-size:0.9rem;">🚨 CRÍTICO</span>'
-                    elif item["sala"] <= 15:
-                        color_valor = "#f59e0b"
-                        sub_label = '<span style="color:#f59e0b; font-weight:bold; font-size:0.9rem;">⚠️ INVENTARIO BAJO</span>'
-                    else:
-                        color_valor = "#10b981"
-                        sub_label = '<span style="color:#10b981; font-weight:bold; font-size:0.9rem;">📦 STOCK ESTABLE</span>'
-                    st.markdown(f'<div class="metric-card"><div class="metric-label" style="font-size:1rem; min-height:40px; display:flex; align-items:center; justify-content:center;">{item["producto"]}</div><div class="metric-value" style="color: {color_valor};">{int(item["sala"])} <span style="font-size:1.2rem; color:#94a3b8;">ud</span></div><div style="margin-top:10px;">{sub_label}</div></div>', unsafe_allow_html=True)
+                    st.markdown(f'''
+                        <div class="metric-card">
+                            <div class="metric-label" style="font-size:1rem; min-height:40px; display:flex; align-items:center; justify-content:center;">{item["producto"]}</div>
+                            <div class="metric-value" style="color: #38bdf8;">{int(item["sala"])} <span style="font-size:1.2rem; color:#94a3b8;">ud</span></div>
+                        </div>
+                    ''', unsafe_allow_html=True)
 
     # 📦 PANEL: BODEGA CENTRAL
     elif menu_choice == "📦 BODEGA CENTRAL":
