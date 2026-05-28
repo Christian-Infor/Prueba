@@ -151,49 +151,41 @@ def export_pdf_component(child_data):
     f_egreso_pdf = clean_timestamp_to_date(child_data.get('fecha_egreso', '-'))
 
     html_content = f"""
-    <div id="pdf-container" style="font-family: Arial, sans-serif; color: #333; padding: 40px; line-height: 1.4; width: 700px; margin: auto;">
-        <!-- CABECERA -->
-        <div style="border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px;">
-            <h1 style="margin: 0; font-size: 20px;">GOTAS DE LECHE</h1>
-            <p style="margin: 0; font-size: 14px; font-weight: bold;">FICHA CLÍNICO-SOCIAL | FICHA N° {child_data.get('ficha', '-')}</p>
+    <div id="pdf-container" style="font-family: 'Helvetica', sans-serif; font-size: 14px; color: #000; width: 700px; margin: auto; padding: 20px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h1 style="margin: 0; font-size: 24px;">GOTAS DE LECHE</h1>
+            <h2 style="margin: 5px 0; font-size: 18px;">FICHA OFICIAL DEL BENEFICIARIO</h2>
+            <p style="margin: 0; font-size: 14px;">DOCUMENTO CLÍNICO-SOCIAL | Ficha N° {child_data.get('ficha', '-')}</p>
         </div>
 
-        <!-- 1. DATOS CLÍNICOS -->
-        <h2 style="font-size: 14px; background: #eee; padding: 5px; margin-top: 20px;">1. IDENTIFICACIÓN Y DATOS CLÍNICOS</h2>
-        <div style="display: flex; flex-wrap: wrap; font-size: 12px; border: 1px solid #ccc; padding: 10px;">
-            <div style="width: 50%; padding: 5px;"><strong>NOMBRE:</strong> {child_data.get('nombre', '-')}</div>
-            <div style="width: 50%; padding: 5px;"><strong>RUN:</strong> {child_data.get('rut', '-')}</div>
-            <div style="width: 50%; padding: 5px;"><strong>FECHA NAC.:</strong> {child_data.get('nacimiento', '-')}</div>
-            <div style="width: 50%; padding: 5px;"><strong>SEXO:</strong> {child_data.get('sexo', '-')}</div>
-            <div style="width: 50%; padding: 5px;"><strong>PESO NACER:</strong> {child_data.get('peso_nacer', '-')}</div>
-            <div style="width: 50%; padding: 5px;"><strong>VACUNAS DÍA:</strong> {child_data.get('vacunas', '-')}</div>
-            <div style="width: 100%; padding: 5px;"><strong>ÚLTIMO CONTROL:</strong> {child_data.get('control', '-')}</div>
-            <div style="width: 50%; padding: 5px;"><strong>INGRESO:</strong> {f_ingreso_pdf}</div>
-            <div style="width: 50%; padding: 5px;"><strong>EGRESO:</strong> {f_egreso_pdf}</div>
+        <h3 style="border-bottom: 1px solid #000; margin-top: 20px;">1. IDENTIFICACIÓN Y DATOS CLÍNICOS</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <p><strong>Nombre Completo:</strong><br>{child_data.get('nombre', '-')}</p>
+            <p><strong>RUN/Identificación:</strong><br>{child_data.get('rut', '-')}</p>
+            <p><strong>Fecha de Nacimiento:</strong><br>{child_data.get('nacimiento', '-')}</p>
+            <p><strong>Sexo:</strong><br>{child_data.get('sexo', '-')}</p>
+            <p><strong>Peso al Nacer:</strong><br>{child_data.get('peso_nacer', '-')}</p>
+            <p><strong>Vacunas al Día:</strong><br>{child_data.get('vacunas', '-')}</p>
+            <p><strong>Último Control Médico:</strong><br>{child_data.get('control', '-')}</p>
+            <p><strong>Fecha Ingreso Programa:</strong><br>{f_ingreso_pdf}</p>
+            <p><strong>Fecha Estimada Egreso:</strong><br>{f_egreso_pdf}</p>
         </div>
 
-        <!-- 2. CONTEXTO FAMILIAR -->
-        <h2 style="font-size: 14px; background: #eee; padding: 5px; margin-top: 20px;">2. CONTEXTO FAMILIAR</h2>
-        <div style="font-size: 12px; border: 1px solid #ccc; padding: 10px;">
-            <p style="margin: 5px 0;"><strong>MADRE:</strong> {child_data.get('madre', '-')}</p>
-            <p style="margin: 5px 0;"><strong>PADRE:</strong> {child_data.get('padre', '-')}</p>
-            <p style="margin: 5px 0;"><strong>TELÉFONO:</strong> {child_data.get('telefono_madre', '-')}</p>
-            <p style="margin: 5px 0;"><strong>DIRECCIÓN:</strong> {child_data.get('direccion', '-')}</p>
-            <p style="margin: 5px 0;"><strong>SUPLENTES:</strong> {child_data.get('suplentes', '-')}</p>
-        </div>
+        <h3 style="border-bottom: 1px solid #000; margin-top: 20px;">2. CONTEXTO FAMILIAR</h3>
+        <p style="margin: 5px 0;"><strong>MADRE:</strong><br>{child_data.get('madre', '-')}</p>
+        <p style="margin: 5px 0;"><strong>PADRE:</strong><br>{child_data.get('padre', '-')}</p>
+        <p style="margin: 5px 0;"><strong>TELÉFONO:</strong> {child_data.get('telefono_madre', '-')}</p>
+        <p style="margin: 5px 0;"><strong>DIRECCIÓN:</strong> {child_data.get('direccion', '-')}</p>
+        <p style="margin: 5px 0;"><strong>SUPLENTES:</strong> {child_data.get('suplentes', '-')}</p>
 
-        <!-- 3. HISTORIA SOCIAL -->
-        <h2 style="font-size: 14px; background: #eee; padding: 5px; margin-top: 20px;">3. HISTORIA SOCIAL</h2>
-        <div style="font-size: 12px; border: 1px solid #ccc; padding: 10px; min-height: 50px;">
-            {child_data.get('historia_social', 'Sin observaciones.')}
-        </div>
+        <h3 style="border-bottom: 1px solid #000; margin-top: 20px;">3. HISTORIA SOCIAL Y ANTECEDENTES</h3>
+        <p style="margin: 5px 0;">{child_data.get('historia_social', 'Sin observaciones.')}</p>
 
-        <!-- FIRMAS -->
-        <div style="margin-top: 50px; display: flex; justify-content: space-between; font-size: 12px;">
-            <div style="text-align: center; border-top: 1px solid #333; width: 40%; padding-top: 5px;">Firma Asistente Social</div>
-            <div style="text-align: center; border-top: 1px solid #334155; width: 40%; padding-top: 5px;">Validación Interna</div>
+        <div style="margin-top: 50px; display: flex; justify-content: space-between;">
+            <div style="text-align: center; border-top: 1px solid #000; width: 40%; font-size: 12px; padding-top: 10px;">Firma Asistente Social</div>
+            <div style="text-align: center; border-top: 1px solid #000; width: 40%; font-size: 12px; padding-top: 10px;">Validación Interna</div>
         </div>
-        <p style="font-size: 10px; text-align: center; margin-top: 20px; color: #777;">Fecha de impresión: {get_local_date()}</p>
+        <p style="font-size: 10px; margin-top: 20px; text-align: right;">Fecha de Emisión: {get_local_date()}</p>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -202,9 +194,7 @@ def export_pdf_component(child_data):
         html2pdf().set({{
             margin: 15,
             filename: 'Ficha_{child_data.get('ficha', '_')}.pdf',
-            image: {{ type: 'jpeg', quality: 1 }},
-            html2canvas: {{ scale: 2, letterRendering: true }},
-            jsPDF: {{ unit: 'mm', format: 'a4', orientation: 'portrait' }}
+            jsPDF: {{ format: 'a4', orientation: 'portrait' }}
         }}).from(element).save();
     </script>
     """
