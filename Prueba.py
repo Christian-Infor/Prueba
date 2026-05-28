@@ -38,39 +38,30 @@ st.markdown("""
     }
     
     /* ── CAJA DE LOGIN (ESTILO FASE 2 EXACTO) ── */
-    .stApp:not(:has(div[data-testid="stSidebar"])) div[data-testid="stVerticalBlockBorderWrapper"] {
-        background-color: #11141E !important; /* Fondo azul noche de la tarjeta */
-        
-        /* Borde fino color Blurple (Azul/Violeta) semitransparente */
+    .stApp:not(:has(div[data-testid="stSidebar"])) .stForm {
+        background-color: #11141E !important;
         border: 1px solid rgba(88, 101, 242, 0.35) !important; 
         border-radius: 12px !important;
-        
-        /* Efecto tubo de neón: Sombra exterior e interior del mismo tono */
-        box-shadow: 0 0 20px rgba(88, 101, 242, 0.12), inset 0 0 10px rgba(88, 101, 242, 0.08) !important; 
-        
-    /* Ancho estricto y centrado automático (sin usar st.columns) */
-        width: 100% !important;
+        box-shadow: 0 0 20px rgba(88, 101, 242, 0.12), inset 0 0 10px rgba(88, 101, 242, 0.08) !important;
+        max-width: 580px !important; 
+        margin: 0 auto !important;
+        padding: 28px 32px !important;
     }
 
-    /* Padding interno de la caja de login */
-    .stApp:not(:has(div[data-testid="stSidebar"])) div[data-testid="stVerticalBlockBorderWrapper"] > div {
-        padding: 25px 30px !important;
-    }
-
-    /* ── INPUTS (Cajas de texto más oscuras que la tarjeta) ── */
-    .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput div[data-baseweb="input"] {
+    /* ── INPUTS ── */
+    .stApp:not(:has(div[data-testid="stSidebar"])) .stForm .stTextInput div[data-baseweb="input"] {
         background-color: #0D1017 !important; 
         border: 1px solid rgba(255, 255, 255, 0.06) !important;
         border-radius: 6px !important;
         color: white !important;
     }
     
-    .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput div[data-baseweb="input"]:focus-within {
+    .stApp:not(:has(div[data-testid="stSidebar"])) .stForm .stTextInput div[data-baseweb="input"]:focus-within {
         border-color: #5865F2 !important;
         box-shadow: 0 0 0 1px #5865F2 !important; 
     }
     
-    .stApp:not(:has(div[data-testid="stSidebar"])) .stTextInput label {
+    .stApp:not(:has(div[data-testid="stSidebar"])) .stForm .stTextInput label {
         color: #f8fafc !important;
         font-weight: 500 !important;
         font-size: 0.9rem !important;
@@ -78,8 +69,8 @@ st.markdown("""
     }
 
     /* ── BOTÓN COLOR BLURPLE EXACTO ── */
-    .stApp:not(:has(div[data-testid="stSidebar"])) .stButton > button {
-        background-color: #5865F2 !important; /* Tono sólido vibrante de tu imagen */
+    .stApp:not(:has(div[data-testid="stSidebar"])) .stForm .stFormSubmitButton > button {
+        background-color: #5865F2 !important;
         border: none !important;
         color: white !important;
         font-weight: 600 !important;
@@ -89,13 +80,11 @@ st.markdown("""
         border-radius: 6px !important;
         width: 100% !important;
         margin-top: 15px !important;
-        
-        /* Brillo sutil del botón */
         box-shadow: 0 4px 14px rgba(88, 101, 242, 0.3) !important; 
         transition: all 0.2s ease-in-out !important;
     }
     
-    .stApp:not(:has(div[data-testid="stSidebar"])) .stButton > button:hover {
+    .stApp:not(:has(div[data-testid="stSidebar"])) .stForm .stFormSubmitButton > button:hover {
         background-color: #4752C4 !important;
         box-shadow: 0 6px 20px rgba(88, 101, 242, 0.5) !important; 
         transform: translateY(-1px);
@@ -280,12 +269,11 @@ def init_supabase():
 supabase = init_supabase()
 
 # ─────────────────────────────────────────
-# 4. LOGIN (ESTRUCTURA EXACTA A FASE 2 SIN ST.COLUMNS)
+# 4. LOGIN
 # ─────────────────────────────────────────
 if "user" not in st.session_state:
     st.markdown("<style>section[data-testid='stSidebar'] {display: none;}</style>", unsafe_allow_html=True)
-    
-    # LOGO Y TÍTULOS ALINEADOS (Controlado puramente por HTML y centrado automático)
+
     st.markdown(f"""
         <div style="text-align: center; margin-bottom: 25px; padding-top: 2vh;">
             <img src="{LOGO_SRC}" style="height: 140px; object-fit: contain; filter: drop-shadow(0px 0px 15px rgba(88, 101, 242, 0.4));">
@@ -293,27 +281,25 @@ if "user" not in st.session_state:
             <p style='color: #64748b; font-size: 0.85rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;'>Sistema Maestro de Gestión</p>
         </div>
     """, unsafe_allow_html=True)
-    
-    # CONTENEDOR CON BORDE centrado con columnas
-    _l, col_login, _r = st.columns([1.2, 2, 1.2])
-    with col_login:
-        with st.container(border=True):
-            username = st.text_input("Usuario", placeholder="Ingrese su usuario")
-            password = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña")
-            
-            if st.button("INGRESAR AL SISTEMA", type="primary", use_container_width=True):
-                if not username or not password:
-                    st.error("⚠️ Por favor, ingresa tu usuario y contraseña.")
+
+    with st.form("login_form"):
+        username = st.text_input("Usuario", placeholder="Ingrese su usuario")
+        password = st.text_input("Contraseña", type="password", placeholder="Ingrese su contraseña")
+        submitted = st.form_submit_button("INGRESAR AL SISTEMA", use_container_width=True)
+
+    if submitted:
+        if not username or not password:
+            st.error("⚠️ Por favor, ingresa tu usuario y contraseña.")
+        else:
+            try:
+                res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
+                if res.data and verify_password(password, res.data[0]["clave"]):
+                    st.session_state.user = res.data[0]
+                    st.rerun()
                 else:
-                    try:
-                        res = supabase.table("usuarios").select("*").eq("usuario", username).execute()
-                        if res.data and verify_password(password, res.data[0]["clave"]):
-                            st.session_state.user = res.data[0]
-                            st.rerun()
-                        else:
-                            st.error("❌ Credenciales incorrectas.")
-                    except Exception as e:
-                        st.error(f"Error al verificar credenciales: {e}")
+                    st.error("❌ Credenciales incorrectas.")
+            except Exception as e:
+                st.error(f"Error al verificar credenciales: {e}")
 
 # ─────────────────────────────────────────
 # 5. PANEL PRINCIPAL (SESIÓN ACTIVA)
