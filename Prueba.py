@@ -300,9 +300,10 @@ else:
     MAX_FICHAS = 210
     
     with st.sidebar:
+        # AQUÍ AGRANDAMOS EL LOGO (de 65px a 130px y ajustamos el margen)
         st.markdown(f"""
-            <div style="text-align:center; margin-bottom:10px;">
-                <img src="{LOGO_SRC}" style="height:65px; object-fit:contain; mix-blend-mode:screen; filter:brightness(1.3);">
+            <div style="text-align:center; margin-bottom:20px; margin-top:10px;">
+                <img src="{LOGO_SRC}" style="height:130px; object-fit:contain; mix-blend-mode:screen; filter:brightness(1.3);">
             </div>
         """, unsafe_allow_html=True)
         st.markdown(f"### 👤 {user['nombre']}")
