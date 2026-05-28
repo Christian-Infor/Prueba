@@ -749,63 +749,46 @@ else:
 
    # 📜 PANEL: HISTORIAL
     elif menu_choice == "📜 HISTORIAL":
-        st.header("📜 Historial de Operaciones y Movimientos", divider="blue")
-        st.markdown("##### 🔍 Búsqueda Avanzada")
-        st.caption("Seleccione el rango de fechas para filtrar los movimientos registrados.")
+        st.header("📜 Historial de Operaciones", divider="blue")
         
-        c_f1, c_f2 = st.columns(2)
-        # Se mantiene la funcionalidad, pero con ayuda visual en los labels
-        with c_f1: fecha_inicio = st.date_input("Fecha Inicial (Año-Mes-Día)", value=datetime.now(CHILE_TZ) - timedelta(days=30))
-        with c_f2: fecha_fin = st.date_input("Fecha Final (Año-Mes-Día)", value=datetime.now(CHILE_TZ))
+        # Filtros amigables en español
+        col1, col2 = st.columns(2)
+        meses = {
+            "Enero": 1, "Febrero": 2, "Marzo": 3, "Abril": 4, "Mayo": 5, "Junio": 6,
+            "Julio": 7, "Agosto": 8, "Septiembre": 9, "Octubre": 10, "Noviembre": 11, "Diciembre": 12
+        }
+        with col1:
+            seleccion_mes = st.selectbox("Seleccione el MES:", list(meses.keys()))
+        with col2:
+            seleccion_anio = st.selectbox("Seleccione el AÑO:", [2026, 2025])
             
         try:
-            with st.spinner("Consultando registros..."): 
+            with st.spinner("Consultando..."): 
                 datos_historial = supabase.table("historial").select("*").order("id", desc=True).execute().data
         except Exception as e: 
-            st.error(f"Fallo al conectar con el historial: {e}"); st.stop()
+            st.error(f"Error: {e}"); st.stop()
             
         if not datos_historial: 
-            st.info("No se registran movimientos históricos.")
+            st.info("No hay movimientos registrados.")
         else:
-            df_historial_general = pd.DataFrame(datos_historial)
+            df = pd.DataFrame(datos_historial)
+            df["dt"] = pd.to_datetime(df["created_at"])
             
-            # Convertimos las fechas a formato 'datetime' entendible por pandas
-            df_historial_general["created_at_dt"] = pd.to_datetime(df_historial_general["created_at"], errors="coerce")
-            
-            # Aplicamos la zona horaria de Chile asegurando que el timezone sea correcto
-            if df_historial_general["created_at_dt"].dt.tz is None:
-                df_historial_general["created_at_dt"] = df_historial_general["created_at_dt"].dt.tz_localize(CHILE_TZ)
-            else:
-                df_historial_general["created_at_dt"] = df_historial_general["created_at_dt"].dt.tz_convert(CHILE_TZ)
-            
-            # Filtramos comparando solo las fechas (sin considerar la hora exacta)
-            df_historial_general = df_historial_general[
-                (df_historial_general["created_at_dt"].dt.date >= fecha_inicio) & 
-                (df_historial_general["created_at_dt"].dt.date <= fecha_fin)
-            ]
-            
-            # Formateamos la fecha para que en la tabla SI se vea como DD/MM/YYYY
-            df_historial_general["Fecha y Hora ⏰"] = df_historial_general["created_at_dt"].dt.strftime("%d/%m/%Y %H:%M")
-            
-            tipos_disponibles = ["TODOS"] + list(df_historial_general["tipo"].unique()) if not df_historial_general.empty else ["TODOS"]
-            filtro_tipo = st.selectbox("Filtrar por tipo de operación:", tipos_disponibles)
-            df_filtrado = df_historial_general[df_historial_general["tipo"] == filtro_tipo] if filtro_tipo != "TODOS" and not df_historial_general.empty else df_historial_general
+            # Filtrar por mes y año seleccionado
+            df_filtrado = df[(df["dt"].dt.month == meses[seleccion_mes]) & (df["dt"].dt.year == seleccion_anio)].copy()
             
             if df_filtrado.empty: 
-                st.warning("No se encontraron registros en el rango seleccionado.")
+                st.warning(f"No hay registros para {seleccion_mes} de {seleccion_anio}.")
             else:
-                df_filtrado["observaciones"] = df_filtrado["observaciones"].fillna("Movimiento interno de stock")
-                # Mostramos la tabla formateada
+                df_filtrado["Fecha"] = df_filtrado["dt"].dt.strftime("%d/%m/%Y %H:%M")
                 st.dataframe(
-                    df_filtrado[["Fecha y Hora ⏰", "tipo", "producto", "cantidad", "responsable", "observaciones"]]
+                    df_filtrado[["Fecha", "tipo", "producto", "cantidad", "responsable", "observaciones"]]
                     .rename(columns={
-                        "tipo": "Tipo de Operación ⚙️", 
-                        "producto": "Insumo / Alimento 🥛", 
-                        "cantidad": "Cantidad 🔢", 
-                        "responsable": "Responsable 👤", 
-                        "observaciones": "Detalle / Observación 📝"
+                        "tipo": "Operación", 
+                        "producto": "Insumo", 
+                        "cantidad": "Cant.", 
+                        "responsable": "Responsable", 
+                        "observaciones": "Detalle"
                     }), 
-                    use_container_width=True, 
-                    hide_index=True, 
-                    column_config={"Cantidad 🔢": st.column_config.NumberColumn(format="%d unidades 📦")}
+                    use_container_width=True, hide_index=True
                 )
