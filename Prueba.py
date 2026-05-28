@@ -418,14 +418,22 @@ else:
                             sala_actual = int(row["sala"])
                             id_registro = int(row["id"])
 
+                            # Realizamos el cálculo
                             if movement_type == "Ingreso a Bodega":
                                 supabase.table("stock").update({"bodega": bodega_actual + cant_operacion}).eq("id", id_registro).execute()
                             else:
                                 supabase.table("stock").update({"bodega": bodega_actual - cant_operacion, "sala": sala_actual + cant_operacion}).eq("id", id_registro).execute()
-                                
+                            
+                            # 🔴 CORRECCIÓN AQUÍ: Forzamos el texto de observación y usamos la hora local
+                            observacion_texto = f"Traslado manual: {movement_type}"
+                            
                             supabase.table("historial").insert({
-                                "responsable": user["nombre"], "producto": product_name,
-                                "cantidad": cant_operacion, "tipo": movement_type.upper(), "created_at": get_local_now(),
+                                "responsable": user["nombre"], 
+                                "producto": product_name,
+                                "cantidad": cant_operacion, 
+                                "tipo": movement_type.upper(), 
+                                "observaciones": observacion_texto, # Ya no será null
+                                "created_at": datetime.now(CHILE_TZ).isoformat() # Formato ISO estricto para Supabase
                             }).execute()
                             
                             st.toast("✅ Inventario actualizado correctamente.", icon="📥")
