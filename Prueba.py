@@ -408,34 +408,35 @@ else:
                     if movement_type == "Traslado a Sala" and row["bodega"] < quantity:
                         st.error(f"⚠️ Stock insuficiente en bodega principal. Disponibles: {row['bodega']} unidades.")
                     else:
-                        try:
-                            cant_operacion = int(quantity)
-                            bodega_actual = int(row["bodega"])
-                            sala_actual = int(row["sala"])
-                            id_registro = int(row["id"])
+                        with st.spinner(f"Procesando {movement_type} en la base de datos..."): # ⏳ ANIMACIÓN DE CARGA AÑADIDA
+                            try:
+                                cant_operacion = int(quantity)
+                                bodega_actual = int(row["bodega"])
+                                sala_actual = int(row["sala"])
+                                id_registro = int(row["id"])
 
-                            # Actualización de stock
-                            if movement_type == "Ingreso a Bodega":
-                                supabase.table("stock").update({"bodega": bodega_actual + cant_operacion}).eq("id", id_registro).execute()
-                            else:
-                                supabase.table("stock").update({"bodega": bodega_actual - cant_operacion, "sala": sala_actual + cant_operacion}).eq("id", id_registro).execute()
-                            
-                            # REGISTRO CON HORA LOCAL DE CHILE Y OBSERVACIÓN ASEGURADA
-                            detalle = f"Operación realizada: {movement_type} de {cant_operacion} unidades."
-                            
-                            supabase.table("historial").insert({
-                                "responsable": user["nombre"], 
-                                "producto": product_name,
-                                "cantidad": cant_operacion, 
-                                "tipo": movement_type.upper(), 
-                                "observaciones": detalle, 
-                                "created_at": get_local_now() 
-                            }).execute()
-                            
-                            st.toast("✅ Inventario y registro actualizados.", icon="📥")
-                            time.sleep(0.5); st.rerun()
-                        except Exception as e:
-                            st.error(f"Error crítico en la transacción: {e}")
+                                # Actualización de stock
+                                if movement_type == "Ingreso a Bodega":
+                                    supabase.table("stock").update({"bodega": bodega_actual + cant_operacion}).eq("id", id_registro).execute()
+                                else:
+                                    supabase.table("stock").update({"bodega": bodega_actual - cant_operacion, "sala": sala_actual + cant_operacion}).eq("id", id_registro).execute()
+                                
+                                # REGISTRO CON HORA LOCAL DE CHILE Y OBSERVACIÓN ASEGURADA
+                                detalle = f"Operación realizada: {movement_type} de {cant_operacion} unidades."
+                                
+                                supabase.table("historial").insert({
+                                    "responsable": user["nombre"], 
+                                    "producto": product_name,
+                                    "cantidad": cant_operacion, 
+                                    "tipo": movement_type.upper(), 
+                                    "observaciones": detalle, 
+                                    "created_at": get_local_now() 
+                                }).execute()
+                                
+                                st.toast("✅ Inventario y registro actualizados.", icon="📥")
+                                time.sleep(1.2); st.rerun() # ⏱️ TIEMPO EXTENDIDO PARA VER NOTIFICACIÓN
+                            except Exception as e:
+                                st.error(f"Error crítico en la transacción: {e}")
 
     # ⚖️ PANEL: SALA DE ATENCIÓN
     elif menu_choice == "⚖️ SALA DE ATENCIÓN":
@@ -517,19 +518,20 @@ else:
                         if errors_stock:
                             for err in errors_stock: st.error(err)
                         else:
-                            try:
-                                detalle_receptor = f"{quien_retira_tipo} (Recibe: {nombre_firma_especifico})"
-                                for p_name, qty in items_validados:
-                                    item = next(x for x in stock_data if x["producto"] == p_name)
-                                    supabase.table("stock").update({"sala": int(item["sala"] - qty)}).eq("id", int(item["id"])).execute()
-                                    supabase.table("historial").insert({
-                                        "responsable": user["nombre"], "producto": p_name, "cantidad": int(qty),
-                                        "tipo": "ENTREGA", "observaciones": f"Ficha {ficha_vinculada} - {detalle_receptor}", "created_at": get_local_now(),
-                                    }).execute()
-                                st.balloons()
-                                st.toast("Entrega asentada de manera exitosa en Sala de Atención.", icon="🎉")
-                                time.sleep(0.5); st.rerun()
-                            except Exception as e: st.error(f"Error crítico guardando la entrega: {e}")
+                            with st.spinner("Validando stock y registrando entrega definitiva..."): # ⏳ ANIMACIÓN DE CARGA AÑADIDA
+                                try:
+                                    detalle_receptor = f"{quien_retira_tipo} (Recibe: {nombre_firma_especifico})"
+                                    for p_name, qty in items_validados:
+                                        item = next(x for x in stock_data if x["producto"] == p_name)
+                                        supabase.table("stock").update({"sala": int(item["sala"] - qty)}).eq("id", int(item["id"])).execute()
+                                        supabase.table("historial").insert({
+                                            "responsable": user["nombre"], "producto": p_name, "cantidad": int(qty),
+                                            "tipo": "ENTREGA", "observaciones": f"Ficha {ficha_vinculada} - {detalle_receptor}", "created_at": get_local_now(),
+                                        }).execute()
+                                    st.balloons() # 🎈 ANIMACIÓN DE GLOBOS PARA LA ENTREGA
+                                    st.toast("Entrega asentada de manera exitosa en Sala de Atención.", icon="🎉")
+                                    time.sleep(1.8); st.rerun() # ⏱️ TIEMPO EXTENDIDO
+                                except Exception as e: st.error(f"Error crítico guardando la entrega: {e}")
                                 
         with tab_resumen_stock:
             st.markdown("### 📊 Resumen Estadístico de Cargas en Sala de Atención")
@@ -548,7 +550,6 @@ else:
                     salidas = df_h[(df_h["producto"] == p_name) & (df_h["tipo"] == "ENTREGA")]["cantidad"].astype(int).sum()
                     resumen_productos.append({"Insumo / Alimento": p_name, "Insumos Recibidos (Desde Bodega) 📥": entradas, "Total Entregado 📤": salidas, "Saldo Disponible ⚖️": p["sala"]})
                 
-                # 🔴 MEJORA: Generación de tabla y botón de descarga a Excel (.xlsx) real
                 df_resumen = pd.DataFrame(resumen_productos)
                 st.dataframe(df_resumen, use_container_width=True, hide_index=True)
                 
@@ -621,26 +622,28 @@ else:
                     if st.form_submit_button("INGRESAR BENEFICIARIO AL SISTEMA", type="primary"):
                         if not name or not rut: st.error("Campos obligatorios faltantes: Nombre y RUN son requeridos.")
                         else:
-                            try:
-                                f_ingreso_dt = datetime.now(CHILE_TZ)
-                                f_egreso_dt = f_ingreso_dt + timedelta(days=730)
-                                
-                                string_ingreso = f_ingreso_dt.strftime("%Y-%m-%d")
-                                string_egreso = f_egreso_dt.strftime("%Y-%m-%d")
-                                
-                                check_ficha = supabase.table("beneficiarios").select("ficha, nombre").eq("ficha", ficha).execute()
-                                if check_ficha.data: st.error(f"Conflicto: El N° de ficha {ficha} ya está asignado a: {check_ficha.data[0]['nombre']}")
-                                else:
-                                    supabase.table("beneficiarios").insert({
-                                        "nombre": name, "rut": rut, "ficha": ficha, "nacimiento": birth_date,
-                                        "sexo": sexo, "peso_nacer": peso_nacer, "vacunas": vacunas, "control": ultimo_control,
-                                        "telefono_madre": phone, "direccion": address, "madre": mother, "padre": father,
-                                        "suplentes": u_suplentes_new, "historia_social": social_history, "estado": "Activo",
-                                        "fecha_ingreso": string_ingreso, "fecha_egreso": string_egreso
-                                    }).execute()
-                                    st.success("Registro clínico-social creado exitosamente.")
-                                    time.sleep(0.5); st.rerun()
-                            except Exception as e: st.error(f"Fallo en inserción: {e}")
+                            with st.spinner("Generando nueva ficha clínica en el servidor..."): # ⏳ ANIMACIÓN DE CARGA AÑADIDA
+                                try:
+                                    f_ingreso_dt = datetime.now(CHILE_TZ)
+                                    f_egreso_dt = f_ingreso_dt + timedelta(days=730)
+                                    
+                                    string_ingreso = f_ingreso_dt.strftime("%Y-%m-%d")
+                                    string_egreso = f_egreso_dt.strftime("%Y-%m-%d")
+                                    
+                                    check_ficha = supabase.table("beneficiarios").select("ficha, nombre").eq("ficha", ficha).execute()
+                                    if check_ficha.data: st.error(f"Conflicto: El N° de ficha {ficha} ya está asignado a: {check_ficha.data[0]['nombre']}")
+                                    else:
+                                        supabase.table("beneficiarios").insert({
+                                            "nombre": name, "rut": rut, "ficha": ficha, "nacimiento": birth_date,
+                                            "sexo": sexo, "peso_nacer": peso_nacer, "vacunas": vacunas, "control": ultimo_control,
+                                            "telefono_madre": phone, "direccion": address, "madre": mother, "padre": father,
+                                            "suplentes": u_suplentes_new, "historia_social": social_history, "estado": "Activo",
+                                            "fecha_ingreso": string_ingreso, "fecha_egreso": string_egreso
+                                        }).execute()
+                                        st.success("Registro clínico-social creado exitosamente.")
+                                        st.balloons() # 🎈 ANIMACIÓN DE GLOBOS PARA NUEVO NIÑO
+                                        time.sleep(1.8); st.rerun() # ⏱️ TIEMPO EXTENDIDO
+                                except Exception as e: st.error(f"Fallo en inserción: {e}")
                                 
             try: children = supabase.table("beneficiarios").select("*").eq("estado", "Activo").order("ficha").execute().data
             except Exception as e: st.error(f"Error cargando padrón: {e}"); st.stop()
@@ -666,13 +669,14 @@ else:
                                 if not pass_confirm:
                                     st.error("⚠️ Debe ingresar su contraseña.")
                                 elif verify_password(pass_confirm, user["clave"]):
-                                    try:
-                                        supabase.table("beneficiarios").update({"estado": "Egresado"}).eq("ficha", child["ficha"]).execute()
-                                        supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "EGRESO", "observaciones": f"Ficha {child['ficha']} dada de baja", "created_at": get_local_now()}).execute()
-                                        st.toast(f"✅ Ficha {child['ficha']} marcada como Egresada.", icon="💼")
-                                        time.sleep(0.5); st.rerun()
-                                    except Exception as e: 
-                                        st.error(f"Error al egresar: {e}")
+                                    with st.spinner("Procesando egreso de ficha..."): # ⏳ ANIMACIÓN DE CARGA AÑADIDA
+                                        try:
+                                            supabase.table("beneficiarios").update({"estado": "Egresado"}).eq("ficha", child["ficha"]).execute()
+                                            supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "EGRESO", "observaciones": f"Ficha {child['ficha']} dada de baja", "created_at": get_local_now()}).execute()
+                                            st.toast(f"✅ Ficha {child['ficha']} marcada como Egresada.", icon="💼")
+                                            time.sleep(1.2); st.rerun()
+                                        except Exception as e: 
+                                            st.error(f"Error al egresar: {e}")
                                 else:
                                     st.error("❌ Contraseña incorrecta. Acción denegada.")
                     st.write("---")
@@ -705,13 +709,14 @@ else:
                             if st.form_submit_button("💾 GUARDAR CAMBIOS", type="primary", use_container_width=True):
                                 if not u_name or not u_rut: st.error("Nombre y RUN no pueden quedar vacíos.")
                                 else:
-                                    try:
-                                        supabase.table("beneficiarios").update({"nombre": u_name, "rut": u_rut, "nacimiento": u_birth, "sexo": u_sexo, "peso_nacer": u_peso, "vacunas": u_vacunas, "control": u_control, "madre": u_mother, "padre": u_father, "telefono_madre": u_phone, "direccion": u_address, "suplentes": u_suplentes_edit, "historia_social": u_social}).eq("ficha", child["ficha"]).execute()
-                                        supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "EDICIÓN", "observaciones": f"Ficha {child['ficha']} corregida", "created_at": get_local_now()}).execute()
-                                        st.session_state[edit_key] = False
-                                        st.toast("✅ Ficha actualizada de manera exitosa.", icon="💾")
-                                        time.sleep(0.5); st.rerun()
-                                    except Exception as e: st.error(f"Error al actualizar: {e}")
+                                    with st.spinner("Actualizando datos en el servidor..."): # ⏳ ANIMACIÓN DE CARGA AÑADIDA
+                                        try:
+                                            supabase.table("beneficiarios").update({"nombre": u_name, "rut": u_rut, "nacimiento": u_birth, "sexo": u_sexo, "peso_nacer": u_peso, "vacunas": u_vacunas, "control": u_control, "madre": u_mother, "padre": u_father, "telefono_madre": u_phone, "direccion": u_address, "suplentes": u_suplentes_edit, "historia_social": u_social}).eq("ficha", child["ficha"]).execute()
+                                            supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "EDICIÓN", "observaciones": f"Ficha {child['ficha']} corregida", "created_at": get_local_now()}).execute()
+                                            st.session_state[edit_key] = False
+                                            st.toast("✅ Ficha actualizada de manera exitosa.", icon="💾")
+                                            time.sleep(1.2); st.rerun()
+                                        except Exception as e: st.error(f"Error al actualizar: {e}")
                     else:
                         fecha_ingreso_clean = clean_timestamp_to_date(child.get('fecha_ingreso', '-'))
                         fecha_egreso_clean = clean_timestamp_to_date(child.get('fecha_egreso', '-'))
@@ -764,12 +769,13 @@ else:
                 for inactive_child in egresados:
                     with st.expander(f"⚪ Ficha {inactive_child['ficha']} — {inactive_child['nombre']} (EGRESADO)"):
                         if st.button(f"🟢 Re-incorporar", key=f"reactivar_{inactive_child['ficha']}", type="primary"):
-                            try:
-                                supabase.table("beneficiarios").update({"estado": "Activo"}).eq("ficha", inactive_child["ficha"]).execute()
-                                supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "REINGRESO", "observaciones": f"Ficha {inactive_child['ficha']} re-incorporada", "created_at": get_local_now()}).execute()
-                                st.toast(f"✅ Ficha {inactive_child['ficha']} re-activada.", icon="🟢")
-                                time.sleep(0.5); st.rerun()
-                            except Exception as e: st.error(f"Error: {e}")
+                            with st.spinner("Reactivando ficha..."): # ⏳ ANIMACIÓN DE CARGA AÑADIDA
+                                try:
+                                    supabase.table("beneficiarios").update({"estado": "Activo"}).eq("ficha", inactive_child["ficha"]).execute()
+                                    supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "REINGRESO", "observaciones": f"Ficha {inactive_child['ficha']} re-incorporada", "created_at": get_local_now()}).execute()
+                                    st.toast(f"✅ Ficha {inactive_child['ficha']} re-activada.", icon="🟢")
+                                    time.sleep(1.2); st.rerun()
+                                except Exception as e: st.error(f"Error: {e}")
 
     # 📜 PANEL: HISTORIAL
     elif menu_choice == "📜 HISTORIAL":
@@ -835,7 +841,6 @@ else:
                 
                 st.write("###")
                 
-                # 🔴 MEJORA: Descarga de Excel REAL (.xlsx) para el historial
                 buffer_historial = io.BytesIO()
                 with pd.ExcelWriter(buffer_historial, engine='openpyxl') as writer:
                     df_mostrar.to_excel(writer, index=False, sheet_name='Historial')
