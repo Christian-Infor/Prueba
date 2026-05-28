@@ -116,8 +116,9 @@ CHILE_TZ = pytz.timezone("America/Santiago")
 
 # 🔴 CORRECCIÓN CLAVE 1: Retornar siempre la hora exacta en formato seguro para la BD.
 def get_local_now() -> str:
-    return datetime.now(CHILE_TZ).strftime("%Y-%m-%d %H:%M:%S")
-
+    # isoformat() le agrega el "-04:00" al final para que Supabase sepa que ya es hora chilena
+    return datetime.now(CHILE_TZ).replace(microsecond=0).isoformat()
+    
 def get_local_date() -> str:
     return datetime.now(CHILE_TZ).strftime("%d/%m/%Y")
 
