@@ -115,7 +115,9 @@ st.markdown("""
 CHILE_TZ = pytz.timezone("America/Santiago")
 
 def get_local_now() -> str:
-    return datetime.now(CHILE_TZ).strftime("%Y-%m-%d %H:%M:%S")
+    # 🔴 CORRECCIÓN CLAVE: Enviamos la hora en formato ISO 8601 con el timezone explícito (-04:00)
+    # Así Supabase no asume erróneamente que estamos en UTC.
+    return datetime.now(CHILE_TZ).isoformat()
 
 def get_local_date() -> str:
     return datetime.now(CHILE_TZ).strftime("%d/%m/%Y")
@@ -300,7 +302,6 @@ else:
     MAX_FICHAS = 210
     
     with st.sidebar:
-        # AQUÍ AGRANDAMOS EL LOGO (de 65px a 130px y ajustamos el margen)
         st.markdown(f"""
             <div style="text-align:center; margin-bottom:20px; margin-top:10px;">
                 <img src="{LOGO_SRC}" style="height:130px; object-fit:contain; mix-blend-mode:screen; filter:brightness(1.3);">
@@ -553,8 +554,11 @@ else:
             df_entregas_global = pd.DataFrame(todo_el_historial) if todo_el_historial else pd.DataFrame()
             if not df_entregas_global.empty:
                 df_entregas_global["created_at"] = pd.to_datetime(df_entregas_global["created_at"], errors="coerce")
-                try: df_entregas_global["created_at"] = df_entregas_global["created_at"].dt.tz_convert("America/Santiago")
-                except: df_entregas_global["created_at"] = df_entregas_global["created_at"].dt.tz_localize("UTC").dt.tz_convert("America/Santiago")
+                # 🔴 CORRECCIÓN CLAVE DE ZONAS HORARIAS
+                if df_entregas_global["created_at"].dt.tz is None:
+                    df_entregas_global["created_at"] = df_entregas_global["created_at"].dt.tz_localize(CHILE_TZ)
+                else:
+                    df_entregas_global["created_at"] = df_entregas_global["created_at"].dt.tz_convert(CHILE_TZ)
         except: df_entregas_global = pd.DataFrame()
 
         if "pdf_trigger" in st.session_state and st.session_state.pdf_trigger is not None:
@@ -751,10 +755,12 @@ else:
         else:
             df_historial_general = pd.DataFrame(datos_historial)
             df_historial_general["created_at_dt"] = pd.to_datetime(df_historial_general["created_at"], errors="coerce")
-            try: df_historial_general["created_at_dt"] = df_historial_general["created_at_dt"].dt.tz_convert("America/Santiago")
-            except:
-                try: df_historial_general["created_at_dt"] = df_historial_general["created_at_dt"].dt.tz_localize("UTC").dt.tz_convert("America/Santiago")
-                except: pass
+            
+            # 🔴 CORRECCIÓN CLAVE DE ZONAS HORARIAS PARA EL HISTORIAL
+            if df_historial_general["created_at_dt"].dt.tz is None:
+                df_historial_general["created_at_dt"] = df_historial_general["created_at_dt"].dt.tz_localize(CHILE_TZ)
+            else:
+                df_historial_general["created_at_dt"] = df_historial_general["created_at_dt"].dt.tz_convert(CHILE_TZ)
             
             df_historial_general = df_historial_general[(df_historial_general["created_at_dt"].dt.date >= fecha_inicio) & (df_historial_general["created_at_dt"].dt.date <= fecha_fin)]
             df_historial_general["Fecha y Hora ⏰"] = df_historial_general["created_at_dt"].dt.strftime("%d/%m/%Y %H:%M")
