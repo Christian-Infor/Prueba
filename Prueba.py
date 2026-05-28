@@ -753,20 +753,17 @@ else:
                                 time.sleep(0.5); st.rerun()
                             except Exception as e: st.error(f"Error: {e}")
 
-  # 📜 PANEL: HISTORIAL (CON MEMORIA DE ESTADO Y DÍA PRESENTE)
+  # 📜 PANEL: HISTORIAL
     elif menu_choice == "📜 HISTORIAL":
         st.header("📜 Historial de Operaciones", divider="blue")
         
-        # Inicializamos estados para que "recuerde" la preferencia al volver
         if "tipo_busqueda" not in st.session_state:
             st.session_state.tipo_busqueda = "Por Día específico"
         if "fecha_seleccionada" not in st.session_state:
             st.session_state.fecha_seleccionada = datetime.now(CHILE_TZ).date()
 
-        # Filtros
         tipo_busqueda = st.radio("¿Cómo desea buscar?", ["Por Mes completo", "Por Día específico"], 
                                  index=0 if st.session_state.tipo_busqueda == "Por Mes completo" else 1)
-        
         st.session_state.tipo_busqueda = tipo_busqueda
 
         if tipo_busqueda == "Por Mes completo":
@@ -790,17 +787,10 @@ else:
         if not datos_historial: 
             st.info("No hay movimientos registrados.")
         else:
-            else:
             df = pd.DataFrame(datos_historial)
-            
-            # 🔴 CORRECCIÓN AQUÍ: 'errors="coerce"' convierte los errores en nulos (NaT)
-            # en lugar de hacer que la aplicación se caiga.
             df["dt"] = pd.to_datetime(df["created_at"], errors="coerce")
-            
-            # Eliminamos los registros donde la fecha quedó nula por seguridad
             df = df.dropna(subset=["dt"])
             
-            # Lógica de filtrado
             if tipo_busqueda == "Por Mes completo":
                 df_filtrado = df[(df["dt"].dt.month == meses[seleccion_mes]) & (df["dt"].dt.year == seleccion_anio)].copy()
                 titulo_alerta = f"No hay registros para {seleccion_mes} de {seleccion_anio}."
