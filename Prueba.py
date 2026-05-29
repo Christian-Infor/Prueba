@@ -106,7 +106,7 @@ st.markdown("""
     }
 
     /* ══════════════════════════════
-       MODERNIZACIÓN DE INTERFAZ (MENÚ Y BOTONES SEGUROS)
+       MODERNIZACIÓN DE INTERFAZ (MENÚ Y BOTONES)
     ══════════════════════════════ */
     
     /* 1. SIDEBAR (Fondo oscuro premium) */
@@ -175,33 +175,24 @@ st.markdown("""
         background: rgba(255, 255, 255, 0.05) !important;
     }
 
-    /* 6. ANIMACIÓN SUAVE DE TRANSICIÓN (FADE-IN) */
-    @keyframes suaveAparicion {
-        0% { opacity: 0; transform: translateY(12px); }
-        100% { opacity: 1; transform: translateY(0); }
-    }
-    .stMainBlockContainer {
-        animation: suaveAparicion 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
-    }
-    div[role="tabpanel"] {
-        animation: suaveAparicion 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
-    }
-    
-    /* 7. BOTÓN DE CERRAR SESIÓN (ROJO / SALIDA) */
-    button[title="logout"] {
+    /* 6. BOTÓN ROJO DE SALIDA INFALIBLE (Atrapa cualquier botón dentro del menú lateral) */
+    [data-testid="stSidebar"] button {
         background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
-        color: #ffffff !important;
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
         border-radius: 10px !important;
-        font-weight: 700 !important;
         transition: all 0.3s ease !important;
         box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3) !important;
+        margin-top: 20px !important;
     }
-    button[title="logout"]:hover {
+    [data-testid="stSidebar"] button:hover {
         background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
         transform: translateY(-2px) !important;
         box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6) !important;
         border-color: #ffffff !important;
+    }
+    [data-testid="stSidebar"] button p {
+        color: #ffffff !important;
+        font-weight: 800 !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -437,8 +428,7 @@ else:
         )
         
         st.divider()
-        # AQUÍ ESTÁ EL TRUCO: Le agregamos help="logout" para poder colorearlo con CSS
-        if st.button("🚪 CERRAR SESIÓN", use_container_width=True, help="logout"):
+        if st.button("🚪 CERRAR SESIÓN", use_container_width=True):
             st.session_state.clear()
             st.rerun()
 
