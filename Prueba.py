@@ -656,50 +656,30 @@ else:
                 
                 df_resumen = pd.DataFrame(resumen_productos)
                 
-                # --- TABLA HTML PERSONALIZADA (TAMAÑO GIGANTE PARA VOLUNTARIAS) ---
-                html_table = """
-                <style>
-                .big-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-family: 'Segoe UI', Tahoma, sans-serif; }
-                .big-table th { background: rgba(30, 41, 59, 0.8); color: #94a3b8; font-size: 1.05rem; padding: 14px; text-transform: uppercase; border-bottom: 2px solid #3b82f6; text-align: center; }
-                .big-table th:first-child { text-align: left; border-radius: 8px 0 0 0; }
-                .big-table th:last-child { border-radius: 0 8px 0 0; }
+                # --- TABLA HTML PERSONALIZADA (CORREGIDA SIN ESPACIOS) ---
+                html_table = "<style>"
+                html_table += ".big-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-family: 'Segoe UI', Tahoma, sans-serif; }"
+                html_table += ".big-table th { background: rgba(30, 41, 59, 0.8); color: #94a3b8; font-size: 1.05rem; padding: 14px; text-transform: uppercase; border-bottom: 2px solid #3b82f6; text-align: center; }"
+                html_table += ".big-table th:first-child { text-align: left; border-radius: 8px 0 0 0; }"
+                html_table += ".big-table th:last-child { border-radius: 0 8px 0 0; }"
+                html_table += ".big-table td { padding: 16px 14px; font-size: 1.5rem; color: #f8fafc; border-bottom: 1px solid rgba(148, 163, 184, 0.1); text-align: center; font-weight: 600; }"
+                html_table += ".big-table td:first-child { text-align: left; font-size: 1.25rem; font-weight: 500; color: #cbd5e1; }"
+                html_table += ".big-table tr:hover td { background-color: rgba(59, 130, 246, 0.15); }"
+                html_table += ".saldo-destacado { color: #38bdf8 !important; font-weight: 800 !important; font-size: 1.7rem !important; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }"
+                html_table += "</style>"
                 
-                /* Tamaño de números gigante (1.5rem) y texto grande (1.25rem) */
-                .big-table td { padding: 16px 14px; font-size: 1.5rem; color: #f8fafc; border-bottom: 1px solid rgba(148, 163, 184, 0.1); text-align: center; font-weight: 600; }
-                .big-table td:first-child { text-align: left; font-size: 1.25rem; font-weight: 500; color: #cbd5e1; }
+                html_table += "<table class='big-table'>"
+                html_table += "<thead><tr><th>Insumo / Alimento</th><th>Recibidos 📥</th><th>Entregados 📤</th><th>Saldo Disponible ⚖️</th></tr></thead>"
+                html_table += "<tbody>"
                 
-                /* Efecto hover al pasar el mouse/dedo */
-                .big-table tr:hover td { background-color: rgba(59, 130, 246, 0.15); }
-                
-                /* Destacar el saldo final en Neón */
-                .saldo-destacado { color: #38bdf8 !important; font-weight: 800 !important; font-size: 1.7rem !important; text-shadow: 0 0 10px rgba(56, 189, 248, 0.4); }
-                </style>
-                
-                <table class="big-table">
-                    <thead>
-                        <tr>
-                            <th>Insumo / Alimento</th>
-                            <th>Recibidos 📥</th>
-                            <th>Entregados 📤</th>
-                            <th>Saldo Disponible ⚖️</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                """
                 for _, row in df_resumen.iterrows():
-                    html_table += f"""
-                        <tr>
-                            <td>{row['Insumo / Alimento']}</td>
-                            <td>{row['Insumos Recibidos (Desde Bodega) 📥']}</td>
-                            <td>{row['Total Entregado 📤']}</td>
-                            <td class="saldo-destacado">{row['Saldo Disponible ⚖️']}</td>
-                        </tr>
-                    """
+                    html_table += f"<tr><td>{row['Insumo / Alimento']}</td><td>{row['Insumos Recibidos (Desde Bodega) 📥']}</td><td>{row['Total Entregado 📤']}</td><td class='saldo-destacado'>{row['Saldo Disponible ⚖️']}</td></tr>"
+                    
                 html_table += "</tbody></table>"
                 
-                # Dibujamos la nueva tabla en la pantalla
+                # Dibujamos la nueva tabla en la pantalla sin que Streamlit se confunda
                 st.markdown(html_table, unsafe_allow_html=True)
-                # ------------------------------------------------------------------
+                # ---------------------------------------------------------
                 
                 st.write("###")
                 buffer_resumen = io.BytesIO()
