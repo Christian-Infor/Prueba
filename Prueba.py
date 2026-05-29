@@ -175,6 +175,22 @@ st.markdown("""
     [data-testid="stTabs"] button:hover {
         background: rgba(255, 255, 255, 0.05) !important;
     }
+
+    /* 6. ANIMACIÓN SUAVE DE TRANSICIÓN (FADE-IN) */
+    @keyframes suaveAparicion {
+        0% { opacity: 0; transform: translateY(12px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Aplica al contenido completo al cambiar de menú */
+    .stMainBlockContainer {
+        animation: suaveAparicion 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+    }
+    
+    /* Aplica al contenido de las pestañas internas (Tabs) */
+    div[role="tabpanel"] {
+        animation: suaveAparicion 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
