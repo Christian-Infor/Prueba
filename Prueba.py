@@ -123,7 +123,7 @@ st.markdown("""
         margin-bottom: 8px !important;
         border: 1px solid rgba(148, 163, 184, 0.1) !important;
         transition: all 0.2s ease !important;
-        width: 100% !important; /* <--- ESTA ES LA MAGIA QUE IGUALA LOS TAMAÑOS */
+        width: 100% !important;
         box-sizing: border-box !important;
         display: flex !important;
         align-items: center !important;
@@ -133,7 +133,6 @@ st.markdown("""
         border-color: rgba(59, 130, 246, 0.4) !important;
         transform: translateX(4px) !important;
     }
-    /* Darle un tono azulado a la opción seleccionada */
     [data-testid="stSidebar"] div[role="radiogroup"] label[aria-checked="true"] {
         background: linear-gradient(90deg, rgba(37,99,235,0.25) 0%, rgba(37,99,235,0.05) 100%) !important;
         border-left: 4px solid #3b82f6 !important;
@@ -181,15 +180,28 @@ st.markdown("""
         0% { opacity: 0; transform: translateY(12px); }
         100% { opacity: 1; transform: translateY(0); }
     }
-    
-    /* Aplica al contenido completo al cambiar de menú */
     .stMainBlockContainer {
         animation: suaveAparicion 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
     }
-    
-    /* Aplica al contenido de las pestañas internas (Tabs) */
     div[role="tabpanel"] {
         animation: suaveAparicion 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+    }
+    
+    /* 7. BOTÓN DE CERRAR SESIÓN (ROJO / SALIDA) */
+    button[title="logout"] {
+        background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-radius: 10px !important;
+        font-weight: 700 !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3) !important;
+    }
+    button[title="logout"]:hover {
+        background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6) !important;
+        border-color: #ffffff !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -425,7 +437,8 @@ else:
         )
         
         st.divider()
-        if st.button("🚪 CERRAR SESIÓN", use_container_width=True, type="secondary"):
+        # AQUÍ ESTÁ EL TRUCO: Le agregamos help="logout" para poder colorearlo con CSS
+        if st.button("🚪 CERRAR SESIÓN", use_container_width=True, help="logout"):
             st.session_state.clear()
             st.rerun()
 
@@ -677,9 +690,7 @@ else:
                     
                 html_table += "</tbody></table>"
                 
-                # Dibujamos la nueva tabla en la pantalla sin que Streamlit se confunda
                 st.markdown(html_table, unsafe_allow_html=True)
-                # ---------------------------------------------------------
                 
                 st.write("###")
                 buffer_resumen = io.BytesIO()
