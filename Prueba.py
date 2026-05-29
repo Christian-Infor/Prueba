@@ -428,7 +428,7 @@ else:
         )
         
         st.divider()
-        if st.button("🚪 CERRAR SESIÓN", use_container_width=True):
+        if st.button("🚪 CERRAR SESIÓN", use_container_width=True, help="logout"):
             st.session_state.clear()
             st.rerun()
 
@@ -745,7 +745,11 @@ else:
                     phone = ccc1.text_input("Teléfono de Contacto")
                     address = ccc2.text_input("Dirección Particular")
                     
-                    u_suplentes_new = st.text_input("Nombres de Suplentes Autorizados")
+                    # NUEVO: Columnas divididas para Suplente y su teléfono
+                    col_sup1, col_sup2 = st.columns(2)
+                    nombre_suplente = col_sup1.text_input("Nombre de suplente autorizado")
+                    tel_suplente = col_sup2.text_input("Número de teléfono del suplente")
+                    
                     social_history = st.text_area("Antecedentes Importantes / Historia Social")
                     
                     if st.form_submit_button("INGRESAR BENEFICIARIO AL SISTEMA", type="primary"):
@@ -759,6 +763,11 @@ else:
                                     string_ingreso = f_ingreso_dt.strftime("%Y-%m-%d")
                                     string_egreso = f_egreso_dt.strftime("%Y-%m-%d")
                                     
+                                    # Truco: Formatear el suplente para guardarlo en la columna existente
+                                    u_suplentes_new = f"{nombre_suplente.strip()} - Tel: {tel_suplente.strip()}" if tel_suplente.strip() else nombre_suplente.strip()
+                                    if not u_suplentes_new:
+                                        u_suplentes_new = "-"
+                                        
                                     check_ficha = supabase.table("beneficiarios").select("ficha, nombre").eq("ficha", ficha).execute()
                                     if check_ficha.data: st.error(f"Conflicto: El N° de ficha {ficha} ya está asignado a: {check_ficha.data[0]['nombre']}")
                                     else:
@@ -832,7 +841,10 @@ else:
                             eccc2, eccc3 = st.columns(2)
                             u_phone = eccc2.text_input("Teléfono", value=child.get("telefono_madre", ""))
                             u_address = eccc3.text_input("Dirección Particular", value=child.get("direccion", ""))
-                            u_suplentes_edit = st.text_input("Suplentes Autorizados", value=child.get("suplentes", ""))
+                            
+                            # NUEVO: Etiqueta actualizada para la edición
+                            u_suplentes_edit = st.text_input("Nombre y Teléfono de Suplente Autorizado", value=child.get("suplentes", ""))
+                            
                             u_social = st.text_area("Antecedentes / Historia Social", value=child.get("historia_social", ""))
                             
                             if st.form_submit_button("💾 GUARDAR CAMBIOS", type="primary", use_container_width=True):
