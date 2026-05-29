@@ -27,7 +27,7 @@ st.markdown("""
     <style>
     html, body, [class*="st-"] { font-size: 1.1rem !important; }
     
-    /* Fondo global ultraroscuro (azul medianoche casi negro) para el Login */
+    /* Fondo global ultraroscuro para el Login */
     .stApp:not(:has(div[data-testid="stSidebar"])) {
         background-color: #090A0F !important;
     }
@@ -39,7 +39,7 @@ st.markdown("""
     }
     
     /* ══════════════════════════════
-       LOGIN (ESTILO EXACTO PRUEBA 6)
+       LOGIN
     ══════════════════════════════ */
     .centered-login {
         max-width: 420px;
@@ -106,7 +106,7 @@ st.markdown("""
     }
 
     /* ══════════════════════════════
-       MODERNIZACIÓN DE INTERFAZ (MENÚ Y BOTONES)
+       MODERNIZACIÓN DE INTERFAZ (MENÚ Y BOTONES SEGUROS)
     ══════════════════════════════ */
     
     /* 1. SIDEBAR (Fondo oscuro premium) */
@@ -115,46 +115,24 @@ st.markdown("""
         border-right: 1px solid #1e293b !important;
     }
 
-    /* 2. MENÚ PRINCIPAL (Píldoras Flotantes) */
-    /* Ocultar los círculos por defecto */
-    [data-testid="stSidebar"] div[role="radiogroup"] label div:first-child {
-        display: none !important;
-    }
-    /* Estructura base de las opciones del menú */
+    /* 2. MENÚ PRINCIPAL (Versión segura para móviles) */
     [data-testid="stSidebar"] div[role="radiogroup"] label {
-        background-color: transparent !important;
-        padding: 14px 18px !important;
+        background-color: rgba(30, 41, 59, 0.4) !important;
+        padding: 12px 15px !important;
         border-radius: 12px !important;
-        margin-bottom: 6px !important;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        border: 1px solid transparent !important;
-        cursor: pointer !important;
+        margin-bottom: 8px !important;
+        border: 1px solid rgba(148, 163, 184, 0.1) !important;
+        transition: all 0.2s ease !important;
     }
-    /* Hover: Animación al pasar el mouse (Movimiento y fondo sutil) */
     [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
-        background-color: rgba(59, 130, 246, 0.08) !important;
-        border: 1px solid rgba(59, 130, 246, 0.2) !important;
-        transform: translateX(6px) !important;
+        background-color: rgba(59, 130, 246, 0.15) !important;
+        border-color: rgba(59, 130, 246, 0.4) !important;
+        transform: translateX(4px) !important;
     }
-    /* Texto del menú */
-    [data-testid="stSidebar"] div[role="radiogroup"] label p {
-        font-size: 1.05rem !important;
-        font-weight: 500 !important;
-        color: #94a3b8 !important;
-        margin: 0 !important;
-        transition: color 0.3s ease !important;
-    }
-    /* Opción Seleccionada (Brillo neón azul) */
+    /* Darle un tono azulado a la opción seleccionada */
     [data-testid="stSidebar"] div[role="radiogroup"] label[aria-checked="true"] {
-        background: linear-gradient(90deg, rgba(37,99,235,0.2) 0%, rgba(37,99,235,0.02) 100%) !important;
+        background: linear-gradient(90deg, rgba(37,99,235,0.25) 0%, rgba(37,99,235,0.05) 100%) !important;
         border-left: 4px solid #3b82f6 !important;
-        border-radius: 4px 12px 12px 4px !important;
-        box-shadow: inset 15px 0 20px -15px rgba(59, 130, 246, 0.4) !important;
-    }
-    [data-testid="stSidebar"] div[role="radiogroup"] label[aria-checked="true"] p {
-        color: #ffffff !important;
-        font-weight: 700 !important;
-        text-shadow: 0 0 12px rgba(59, 130, 246, 0.6) !important;
     }
 
     /* 3. BOTONES SECUNDARIOS (Efecto Glassmorphism Ahumado) */
