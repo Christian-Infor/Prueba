@@ -49,7 +49,6 @@ st.markdown("""
     }
     .centered-login h1, .centered-login p { text-align: center !important; }
 
-    /* Formulario de login */
     .stForm {
         background: linear-gradient(160deg, #111827 0%, #0f172a 100%) !important;
         border: 1px solid rgba(99, 131, 246, 0.35) !important;
@@ -66,11 +65,11 @@ st.markdown("""
         border: none !important;
         border-radius: 12px !important;
         padding: 0.75rem 1rem !important;
-        transition: all 0.2s ease !important;
+        transition: all 0.3s ease !important;
         box-shadow: 0 4px 20px rgba(79, 70, 229, 0.4) !important;
     }
     .stForm [data-testid="stFormSubmitButton"] button:hover {
-        transform: translateY(-1px) !important;
+        transform: translateY(-2px) !important;
         box-shadow: 0 6px 28px rgba(79, 70, 229, 0.55) !important;
     }
     
@@ -98,14 +97,101 @@ st.markdown("""
         font-weight: 700;
         line-height: 1;
     }
-    
-    /* Bloques de ficha detallados en la UI */
     .ficha-seccion-datos {
         background-color: #1e293b;
         border-left: 4px solid #3b82f6;
         padding: 15px;
         border-radius: 4px;
         margin-bottom: 10px;
+    }
+
+    /* ══════════════════════════════
+       MODERNIZACIÓN DE INTERFAZ (MENÚ Y BOTONES)
+    ══════════════════════════════ */
+    
+    /* 1. SIDEBAR (Fondo oscuro premium) */
+    [data-testid="stSidebar"] {
+        background-color: #080b13 !important;
+        border-right: 1px solid #1e293b !important;
+    }
+
+    /* 2. MENÚ PRINCIPAL (Píldoras Flotantes) */
+    /* Ocultar los círculos por defecto */
+    [data-testid="stSidebar"] div[role="radiogroup"] label div:first-child {
+        display: none !important;
+    }
+    /* Estructura base de las opciones del menú */
+    [data-testid="stSidebar"] div[role="radiogroup"] label {
+        background-color: transparent !important;
+        padding: 14px 18px !important;
+        border-radius: 12px !important;
+        margin-bottom: 6px !important;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        border: 1px solid transparent !important;
+        cursor: pointer !important;
+    }
+    /* Hover: Animación al pasar el mouse (Movimiento y fondo sutil) */
+    [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
+        background-color: rgba(59, 130, 246, 0.08) !important;
+        border: 1px solid rgba(59, 130, 246, 0.2) !important;
+        transform: translateX(6px) !important;
+    }
+    /* Texto del menú */
+    [data-testid="stSidebar"] div[role="radiogroup"] label p {
+        font-size: 1.05rem !important;
+        font-weight: 500 !important;
+        color: #94a3b8 !important;
+        margin: 0 !important;
+        transition: color 0.3s ease !important;
+    }
+    /* Opción Seleccionada (Brillo neón azul) */
+    [data-testid="stSidebar"] div[role="radiogroup"] label[aria-checked="true"] {
+        background: linear-gradient(90deg, rgba(37,99,235,0.2) 0%, rgba(37,99,235,0.02) 100%) !important;
+        border-left: 4px solid #3b82f6 !important;
+        border-radius: 4px 12px 12px 4px !important;
+        box-shadow: inset 15px 0 20px -15px rgba(59, 130, 246, 0.4) !important;
+    }
+    [data-testid="stSidebar"] div[role="radiogroup"] label[aria-checked="true"] p {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        text-shadow: 0 0 12px rgba(59, 130, 246, 0.6) !important;
+    }
+
+    /* 3. BOTONES SECUNDARIOS (Efecto Glassmorphism Ahumado) */
+    button[kind="secondary"] {
+        background: rgba(30, 41, 59, 0.5) !important;
+        color: #cbd5e1 !important;
+        border: 1px solid rgba(148, 163, 184, 0.25) !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        backdrop-filter: blur(4px) !important;
+        transition: all 0.3s ease !important;
+    }
+    button[kind="secondary"]:hover {
+        background: rgba(51, 65, 85, 0.9) !important;
+        border-color: #94a3b8 !important;
+        color: #ffffff !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    /* 4. ANIMACIÓN EXTRA A BOTONES PRIMARIOS */
+    button[kind="primary"] {
+        border-radius: 10px !important;
+        transition: all 0.3s ease !important;
+    }
+    button[kind="primary"]:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5) !important;
+    }
+    
+    /* 5. PESTAÑAS (TABS) más limpias */
+    [data-testid="stTabs"] button {
+        border-radius: 8px 8px 0 0 !important;
+        transition: background 0.2s !important;
+    }
+    [data-testid="stTabs"] button:hover {
+        background: rgba(255, 255, 255, 0.05) !important;
     }
     </style>
 """, unsafe_allow_html=True)
