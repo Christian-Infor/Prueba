@@ -115,7 +115,7 @@ st.markdown("""
         border-right: 1px solid #1e293b !important;
     }
 
-    /* 2. MENÚ PRINCIPAL (Versión segura para móviles) */
+    /* 2. MENÚ PRINCIPAL (Versión segura para móviles y uniforme en ancho) */
     [data-testid="stSidebar"] div[role="radiogroup"] label {
         background-color: rgba(30, 41, 59, 0.4) !important;
         padding: 12px 15px !important;
@@ -123,6 +123,10 @@ st.markdown("""
         margin-bottom: 8px !important;
         border: 1px solid rgba(148, 163, 184, 0.1) !important;
         transition: all 0.2s ease !important;
+        width: 100% !important; /* <--- ESTA ES LA MAGIA QUE IGUALA LOS TAMAÑOS */
+        box-sizing: border-box !important;
+        display: flex !important;
+        align-items: center !important;
     }
     [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
         background-color: rgba(59, 130, 246, 0.15) !important;
