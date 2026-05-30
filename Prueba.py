@@ -175,7 +175,19 @@ st.markdown("""
         background: rgba(255, 255, 255, 0.05) !important;
     }
 
-    /* 6. BOTÓN ROJO DE SALIDA INFALIBLE (Atrapa cualquier botón dentro del menú lateral) */
+    /* 6. ANIMACIÓN SUAVE DE TRANSICIÓN (FADE-IN) */
+    @keyframes suaveAparicion {
+        0% { opacity: 0; transform: translateY(12px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .stMainBlockContainer {
+        animation: suaveAparicion 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+    }
+    div[role="tabpanel"] {
+        animation: suaveAparicion 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+    }
+
+    /* 7. BOTÓN DE CERRAR SESIÓN (ROJO / SALIDA) */
     [data-testid="stSidebar"] button {
         background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -252,7 +264,7 @@ def export_pdf_component(child_data):
                     <img src="{LOGO_SRC}" style="height: 60px;">
                 </td>
                 <td style="padding: 20px 10px; width: 50%;">
-                    <h1 style="margin: 0; font-size: 24px;">GOTAS DE LECHE</h1>
+                    <h1 style="margin: 0; font-size: 24px;">GOTA DE LECHE</h1>
                     <p style="margin: 4px 0 0 0; font-size: 11px; text-transform: uppercase;">Ficha Oficial del Beneficiario</p>
                 </td>
                 <td style="padding: 20px; width: 35%; text-align: right;">
@@ -316,7 +328,7 @@ def export_pdf_component(child_data):
             <table style="width: 100%; margin-top: 50px; border-collapse: collapse; page-break-inside: avoid;">
                 <tr>
                     <td style="width: 40%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 10px; font-size: 12px; color: #475569;">
-                        <b style="color: #0f172a;">Firma Asistente Social</b><br>Gotas de Leche
+                        <b style="color: #0f172a;">Firma Asistente Social</b><br>Gota de Leche
                     </td>
                     <td style="width: 20%;"></td>
                     <td style="width: 40%; text-align: center; border-top: 1px solid #94a3b8; padding-top: 10px; font-size: 12px; color: #475569;">
@@ -383,7 +395,7 @@ if "user" not in st.session_state:
             </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("<h1 style='color:#e2e8f0; font-size:2rem; margin-bottom:2px; font-weight:800; letter-spacing:-0.01em; text-align:center;'>GOTAS DE LECHE</h1>", unsafe_allow_html=True)
+        st.markdown("<h1 style='color:#e2e8f0; font-size:2rem; margin-bottom:2px; font-weight:800; letter-spacing:-0.01em; text-align:center;'>GOTA DE LECHE</h1>", unsafe_allow_html=True)
         st.markdown("<p style='color:#475569; font-size:0.8rem; margin-bottom:28px; letter-spacing:0.12em; text-transform:uppercase; font-weight:600; text-align:center;'>Sistema Maestro de Gestión</p>", unsafe_allow_html=True)
         
         with st.form("login"):
