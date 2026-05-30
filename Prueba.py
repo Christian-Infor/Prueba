@@ -106,7 +106,7 @@ st.markdown("""
     }
 
     /* ══════════════════════════════
-       MODERNIZACIÓN DE INTERFAZ (MENÚ Y BOTONES)
+       MODERNIZACIÓN DE INTERFAZ (MENÚ Y BOTONES SEGUROS)
     ══════════════════════════════ */
     
     /* 1. SIDEBAR (Fondo oscuro premium) */
@@ -395,8 +395,9 @@ if "user" not in st.session_state:
             </div>
         """, unsafe_allow_html=True)
         
-        st.markdown("<h1 style='color:#e2e8f0; font-size:2rem; margin-bottom:2px; font-weight:800; letter-spacing:-0.01em; text-align:center;'>GOTA DE LECHE</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='color:#475569; font-size:0.8rem; margin-bottom:28px; letter-spacing:0.12em; text-transform:uppercase; font-weight:600; text-align:center;'>Sistema Maestro de Gestión</p>", unsafe_allow_html=True)
+        # AQUÍ APLICAMOS EL TRUCO DEL MARGEN NEGATIVO PARA CENTRARLO PERFECTAMENTE
+        st.markdown("<h1 style='color:#e2e8f0; font-size:2.2rem; margin-bottom:0px; font-weight:800; text-align:center;'>GOTA DE LECHE</h1>", unsafe_allow_html=True)
+        st.markdown("<p style='color:#64748b; font-size:0.85rem; margin-bottom:28px; letter-spacing:0.15em; text-transform:uppercase; font-weight:600; text-align:center; margin-right:-0.15em;'>Sistema Maestro de Gestión</p>", unsafe_allow_html=True)
         
         with st.form("login"):
             username = st.text_input("Usuario", placeholder="Ingrese su usuario")
