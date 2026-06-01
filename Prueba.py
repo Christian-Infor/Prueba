@@ -497,16 +497,34 @@ else:
             
         df_inventory = pd.DataFrame(raw)
         st.write("### Niveles Actuales de Existencias")
-        st.dataframe(
-            df_inventory[["producto", "bodega", "sala"]], 
-            use_container_width=True, 
-            hide_index=True,
-            column_config={
-                "producto": "Descripción de Insumo",
-                "bodega": st.column_config.NumberColumn("Cantidad en Bodega Principal", format="%d Unidades 🏢"),
-                "sala": st.column_config.NumberColumn("Cantidad en Sala de Atención", format="%d Unidades ⚖️")
-            }
-        )
+
+        # --- TABLA HTML PERSONALIZADA PARA BODEGA (REEMPLAZA A st.dataframe) ---
+        html_bodega = "<style>"
+        html_bodega += ".bodega-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-family: 'Segoe UI', Tahoma, sans-serif; }"
+        html_bodega += ".bodega-table th { background: rgba(30, 41, 59, 0.8); color: #94a3b8; font-size: 1.05rem; padding: 14px; text-transform: uppercase; border-bottom: 2px solid #3b82f6; text-align: left; }"
+        html_bodega += ".bodega-table th:first-child { border-radius: 8px 0 0 0; }"
+        html_bodega += ".bodega-table th:last-child { border-radius: 0 8px 0 0; }"
+        html_bodega += ".bodega-table td { padding: 14px 14px; font-size: 1.15rem; color: #f8fafc; border-bottom: 1px solid rgba(148, 163, 184, 0.1); }"
+        html_bodega += ".bodega-table td:first-child { font-weight: 500; color: #cbd5e1; }"
+        html_bodega += ".bodega-table tr:hover td { background-color: rgba(59, 130, 246, 0.15); }"
+        html_bodega += ".bodega-num { font-size: 1.35rem !important; font-weight: 800; color: #38bdf8; }" # Números un poco más grandes
+        html_bodega += ".bodega-unidades { font-size: 1rem; color: #94a3b8; font-weight: 500; }"
+        html_bodega += "</style>"
+
+        html_bodega += "<table class='bodega-table'>"
+        html_bodega += "<thead><tr><th>Descripción de Insumo</th><th>Cantidad en Bodega Principal 🏢</th><th>Cantidad en Sala de Atención ⚖️</th></tr></thead>"
+        html_bodega += "<tbody>"
+
+        for _, row in df_inventory.iterrows():
+            html_bodega += f"<tr>"
+            html_bodega += f"<td>{row['producto']}</td>"
+            html_bodega += f"<td><span class='bodega-num'>{int(row['bodega'])}</span> <span class='bodega-unidades'>Unidades</span></td>"
+            html_bodega += f"<td><span class='bodega-num'>{int(row['sala'])}</span> <span class='bodega-unidades'>Unidades</span></td>"
+            html_bodega += f"</tr>"
+
+        html_bodega += "</tbody></table>"
+
+        st.markdown(html_bodega, unsafe_allow_html=True)
         
         st.write("###")
         with st.expander("🔄 EJECUTAR MOVIMIENTO INTERNO DE STOCK", expanded=True):
