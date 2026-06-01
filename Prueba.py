@@ -47,7 +47,6 @@ st.markdown("""
         text-align: center;
         padding-top: 5vh;
     }
-    .centered-login h1, .centered-login p { text-align: center !important; }
 
     .stForm {
         background: linear-gradient(160deg, #111827 0%, #0f172a 100%) !important;
@@ -106,7 +105,7 @@ st.markdown("""
     }
 
     /* ══════════════════════════════
-       MODERNIZACIÓN DE INTERFAZ (MENÚ Y BOTONES)
+       MODERNIZACIÓN DE INTERFAZ (MENÚ Y BOTONES SEGUROS)
     ══════════════════════════════ */
     
     /* 1. SIDEBAR (Fondo oscuro premium) */
@@ -384,12 +383,12 @@ if "user" not in st.session_state:
     with col_mid:
         st.markdown('<div class="centered-login">', unsafe_allow_html=True)
         
-        # AQUÍ ESTÁ LA AGRUPACIÓN TOTAL: Logo, Título y Subtítulo forzados a centrarse matemáticamente
+        # AQUÍ ESTÁ EL CÓDIGO CORREGIDO PARA EL CENTRADO PERFECTO SIN MARGEN DE ERROR
         st.markdown(f"""
-            <div style='display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; margin-bottom: 28px;'>
-                <img src="{LOGO_SRC}" style="height: 180px; object-fit: contain; mix-blend-mode: screen; filter: brightness(1.4) drop-shadow(0px 6px 18px rgba(96, 165, 250, 0.5)); margin-bottom: 16px;">
-                <h1 style='color:#e2e8f0; font-size:2.2rem; margin:0px; font-weight:800; text-align:center;'>GOTA DE LECHE</h1>
-                <p style='color:#64748b; font-size:0.85rem; margin:0px; margin-top:2px; letter-spacing:0.15em; text-transform:uppercase; font-weight:600; text-align:center; padding-left:0.15em;'>Sistema Maestro de Gestión</p>
+            <div style="text-align: center; margin-bottom: 28px; width: 100%;">
+                <img src="{LOGO_SRC}" style="height: 180px; object-fit: contain; mix-blend-mode: screen; filter: brightness(1.4) drop-shadow(0px 6px 18px rgba(96, 165, 250, 0.5)); margin-bottom: 16px; display: inline-block;">
+                <h1 style="color:#e2e8f0; font-size:2.2rem; margin:0; font-weight:800; text-align:center;">GOTA DE LECHE</h1>
+                <p style="color:#64748b; font-size:0.85rem; margin:2px 0 0 0; letter-spacing:0.15em; text-transform:uppercase; font-weight:600; text-align:center; text-indent:0.15em;">SISTEMA MAESTRO DE GESTIÓN</p>
             </div>
         """, unsafe_allow_html=True)
         
