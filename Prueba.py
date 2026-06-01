@@ -27,9 +27,9 @@ st.markdown("""
     <style>
     html, body, [class*="st-"] { font-size: 1.1rem !important; }
     
-    /* Fondo global ultraroscuro para el Login */
+    /* Fondo global Azul Corporativo para el Login */
     .stApp:not(:has(div[data-testid="stSidebar"])) {
-        background-color: #090A0F !important;
+        background: linear-gradient(135deg, #0A1931 0%, #050C17 100%) !important;
     }
     
     /* Bajar un poco el contenido desde el techo */
