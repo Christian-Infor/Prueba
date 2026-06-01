@@ -395,9 +395,13 @@ if "user" not in st.session_state:
             </div>
         """, unsafe_allow_html=True)
         
-        # AQUÍ APLICAMOS EL TRUCO DEL MARGEN NEGATIVO PARA CENTRARLO PERFECTAMENTE
-        st.markdown("<h1 style='color:#e2e8f0; font-size:2.2rem; margin-bottom:0px; font-weight:800; text-align:center;'>GOTA DE LECHE</h1>", unsafe_allow_html=True)
-        st.markdown("<p style='color:#64748b; font-size:0.85rem; margin-bottom:28px; letter-spacing:0.15em; text-transform:uppercase; font-weight:600; text-align:center; margin-right:-0.15em;'>Sistema Maestro de Gestión</p>", unsafe_allow_html=True)
+        # AQUÍ ESTÁ LA MAGIA: Caja flexible y padding-left para anular el espaciado
+        st.markdown("""
+            <div style='display: flex; flex-direction: column; align-items: center; margin-bottom: 28px;'>
+                <h1 style='color:#e2e8f0; font-size:2.2rem; margin:0px; font-weight:800; text-align:center;'>GOTA DE LECHE</h1>
+                <p style='color:#64748b; font-size:0.85rem; margin:0px; margin-top:2px; letter-spacing:0.15em; text-transform:uppercase; font-weight:600; text-align:center; padding-left:0.15em;'>Sistema Maestro de Gestión</p>
+            </div>
+        """, unsafe_allow_html=True)
         
         with st.form("login"):
             username = st.text_input("Usuario", placeholder="Ingrese su usuario")
