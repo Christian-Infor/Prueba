@@ -1161,6 +1161,8 @@ else:
                 else:
                     for inactive_child in egresados_filtrados:
                         with st.expander(f"⚪ Egresado: {inactive_child['nombre']} (RUT: {inactive_child['rut']})"):
+                            
+                            # --- BOTÓN DE DESHACER (Arriba para acceso rápido) ---
                             with st.popover("↩️ Deshacer Egreso (Error)", use_container_width=True):
                                 st.write("**Restaurar Ficha (Solo en caso de error)**")
                                 st.caption("Esta opción es únicamente para corregir un egreso accidental. El niño(a) no debería reingresar si fue dado de alta formalmente.")
@@ -1186,6 +1188,70 @@ else:
                                                 st.toast("✅ Ficha restaurada exitosamente.", icon="↩️")
                                                 time.sleep(1.5); st.rerun()
                                             except Exception as e: st.error(f"Error: {e}")
+                            
+                            st.write("---")
+                            
+                            # --- MOSTRAR DATOS DEL EGRESADO ---
+                            fecha_ingreso_clean = clean_timestamp_to_date(inactive_child.get('fecha_ingreso', '-'))
+                            fecha_egreso_clean = clean_timestamp_to_date(inactive_child.get('fecha_egreso', '-'))
+                            
+                            sub_c1, sub_c2, sub_c3 = st.columns(3)
+                            with sub_c1:
+                                st.markdown(f"**RUN:** `{inactive_child['rut']}`")
+                                st.markdown(f"**Nacimiento:** {inactive_child.get('nacimiento', '-')}")
+                                st.markdown(f"**Peso al Nacer:** {inactive_child.get('peso_nacer', '-')}")
+                                st.markdown(f"**Vacunas al Día:** `{inactive_child.get('vacunas', '-')}`")
+                                st.markdown(f"**Control Médico:** {inactive_child.get('control', '-')}")
+                            with sub_c2:
+                                st.markdown(f"**Comuna:** {inactive_child.get('comuna', '-')}")
+                                st.markdown(f"**Dirección:** {inactive_child.get('direccion', '-')}")
+                                st.markdown(f"**Previsión:** {inactive_child.get('prevision', '-')}")
+                                st.markdown(f"**Alergias:** `{inactive_child.get('alergias', '-')}`")
+                            with sub_c3:
+                                st.markdown(f"**Tel. Madre:** `{inactive_child.get('telefono_madre', '-')}`")
+                                st.markdown(f"**Tel. Padre:** `{inactive_child.get('telefono_padre', '-')}`")
+                                st.markdown(f"**Suplentes:** {inactive_child.get('suplentes', '-')}")
+                                st.markdown(f"**Ingreso:** `{fecha_ingreso_clean}`")
+                                st.markdown(f"**Egreso:** `{fecha_egreso_clean}`")
+                            
+                            st.write("###")
+                            st.markdown('<div class="ficha-seccion-datos">', unsafe_allow_html=True)
+                            st.markdown(f"👩 **ANTECEDENTES DE LA MADRE:** \n{inactive_child.get('madre', '-')}")
+                            st.markdown('</div>', unsafe_allow_html=True)
+                            st.markdown('<div class="ficha-seccion-datos">', unsafe_allow_html=True)
+                            st.markdown(f"👨 **ANTECEDENTES DEL PADRE:** \n{inactive_child.get('padre', '-')}")
+                            st.markdown('</div>', unsafe_allow_html=True)
+                            
+                            st.write("###")
+                            st.markdown("##### 📝 ANTECEDENTES GENERALES E HISTORIA SOCIAL")
+                            historia = inactive_child.get('historia_social')
+                            if historia: st.info(historia)
+                            else: st.caption("No se registran antecedentes sociales.")
+                        
+                            st.write("###")
+                            col_hist1, col_hist2 = st.columns(2)
+                            with col_hist1:
+                                st.markdown("##### 📦 HISTORIAL DE ENTREGAS RECIBIDAS")
+                                if not df_entregas_global.empty:
+                                    string_busqueda_rut = f"RUT: {inactive_child['rut']}"
+                                    df_niño = df_entregas_global[df_entregas_global["observaciones"].astype(str).str.contains(string_busqueda_rut, na=False)].copy()
+                                    
+                                    if not df_niño.empty:
+                                        df_niño["Fecha"] = df_niño["created_at"].dt.strftime("%d/%m/%Y")
+                                        st.dataframe(df_niño[["Fecha", "producto", "cantidad"]].rename(columns={"producto": "Insumo", "cantidad": "Cant"}), use_container_width=True, hide_index=True)
+                                    else: st.caption("No registra entregas aún.")
+                                else: st.caption("No registra entregas.")
+                                
+                            with col_hist2:
+                                st.markdown("##### ⚖️ HISTORIAL DE PESO Y CONTROLES")
+                                if not df_pesos_global.empty and 'rut' in df_pesos_global.columns:
+                                    df_pesos_niño = df_pesos_global[df_pesos_global["rut"] == inactive_child["rut"]].copy()
+                                    if not df_pesos_niño.empty:
+                                        df_pesos_niño = df_pesos_niño.sort_values(by="fecha", ascending=False)
+                                        df_pesos_niño["Fecha"] = df_pesos_niño["fecha"].dt.strftime("%d/%m/%Y")
+                                        st.dataframe(df_pesos_niño[["Fecha", "peso", "responsable"]].rename(columns={"peso": "Peso Registrado", "responsable": "Atendió"}), use_container_width=True, hide_index=True)
+                                    else: st.caption("No registra controles de peso.")
+                                else: st.caption("No registra controles de peso.")
 
     # 📜 PANEL: HISTORIAL
     elif menu_choice == "📜 HISTORIAL":
