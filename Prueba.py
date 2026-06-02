@@ -87,13 +87,13 @@ st.markdown("""
     }
     
     /* CAJAS DE TEXTO REACTIVAS */
-    .stForm [data-baseweb="input"] {
+    .stForm [data-baseweb="input"], .stForm [data-baseweb="textarea"], .stForm [data-baseweb="select"] {
         background-color: rgba(30, 41, 59, 0.4) !important;
         border: 1px solid rgba(148, 163, 184, 0.2) !important;
         border-radius: 10px !important;
         transition: all 0.3s ease !important;
     }
-    .stForm [data-baseweb="input"]:focus-within {
+    .stForm [data-baseweb="input"]:focus-within, .stForm [data-baseweb="textarea"]:focus-within {
         border-color: #3b82f6 !important;
         box-shadow: 0 0 12px rgba(59, 130, 246, 0.5) !important;
         background-color: rgba(30, 41, 59, 0.7) !important;
@@ -108,7 +108,6 @@ st.markdown("""
         100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
     }
 
-    /* Aplica el pulso a TODOS los botones primarios (Excel, Formularios, Login) */
     button[kind="primary"], 
     .stForm [data-testid="stFormSubmitButton"] button {
         background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
@@ -123,10 +122,9 @@ st.markdown("""
     .stForm [data-testid="stFormSubmitButton"] button:hover {
         transform: translateY(-2px) !important;
         box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6) !important;
-        animation: none !important; /* Detiene el pulso al poner el mouse */
+        animation: none !important; 
     }
     
-    /* Detalles específicos para que los textos de los formularios se vean perfectos */
     .stForm [data-testid="stFormSubmitButton"] button {
         font-weight: 700 !important;
         font-size: 0.95rem !important;
@@ -186,21 +184,19 @@ st.markdown("""
         background-color: #1e293b;
         border-left: 4px solid #3b82f6;
         padding: 15px;
-        border-radius: 4px;
-        margin-bottom: 10px;
+        border-radius: 8px;
+        margin-bottom: 15px;
     }
 
     /* ══════════════════════════════
        MODERNIZACIÓN DE INTERFAZ (MENÚ Y BOTONES SEGUROS)
     ══════════════════════════════ */
     
-    /* 1. SIDEBAR (Fondo oscuro premium) */
     [data-testid="stSidebar"] {
         background-color: #080b13 !important;
         border-right: 1px solid #1e293b !important;
     }
 
-    /* 2. MENÚ PRINCIPAL (Versión segura para móviles y uniforme en ancho) */
     [data-testid="stSidebar"] div[role="radiogroup"] label {
         background-color: rgba(30, 41, 59, 0.4) !important;
         padding: 12px 15px !important;
@@ -223,7 +219,6 @@ st.markdown("""
         border-left: 4px solid #3b82f6 !important;
     }
 
-    /* ANIMACIÓN EN CASCADA PARA EL MENÚ */
     @keyframes entradaCascada {
         from { opacity: 0; transform: translateX(-25px); }
         to { opacity: 1; transform: translateX(0); }
@@ -234,7 +229,6 @@ st.markdown("""
     [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(4) { animation: entradaCascada 0.5s ease-out 0.4s forwards; opacity: 0; }
     [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(5) { animation: entradaCascada 0.5s ease-out 0.5s forwards; opacity: 0; }
 
-    /* 3. BOTONES SECUNDARIOS (Efecto Glassmorphism Ahumado) */
     button[kind="secondary"] {
         background: rgba(30, 41, 59, 0.5) !important;
         color: #cbd5e1 !important;
@@ -252,7 +246,6 @@ st.markdown("""
         box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4) !important;
     }
 
-    /* 4. PESTAÑAS (TABS) más limpias */
     [data-testid="stTabs"] button {
         border-radius: 8px 8px 0 0 !important;
         transition: background 0.2s !important;
@@ -261,13 +254,11 @@ st.markdown("""
         background: rgba(255, 255, 255, 0.05) !important;
     }
 
-    /* 5. ANIMACIÓN SUAVE DE TRANSICIÓN (FADE-IN INTERNO) */
     @keyframes suaveAparicion {
         0% { opacity: 0; transform: translateY(15px); }
         100% { opacity: 1; transform: translateY(0); }
     }
     
-    /* Animamos los bloques internos (DataFrames, Formularios, Expanders) para que no entren de golpe */
     .main [data-testid="stVerticalBlock"] > div,
     [data-testid="stDataFrame"], 
     [data-testid="stExpander"], 
@@ -275,7 +266,6 @@ st.markdown("""
         animation: suaveAparicion 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
     }
 
-    /* 6. BOTÓN DE CERRAR SESIÓN (ROJO / SALIDA) */
     [data-testid="stSidebar"] button {
         background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -283,7 +273,7 @@ st.markdown("""
         transition: all 0.3s ease !important;
         box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3) !important;
         margin-top: 20px !important;
-        animation: none !important; /* Asegura que el botón rojo no tenga pulso azul */
+        animation: none !important; 
     }
     [data-testid="stSidebar"] button:hover {
         background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
@@ -297,7 +287,7 @@ st.markdown("""
     }
     
     /* ══════════════════════════════
-       NUEVO: BARRA DE DESPLAZAMIENTO (SCROLLBAR) DE LUJO
+       BARRA DE DESPLAZAMIENTO (SCROLLBAR) DE LUJO
     ══════════════════════════════ */
     ::-webkit-scrollbar {
         width: 10px;
@@ -316,7 +306,7 @@ st.markdown("""
     }
 
     /* ══════════════════════════════
-       NUEVO: FICHAS (EXPANDERS) REACTIVAS
+       FICHAS (EXPANDERS) REACTIVAS
     ══════════════════════════════ */
     [data-testid="stExpander"] {
         border-radius: 12px !important;
@@ -374,7 +364,7 @@ def export_pdf_component(child_data):
     f_ingreso_pdf = clean_timestamp_to_date(child_data.get('fecha_ingreso', '-'))
     f_egreso_pdf = clean_timestamp_to_date(child_data.get('fecha_egreso', '-'))
 
-    # Formateo ultra simple: convertimos saltos de línea en <br> nativos. Cero cajas restrictivas.
+    # Formateo ultra simple: convertimos saltos de línea en <br> nativos
     html_madre = str(child_data.get('madre', '-')).replace('\n', '<br>')
     html_padre = str(child_data.get('padre', '-')).replace('\n', '<br>')
     html_historia = str(child_data.get('historia_social', 'No se registran antecedentes adicionales.')).replace('\n', '<br>')
@@ -415,8 +405,12 @@ def export_pdf_component(child_data):
                     <td style="padding-bottom: 12px;"><b>PESO AL NACER:</b> <br> {child_data.get('peso_nacer', '-')}</td>
                 </tr>
                 <tr>
+                    <td style="padding-bottom: 12px;"><b>COMUNA:</b> <br> {child_data.get('comuna', '-')}</td>
+                    <td style="padding-bottom: 12px;"><b>PREVISIÓN SALUD:</b> <br> {child_data.get('prevision', '-')}</td>
+                </tr>
+                <tr>
+                    <td style="padding-bottom: 12px; color: #dc2626;"><b>ALERGIAS / CONDICIÓN:</b> <br> {child_data.get('alergias', '-')}</td>
                     <td style="padding-bottom: 12px;"><b>VACUNAS AL DÍA:</b> <br> {child_data.get('vacunas', '-')}</td>
-                    <td style="padding-bottom: 12px;"><b>ÚLTIMO CONTROL MÉDICO:</b> <br> {child_data.get('control', '-')}</td>
                 </tr>
                 <tr>
                     <td style="padding-bottom: 12px; color: #16a34a;"><b>FECHA INGRESO PROGRAMA:</b> <br> {f_ingreso_pdf}</td>
@@ -424,7 +418,7 @@ def export_pdf_component(child_data):
                 </tr>
             </table>
 
-            <h3 style="color: #1e3a8a; font-size: 14px; text-transform: uppercase; border-bottom: 2px solid #3b82f6; padding-bottom: 5px; margin-bottom: 15px;">2. Contexto Familiar</h3>
+            <h3 style="color: #1e3a8a; font-size: 14px; text-transform: uppercase; border-bottom: 2px solid #3b82f6; padding-bottom: 5px; margin-bottom: 15px;">2. Contexto Familiar y Contactos</h3>
             <div style="font-size: 13px; margin-bottom: 15px; line-height: 1.5;">
                 <b style="text-transform: uppercase; color: #1e3a8a;">Antecedentes de la Madre:</b><br>
                 {html_madre}
@@ -434,13 +428,16 @@ def export_pdf_component(child_data):
                 {html_padre}
             </div>
             
-            <table style="width: 100%; font-size: 12px; background-color: #f8fafc; border-collapse: collapse; margin-bottom: 30px;">
+            <table style="width: 100%; font-size: 12px; background-color: #f8fafc; border-collapse: collapse; margin-bottom: 30px; border: 1px solid #e2e8f0;">
                 <tr>
-                    <td style="width: 50%; padding: 12px;"><b>TELÉFONO DE CONTACTO:</b> <br> {child_data.get('telefono_madre', '-')}</td>
-                    <td style="width: 50%; padding: 12px;"><b>DIRECCIÓN PARTICULAR:</b> <br> {child_data.get('direccion', '-')}</td>
+                    <td colspan="2" style="padding: 10px; border-bottom: 1px solid #e2e8f0;"><b>DIRECCIÓN PARTICULAR:</b> {child_data.get('direccion', '-')}</td>
                 </tr>
                 <tr>
-                    <td colspan="2" style="padding: 12px; border-top: 1px solid #e2e8f0;"><b>SUPLENTES AUTORIZADOS PARA RETIRO:</b> <br> {child_data.get('suplentes', '-')}</td>
+                    <td style="width: 50%; padding: 10px; border-right: 1px solid #e2e8f0;"><b>TELÉFONO MADRE:</b> <br> {child_data.get('telefono_madre', '-')}</td>
+                    <td style="width: 50%; padding: 10px;"><b>TELÉFONO PADRE:</b> <br> {child_data.get('telefono_padre', '-')}</td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="padding: 10px; border-top: 1px solid #e2e8f0;"><b>TELÉFONO Y NOMBRE SUPLENTE AUTORIZADO:</b> <br> {child_data.get('suplentes', '-')}</td>
                 </tr>
             </table>
 
@@ -469,12 +466,12 @@ def export_pdf_component(child_data):
             setTimeout(function() {{
                 var element = document.getElementById('pdf-container');
                 var opt = {{
-                    margin:       [15, 10, 20, 10], // Margen inferior de 2cm asegurado
+                    margin:       [15, 10, 20, 10], 
                     filename:     'Ficha_GotaDeLeche_{child_data.get("ficha", "_")}.pdf',
                     image:        {{ type: 'jpeg', quality: 1.0 }},
                     html2canvas:  {{ scale: 2, useCORS: true, logging: false }},
                     jsPDF:        {{ unit: 'mm', format: 'letter', orientation: 'portrait' }},
-                    pagebreak:    {{ mode: ['css'] }} // Permitimos que la hoja se corte de forma natural
+                    pagebreak:    {{ mode: ['css'] }} 
                 }};
                 html2pdf().set(opt).from(element).save();
             }}, 600);
@@ -622,7 +619,6 @@ else:
         df_inventory = pd.DataFrame(raw)
         st.write("### Niveles Actuales de Existencias")
 
-        # --- TABLA HTML PERSONALIZADA PARA BODEGA (REEMPLAZA A st.dataframe) ---
         html_bodega = "<style>"
         html_bodega += ".bodega-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-family: 'Segoe UI', Tahoma, sans-serif; }"
         html_bodega += ".bodega-table th { background: rgba(30, 41, 59, 0.8); color: #94a3b8; font-size: 1.05rem; padding: 14px; text-transform: uppercase; border-bottom: 2px solid #3b82f6; text-align: left; }"
@@ -631,7 +627,7 @@ else:
         html_bodega += ".bodega-table td { padding: 14px 14px; font-size: 1.15rem; color: #f8fafc; border-bottom: 1px solid rgba(148, 163, 184, 0.1); }"
         html_bodega += ".bodega-table td:first-child { font-weight: 500; color: #cbd5e1; }"
         html_bodega += ".bodega-table tr:hover td { background-color: rgba(59, 130, 246, 0.15); }"
-        html_bodega += ".bodega-num { font-size: 1.35rem !important; font-weight: 800; color: #38bdf8; }" # Números un poco más grandes
+        html_bodega += ".bodega-num { font-size: 1.35rem !important; font-weight: 800; color: #38bdf8; }" 
         html_bodega += ".bodega-unidades { font-size: 1rem; color: #94a3b8; font-weight: 500; }"
         html_bodega += "</style>"
 
@@ -663,22 +659,19 @@ else:
                     if movement_type == "Traslado a Sala" and row["bodega"] < quantity:
                         st.error(f"⚠️ Stock insuficiente en bodega principal. Disponibles: {row['bodega']} unidades.")
                     else:
-                        with st.spinner(f"Procesando {movement_type} en la base de datos..."): # ⏳ ANIMACIÓN DE CARGA AÑADIDA
+                        with st.spinner(f"Procesando {movement_type} en la base de datos..."):
                             try:
                                 cant_operacion = int(quantity)
                                 bodega_actual = int(row["bodega"])
                                 sala_actual = int(row["sala"])
                                 id_registro = int(row["id"])
 
-                                # Actualización de stock
                                 if movement_type == "Ingreso a Bodega":
                                     supabase.table("stock").update({"bodega": bodega_actual + cant_operacion}).eq("id", id_registro).execute()
                                 else:
                                     supabase.table("stock").update({"bodega": bodega_actual - cant_operacion, "sala": sala_actual + cant_operacion}).eq("id", id_registro).execute()
                                 
-                                # REGISTRO CON HORA LOCAL DE CHILE Y OBSERVACIÓN ASEGURADA
                                 detalle = f"Operación realizada: {movement_type} de {cant_operacion} unidades."
-                                
                                 supabase.table("historial").insert({
                                     "responsable": user["nombre"], 
                                     "producto": product_name,
@@ -689,14 +682,14 @@ else:
                                 }).execute()
                                 
                                 st.toast("✅ Inventario y registro actualizados.", icon="📥")
-                                time.sleep(1.2); st.rerun() # ⏱️ TIEMPO EXTENDIDO PARA VER NOTIFICACIÓN
+                                time.sleep(1.2); st.rerun() 
                             except Exception as e:
                                 st.error(f"Error crítico en la transacción: {e}")
 
     # ⚖️ PANEL: SALA DE ATENCIÓN
     elif menu_choice == "⚖️ SALA DE ATENCIÓN":
         st.header("⚖️ Sala de Atención - Despacho y Control", divider="blue")
-        tab_entrega, tab_resumen_stock = st.tabs(["📝 CONTROL DE ENTREGA (REGISTRAR)", "📊 RESUMEN DE INGRESOS Y SALIDAS"])
+        tab_entrega, tab_resumen_stock = st.tabs(["📝 CONTROL DE ENTREGA Y PESO", "📊 RESUMEN DE INGRESOS Y SALIDAS"])
         
         try:
             stock_data = supabase.table("stock").select("*").order("producto").execute().data
@@ -738,7 +731,7 @@ else:
             product_options = ["--"] + [x["producto"] for x in stock_data if x["producto"].upper() not in ["AJUAR", "OTROS"]]
             
             with st.form("delivery_master_form"):
-                st.markdown("##### 📦 Desglose Obligatorio de Insumos (Se deben registrar exactamente 3 ítems)")
+                st.markdown("##### 📦 Desglose Obligatorio de Insumos")
                 col_p1, col_q1 = st.columns([3, 1])
                 with col_p1: prod_1 = st.selectbox("Insumo 1", product_options, key="p1")
                 with col_q1: qty_1 = st.number_input("Cant 1", min_value=0, step=1, key="q1")
@@ -751,6 +744,10 @@ else:
                 with col_p3: prod_3 = st.selectbox("Insumo 3", product_options, key="p3")
                 with col_q3: qty_3 = st.number_input("Cant 3", min_value=0, step=1, key="q3")
                 
+                st.divider()
+                st.markdown("##### ⚖️ Control de Peso (Opcional)")
+                peso_visita = st.text_input("Registrar peso actual del niño(a) en esta visita:", placeholder="Ej: 14.5 kg")
+
                 st.divider()
                 st.markdown("##### 👤 Control de Retiro Autorizado")
                 quien_retira_tipo = st.selectbox("Persona que retira de la ficha:", opciones_retiro)
@@ -773,8 +770,22 @@ else:
                         if errors_stock:
                             for err in errors_stock: st.error(err)
                         else:
-                            with st.spinner("Validando stock y registrando entrega definitiva..."): # ⏳ ANIMACIÓN DE CARGA AÑADIDA
+                            with st.spinner("Validando stock y registrando operación completa..."):
                                 try:
+                                    # 1. Registrar el peso si se ingresó
+                                    if peso_visita.strip():
+                                        supabase.table("controles_peso").insert({
+                                            "ficha": ficha_vinculada,
+                                            "fecha": get_local_now(),
+                                            "peso": peso_visita.strip(),
+                                            "responsable": user["nombre"]
+                                        }).execute()
+                                        
+                                        # Actualizar campo 'control' para vista rápida
+                                        nuevo_control = f"{get_local_date()} - {peso_visita.strip()}"
+                                        supabase.table("beneficiarios").update({"control": nuevo_control}).eq("ficha", ficha_vinculada).execute()
+
+                                    # 2. Descontar Stock e Historial
                                     detalle_receptor = f"{quien_retira_tipo} (Recibe: {nombre_firma_especifico})"
                                     for p_name, qty in items_validados:
                                         item = next(x for x in stock_data if x["producto"] == p_name)
@@ -783,9 +794,10 @@ else:
                                             "responsable": user["nombre"], "producto": p_name, "cantidad": int(qty),
                                             "tipo": "ENTREGA", "observaciones": f"Ficha {ficha_vinculada} - {detalle_receptor}", "created_at": get_local_now(),
                                         }).execute()
-                                    st.balloons() # 🎈 ANIMACIÓN DE GLOBOS PARA LA ENTREGA
-                                    st.toast("Entrega asentada de manera exitosa en Sala de Atención.", icon="🎉")
-                                    time.sleep(1.8); st.rerun() # ⏱️ TIEMPO EXTENDIDO
+                                    
+                                    st.balloons() 
+                                    st.toast("Entrega (y peso si aplica) guardados con éxito.", icon="🎉")
+                                    time.sleep(1.8); st.rerun() 
                                 except Exception as e: st.error(f"Error crítico guardando la entrega: {e}")
                                 
         with tab_resumen_stock:
@@ -807,7 +819,6 @@ else:
                 
                 df_resumen = pd.DataFrame(resumen_productos)
                 
-                # --- TABLA HTML PERSONALIZADA (CORREGIDA SIN ESPACIOS) ---
                 html_table = "<style>"
                 html_table += ".big-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-family: 'Segoe UI', Tahoma, sans-serif; }"
                 html_table += ".big-table th { background: rgba(30, 41, 59, 0.8); color: #94a3b8; font-size: 1.05rem; padding: 14px; text-transform: uppercase; border-bottom: 2px solid #3b82f6; text-align: center; }"
@@ -857,7 +868,18 @@ else:
                     df_entregas_global["created_at"] = df_entregas_global["created_at"].dt.tz_localize('UTC').dt.tz_convert(CHILE_TZ)
                 else:
                     df_entregas_global["created_at"] = df_entregas_global["created_at"].dt.tz_convert(CHILE_TZ)
-        except: df_entregas_global = pd.DataFrame()
+                    
+            todo_los_pesos = supabase.table("controles_peso").select("*").execute().data
+            df_pesos_global = pd.DataFrame(todo_los_pesos) if todo_los_pesos else pd.DataFrame()
+            if not df_pesos_global.empty:
+                df_pesos_global["fecha"] = pd.to_datetime(df_pesos_global["fecha"], errors="coerce")
+                if df_pesos_global["fecha"].dt.tz is None:
+                    df_pesos_global["fecha"] = df_pesos_global["fecha"].dt.tz_localize('UTC').dt.tz_convert(CHILE_TZ)
+                else:
+                    df_pesos_global["fecha"] = df_pesos_global["fecha"].dt.tz_convert(CHILE_TZ)
+        except: 
+            df_entregas_global = pd.DataFrame()
+            df_pesos_global = pd.DataFrame()
 
         if "pdf_trigger" in st.session_state and st.session_state.pdf_trigger is not None:
             export_pdf_component(st.session_state.pdf_trigger)
@@ -871,39 +893,45 @@ else:
                 
             with st.expander("➕ INSCRIBIR NUEVO BENEFICIARIO (MÁXIMO 210 FICHAS)", expanded=False):
                 with st.form("new_child_form"):
+                    st.markdown("##### I. Identificación General")
                     c1, c2, c3 = st.columns([2, 1.5, 1])
                     name = c1.text_input("Nombre Completo del Niño(a) *")
                     rut = c2.text_input("RUN / Identificación *")
                     ficha = c3.number_input("N° Ficha Asignado", min_value=1, value=siguiente_ficha, step=1)
                     
+                    st.markdown("##### II. Datos Clínicos")
                     cc1, cc2, cc3 = st.columns(3)
                     birth_date = cc1.text_input("Fecha Nacimiento (DD/MM/AAAA)")
                     sexo = cc2.selectbox("Sexo", ["Masculino", "Femenino"])
                     peso_nacer = cc3.text_input("Peso al Nacer (ej: 3.935 kg)")
                     
-                    cx1, cx2 = st.columns(2)
-                    vacunas = cx1.selectbox("¿Vacunas al Día?", ["Sí", "No"])
-                    ultimo_control = cx2.text_input("Último Control Médico (ej: 30.03.26 / 3.820 kg)")
+                    cx1, cx2, cx3 = st.columns(3)
+                    alergias = cx1.text_input("Alergias / Condiciones Médicas")
+                    prevision = cx2.selectbox("Previsión de Salud", ["Fonasa A", "Fonasa B", "Fonasa C", "Fonasa D", "Isapre", "Particular", "Ninguna"])
+                    vacunas = cx3.selectbox("¿Vacunas al Día?", ["Sí", "No"])
                     
-                    st.markdown("---")
+                    ultimo_control = st.text_input("Último Control Médico base (ej: 30.03.26 / 3.820 kg)")
+                    
+                    st.markdown("##### III. Contacto y Familia")
+                    comuna = st.text_input("Comuna de Residencia")
+                    
+                    c_tel1, c_tel2, c_tel3 = st.columns(3)
+                    tel_madre = c_tel1.text_input("Teléfono de la Madre")
+                    tel_padre = c_tel2.text_input("Teléfono del Padre")
+                    tel_suplente = c_tel3.text_input("Teléfono de Suplente")
+                    
+                    address = st.text_input("Dirección Particular Completa")
+                    
+                    nombre_suplente = st.text_input("Nombre del Suplente Autorizado (Asociado al teléfono arriba)")
+                    
                     mother = st.text_area("Datos de la Madre (Nacionalidad, Edad, Escolaridad, Ocupación)")
                     father = st.text_area("Datos del Padre (Nacionalidad, Edad, Escolaridad, Ocupación)")
-                    
-                    ccc1, ccc2 = st.columns(2)
-                    phone = ccc1.text_input("Teléfono de Contacto")
-                    address = ccc2.text_input("Dirección Particular")
-                    
-                    # NUEVO: Columnas divididas para Suplente y su teléfono
-                    col_sup1, col_sup2 = st.columns(2)
-                    nombre_suplente = col_sup1.text_input("Nombre de suplente autorizado")
-                    tel_suplente = col_sup2.text_input("Número de teléfono del suplente")
-                    
                     social_history = st.text_area("Antecedentes Importantes / Historia Social")
                     
                     if st.form_submit_button("INGRESAR BENEFICIARIO AL SISTEMA", type="primary"):
                         if not name or not rut: st.error("Campos obligatorios faltantes: Nombre y RUN son requeridos.")
                         else:
-                            with st.spinner("Generando nueva ficha clínica en el servidor..."): # ⏳ ANIMACIÓN DE CARGA AÑADIDA
+                            with st.spinner("Generando nueva ficha clínica en el servidor..."):
                                 try:
                                     f_ingreso_dt = datetime.now(CHILE_TZ)
                                     f_egreso_dt = f_ingreso_dt + timedelta(days=730)
@@ -911,10 +939,8 @@ else:
                                     string_ingreso = f_ingreso_dt.strftime("%Y-%m-%d")
                                     string_egreso = f_egreso_dt.strftime("%Y-%m-%d")
                                     
-                                    # Truco: Formatear el suplente para guardarlo en la columna existente
                                     u_suplentes_new = f"{nombre_suplente.strip()} - Tel: {tel_suplente.strip()}" if tel_suplente.strip() else nombre_suplente.strip()
-                                    if not u_suplentes_new:
-                                        u_suplentes_new = "-"
+                                    if not u_suplentes_new: u_suplentes_new = "-"
                                         
                                     check_ficha = supabase.table("beneficiarios").select("ficha, nombre").eq("ficha", ficha).execute()
                                     if check_ficha.data: st.error(f"Conflicto: El N° de ficha {ficha} ya está asignado a: {check_ficha.data[0]['nombre']}")
@@ -922,13 +948,15 @@ else:
                                         supabase.table("beneficiarios").insert({
                                             "nombre": name, "rut": rut, "ficha": ficha, "nacimiento": birth_date,
                                             "sexo": sexo, "peso_nacer": peso_nacer, "vacunas": vacunas, "control": ultimo_control,
-                                            "telefono_madre": phone, "direccion": address, "madre": mother, "padre": father,
+                                            "alergias": alergias, "prevision": prevision, "comuna": comuna,
+                                            "telefono_madre": tel_madre, "telefono_padre": tel_padre, 
+                                            "direccion": address, "madre": mother, "padre": father,
                                             "suplentes": u_suplentes_new, "historia_social": social_history, "estado": "Activo",
                                             "fecha_ingreso": string_ingreso, "fecha_egreso": string_egreso
                                         }).execute()
                                         st.success("Registro clínico-social creado exitosamente.")
-                                        st.balloons() # 🎈 ANIMACIÓN DE GLOBOS PARA NUEVO NIÑO
-                                        time.sleep(1.8); st.rerun() # ⏱️ TIEMPO EXTENDIDO
+                                        st.balloons() 
+                                        time.sleep(1.8); st.rerun() 
                                 except Exception as e: st.error(f"Fallo en inserción: {e}")
                                 
             try: children = supabase.table("beneficiarios").select("*").eq("estado", "Activo").order("ficha").execute().data
@@ -955,7 +983,7 @@ else:
                                 if not pass_confirm:
                                     st.error("⚠️ Debe ingresar su contraseña.")
                                 elif verify_password(pass_confirm, user["clave"]):
-                                    with st.spinner("Procesando egreso de ficha..."): # ⏳ ANIMACIÓN DE CARGA AÑADIDA
+                                    with st.spinner("Procesando egreso de ficha..."):
                                         try:
                                             supabase.table("beneficiarios").update({"estado": "Egresado"}).eq("ficha", child["ficha"]).execute()
                                             supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "EGRESO", "observaciones": f"Ficha {child['ficha']} dada de baja", "created_at": get_local_now()}).execute()
@@ -969,6 +997,7 @@ else:
                     
                     if st.session_state[edit_key]:
                         with st.form(key=f"form_edit_data_{child['ficha']}"):
+                            st.markdown("##### Editando Datos Médicos y Personales")
                             ec1, ec2, ec3 = st.columns([2, 1.5, 1])
                             u_name = ec1.text_input("Nombre Completo *", value=child["nombre"])
                             u_rut = ec2.text_input("RUN / Identificación *", value=child["rut"])
@@ -979,28 +1008,40 @@ else:
                             u_sexo = ecc2.selectbox("Sexo", ["Masculino", "Femenino"], index=0 if child.get("sexo") == "Masculino" else 1)
                             u_peso = ecc3.text_input("Peso al Nacer", value=child.get("peso_nacer", ""))
                             
-                            ecx1, ecx2 = st.columns(2)
-                            u_vacunas = ecx1.selectbox("¿Vacunas al Día?", ["Sí", "No"], index=0 if child.get("vacunas") == "Sí" else 1)
-                            u_control = ecx2.text_input("Último Control Médico", value=child.get("control", ""))
+                            ecx1, ecx2, ecx3 = st.columns(3)
+                            u_alergias = ecx1.text_input("Alergias / Condiciones Médicas", value=child.get("alergias", ""))
+                            u_prevision = ecx2.selectbox("Previsión de Salud", ["Fonasa A", "Fonasa B", "Fonasa C", "Fonasa D", "Isapre", "Particular", "Ninguna"], index=["Fonasa A", "Fonasa B", "Fonasa C", "Fonasa D", "Isapre", "Particular", "Ninguna"].index(child.get("prevision", "Fonasa A")) if child.get("prevision") in ["Fonasa A", "Fonasa B", "Fonasa C", "Fonasa D", "Isapre", "Particular", "Ninguna"] else 0)
+                            u_vacunas = ecx3.selectbox("¿Vacunas al Día?", ["Sí", "No"], index=0 if child.get("vacunas") == "Sí" else 1)
+                            
+                            u_control = st.text_input("Último Control Médico base", value=child.get("control", ""))
+                            
+                            u_comuna = st.text_input("Comuna", value=child.get("comuna", ""))
+                            
+                            eccc1, eccc2, eccc3 = st.columns(3)
+                            u_phone_m = eccc1.text_input("Teléfono Madre", value=child.get("telefono_madre", ""))
+                            u_phone_p = eccc2.text_input("Teléfono Padre", value=child.get("telefono_padre", ""))
+                            u_suplentes_edit = eccc3.text_input("Nombre y Teléfono Suplente", value=child.get("suplentes", ""))
+                            
+                            u_address = st.text_input("Dirección Particular", value=child.get("direccion", ""))
                             
                             u_mother = st.text_area("Datos de la Madre (Nacionalidad, Edad, Escolaridad, Ocupación)", value=child.get("madre", ""))
                             u_father = st.text_area("Datos del Padre (Nacionalidad, Edad, Escolaridad, Ocupación)", value=child.get("padre", ""))
-                            
-                            eccc2, eccc3 = st.columns(2)
-                            u_phone = eccc2.text_input("Teléfono", value=child.get("telefono_madre", ""))
-                            u_address = eccc3.text_input("Dirección Particular", value=child.get("direccion", ""))
-                            
-                            # NUEVO: Etiqueta actualizada para la edición
-                            u_suplentes_edit = st.text_input("Nombre y Teléfono de Suplente Autorizado", value=child.get("suplentes", ""))
-                            
                             u_social = st.text_area("Antecedentes / Historia Social", value=child.get("historia_social", ""))
                             
                             if st.form_submit_button("💾 GUARDAR CAMBIOS", type="primary", use_container_width=True):
                                 if not u_name or not u_rut: st.error("Nombre y RUN no pueden quedar vacíos.")
                                 else:
-                                    with st.spinner("Actualizando datos en el servidor..."): # ⏳ ANIMACIÓN DE CARGA AÑADIDA
+                                    with st.spinner("Actualizando datos en el servidor..."):
                                         try:
-                                            supabase.table("beneficiarios").update({"nombre": u_name, "rut": u_rut, "nacimiento": u_birth, "sexo": u_sexo, "peso_nacer": u_peso, "vacunas": u_vacunas, "control": u_control, "madre": u_mother, "padre": u_father, "telefono_madre": u_phone, "direccion": u_address, "suplentes": u_suplentes_edit, "historia_social": u_social}).eq("ficha", child["ficha"]).execute()
+                                            supabase.table("beneficiarios").update({
+                                                "nombre": u_name, "rut": u_rut, "nacimiento": u_birth, "sexo": u_sexo, 
+                                                "peso_nacer": u_peso, "vacunas": u_vacunas, "control": u_control, 
+                                                "alergias": u_alergias, "prevision": u_prevision, "comuna": u_comuna,
+                                                "madre": u_mother, "padre": u_father, "telefono_madre": u_phone_m, 
+                                                "telefono_padre": u_phone_p, "direccion": u_address, 
+                                                "suplentes": u_suplentes_edit, "historia_social": u_social
+                                            }).eq("ficha", child["ficha"]).execute()
+                                            
                                             supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "EDICIÓN", "observaciones": f"Ficha {child['ficha']} corregida", "created_at": get_local_now()}).execute()
                                             st.session_state[edit_key] = False
                                             st.toast("✅ Ficha actualizada de manera exitosa.", icon="💾")
@@ -1009,19 +1050,25 @@ else:
                     else:
                         fecha_ingreso_clean = clean_timestamp_to_date(child.get('fecha_ingreso', '-'))
                         fecha_egreso_clean = clean_timestamp_to_date(child.get('fecha_egreso', '-'))
-                        sub_c1, sub_c2 = st.columns(2)
+                        
+                        sub_c1, sub_c2, sub_c3 = st.columns(3)
                         with sub_c1:
                             st.markdown(f"**RUN:** `{child['rut']}`")
-                            st.markdown(f"**Fecha Nacimiento:** {child.get('nacimiento', '-')}")
+                            st.markdown(f"**Nacimiento:** {child.get('nacimiento', '-')}")
                             st.markdown(f"**Peso al Nacer:** {child.get('peso_nacer', '-')}")
                             st.markdown(f"**Vacunas al Día:** `{child.get('vacunas', '-')}`")
-                            st.markdown(f"**Último Control Médico:** {child.get('control', '-')}")
+                            st.markdown(f"**Control Médico:** {child.get('control', '-')}")
                         with sub_c2:
-                            st.markdown(f"**Fecha Ingreso:** `{fecha_ingreso_clean}`")
-                            st.markdown(f"**Egreso Estimado:** `{fecha_egreso_clean}`")
-                            st.markdown(f"**Teléfono:** `{child.get('telefono_madre', '-')}`")
+                            st.markdown(f"**Comuna:** {child.get('comuna', '-')}")
                             st.markdown(f"**Dirección:** {child.get('direccion', '-')}")
-                            st.markdown(f"**Suplentes Autorizados:** {child.get('suplentes', '-')}")
+                            st.markdown(f"**Previsión:** {child.get('prevision', '-')}")
+                            st.markdown(f"**Alergias:** `{child.get('alergias', '-')}`")
+                        with sub_c3:
+                            st.markdown(f"**Tel. Madre:** `{child.get('telefono_madre', '-')}`")
+                            st.markdown(f"**Tel. Padre:** `{child.get('telefono_padre', '-')}`")
+                            st.markdown(f"**Suplentes:** {child.get('suplentes', '-')}")
+                            st.markdown(f"**Ingreso:** `{fecha_ingreso_clean}`")
+                            st.markdown(f"**Egreso:** `{fecha_egreso_clean}`")
                         
                         st.write("###")
                         st.markdown('<div class="ficha-seccion-datos">', unsafe_allow_html=True)
@@ -1038,15 +1085,28 @@ else:
                         else: st.caption("No se registran antecedentes sociales.")
                     
                     st.write("###")
-                    st.markdown("##### 📦 HISTORIAL DE ENTREGAS RECIBIDAS")
-                    if not df_entregas_global.empty:
-                        string_busqueda = f"Ficha {child['ficha']} "
-                        df_niño = df_entregas_global[df_entregas_global["observaciones"].astype(str).str.contains(string_busqueda, na=False)].copy()
-                        if not df_niño.empty:
-                            df_niño["Fecha/Hora"] = df_niño["created_at"].dt.strftime("%d/%m/%Y %H:%M")
-                            st.dataframe(df_niño[["Fecha/Hora", "producto", "cantidad", "responsable", "observaciones"]].rename(columns={"producto": "Producto", "cantidad": "Cant.", "responsable": "Entregó", "observaciones": "Detalle Retiro"}), use_container_width=True, hide_index=True)
-                        else: st.info("No se registran entregas históricas.")
-                    else: st.info("No se registran entregas históricas.")
+                    col_hist1, col_hist2 = st.columns(2)
+                    with col_hist1:
+                        st.markdown("##### 📦 HISTORIAL DE ENTREGAS RECIBIDAS")
+                        if not df_entregas_global.empty:
+                            string_busqueda = f"Ficha {child['ficha']} "
+                            df_niño = df_entregas_global[df_entregas_global["observaciones"].astype(str).str.contains(string_busqueda, na=False)].copy()
+                            if not df_niño.empty:
+                                df_niño["Fecha"] = df_niño["created_at"].dt.strftime("%d/%m/%Y")
+                                st.dataframe(df_niño[["Fecha", "producto", "cantidad"]].rename(columns={"producto": "Insumo", "cantidad": "Cant"}), use_container_width=True, hide_index=True)
+                            else: st.caption("No registra entregas.")
+                        else: st.caption("No registra entregas.")
+                        
+                    with col_hist2:
+                        st.markdown("##### ⚖️ HISTORIAL DE PESO Y CONTROLES")
+                        if not df_pesos_global.empty:
+                            df_pesos_niño = df_pesos_global[df_pesos_global["ficha"] == child["ficha"]].copy()
+                            if not df_pesos_niño.empty:
+                                df_pesos_niño = df_pesos_niño.sort_values(by="fecha", ascending=False)
+                                df_pesos_niño["Fecha"] = df_pesos_niño["fecha"].dt.strftime("%d/%m/%Y")
+                                st.dataframe(df_pesos_niño[["Fecha", "peso", "responsable"]].rename(columns={"peso": "Peso Registrado", "responsable": "Atendió"}), use_container_width=True, hide_index=True)
+                            else: st.caption("No registra controles de peso en el sistema.")
+                        else: st.caption("No registra controles de peso en el sistema.")
 
         with tab_inactive:
             st.write("### Historial de Egresos Pasivos")
@@ -1058,7 +1118,7 @@ else:
                 for inactive_child in egresados:
                     with st.expander(f"⚪ Ficha {inactive_child['ficha']} — {inactive_child['nombre']} (EGRESADO)"):
                         if st.button(f"🟢 Re-incorporar", key=f"reactivar_{inactive_child['ficha']}", type="primary"):
-                            with st.spinner("Reactivando ficha..."): # ⏳ ANIMACIÓN DE CARGA AÑADIDA
+                            with st.spinner("Reactivando ficha..."): 
                                 try:
                                     supabase.table("beneficiarios").update({"estado": "Activo"}).eq("ficha", inactive_child["ficha"]).execute()
                                     supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "REINGRESO", "observaciones": f"Ficha {inactive_child['ficha']} re-incorporada", "created_at": get_local_now()}).execute()
