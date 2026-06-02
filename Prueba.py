@@ -295,6 +295,41 @@ st.markdown("""
         color: #ffffff !important;
         font-weight: 800 !important;
     }
+    
+    /* ══════════════════════════════
+       NUEVO: BARRA DE DESPLAZAMIENTO (SCROLLBAR) DE LUJO
+    ══════════════════════════════ */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #050C17;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: rgba(59, 130, 246, 0.3);
+        border-radius: 5px;
+        transition: background 0.3s ease;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(59, 130, 246, 0.8);
+    }
+
+    /* ══════════════════════════════
+       NUEVO: FICHAS (EXPANDERS) REACTIVAS
+    ══════════════════════════════ */
+    [data-testid="stExpander"] {
+        border-radius: 12px !important;
+        border: 1px solid rgba(148, 163, 184, 0.15) !important;
+        background-color: rgba(15, 23, 42, 0.3) !important;
+        transition: all 0.3s ease !important;
+        margin-bottom: 12px !important;
+    }
+    [data-testid="stExpander"]:hover {
+        border-color: rgba(56, 189, 248, 0.4) !important;
+        box-shadow: 0 4px 20px rgba(56, 189, 248, 0.1) !important;
+        transform: translateY(-1px);
+    }
     </style>
 """, unsafe_allow_html=True)
 
