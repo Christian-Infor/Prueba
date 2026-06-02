@@ -228,6 +228,7 @@ st.markdown("""
     [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(3) { animation: entradaCascada 0.5s ease-out 0.3s forwards; opacity: 0; }
     [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(4) { animation: entradaCascada 0.5s ease-out 0.4s forwards; opacity: 0; }
     [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(5) { animation: entradaCascada 0.5s ease-out 0.5s forwards; opacity: 0; }
+    [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(6) { animation: entradaCascada 0.5s ease-out 0.6s forwards; opacity: 0; }
 
     button[kind="secondary"] {
         background: rgba(30, 41, 59, 0.5) !important;
@@ -547,9 +548,10 @@ else:
         st.caption(f"Operador autorizado")
         st.divider()
         
+        # AÑADIMOS LA OPCIÓN DEL PANEL ADMIN AL MENÚ
         menu_choice = st.radio(
             "MENÚ PRINCIPAL", 
-            ["📊 PANEL PRINCIPAL", "📦 BODEGA CENTRAL", "⚖️ SALA DE ATENCIÓN", "👥 GESTIÓN DE NIÑOS", "📜 HISTORIAL"],
+            ["📊 PANEL PRINCIPAL", "📦 BODEGA CENTRAL", "⚖️ SALA DE ATENCIÓN", "👥 GESTIÓN DE NIÑOS", "📜 HISTORIAL", "🔐 PANEL ADMIN"],
             label_visibility="collapsed"
         )
         
@@ -1355,3 +1357,92 @@ else:
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     type="primary"
                 )
+
+    # 🔐 PANEL DE ADMINISTRACIÓN
+    elif menu_choice == "🔐 PANEL ADMIN":
+        st.header("🔐 Panel de Administración de Usuarios", divider="blue")
+        st.warning("⚠️ Zona de acceso restringido. Aquí puede gestionar las cuentas de las voluntarias y operadores del sistema.")
+        
+        try:
+            res_users = supabase.table("usuarios").select("id, usuario, nombre").execute()
+            df_users = pd.DataFrame(res_users.data)
+        except Exception as e:
+            st.error(f"Error al conectar con la base de datos: {e}")
+            st.stop()
+            
+        st.write("### 👥 Usuarios Actuales en el Sistema")
+        st.dataframe(df_users.rename(columns={"id": "ID", "usuario": "Nombre de Usuario (Login)", "nombre": "Nombre Completo"}), hide_index=True, use_container_width=True)
+        
+        st.write("---")
+        
+        tab_add, tab_edit, tab_del = st.tabs(["➕ Crear Nueva Voluntaria", "🔑 Actualizar Contraseña", "❌ Eliminar Acceso"])
+        
+        with tab_add:
+            with st.form("add_user_form"):
+                st.markdown("##### Registrar nuevo operador")
+                c1, c2 = st.columns(2)
+                with c1: new_nombre = st.text_input("Nombre Completo")
+                with c2: new_usuario = st.text_input("Nombre de Usuario (Para el Login)")
+                
+                new_pass = st.text_input("Asigne una Contraseña", type="password")
+                
+                if st.form_submit_button("Crear Usuario de Acceso", type="primary", use_container_width=True):
+                    if not new_nombre or not new_usuario or not new_pass:
+                        st.error("Por favor llene todos los campos para crear la cuenta.")
+                    else:
+                        with st.spinner("Encriptando credenciales y creando usuario..."):
+                            try:
+                                hashed_pw = bcrypt.hashpw(new_pass.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                                supabase.table("usuarios").insert({"nombre": new_nombre, "usuario": new_usuario, "clave": hashed_pw}).execute()
+                                st.success(f"La cuenta de {new_nombre} ha sido creada con éxito.")
+                                time.sleep(1.5)
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Error al crear usuario (Verifique que el usuario no exista ya): {e}")
+                        
+        with tab_edit:
+            with st.form("edit_user_form"):
+                st.markdown("##### Cambiar clave de una voluntaria")
+                edit_usuario = st.selectbox("Seleccione la cuenta que desea modificar", df_users['usuario'].tolist())
+                edit_pass = st.text_input("Escriba la nueva contraseña", type="password")
+                
+                if st.form_submit_button("Actualizar Contraseña de Seguridad", type="primary", use_container_width=True):
+                    if not edit_usuario or not edit_pass:
+                        st.error("Debe seleccionar un usuario e ingresar una contraseña válida.")
+                    else:
+                        with st.spinner("Actualizando seguridad..."):
+                            try:
+                                hashed_pw = bcrypt.hashpw(edit_pass.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                                supabase.table("usuarios").update({"clave": hashed_pw}).eq("usuario", edit_usuario).execute()
+                                st.success(f"Contraseña actualizada para el usuario: {edit_usuario}")
+                                time.sleep(1.5)
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Error al actualizar: {e}")
+                        
+        with tab_del:
+            with st.form("del_user_form"):
+                st.markdown("##### Revocar acceso al sistema")
+                st.caption("Esta acción es irreversible y la persona ya no podrá iniciar sesión en Gota de Leche.")
+                del_usuario = st.selectbox("Seleccionar cuenta a ELIMINAR", df_users['usuario'].tolist())
+                
+                st.divider()
+                st.markdown("**🛡️ Verificación de Seguridad**")
+                admin_pass = st.text_input("Ingrese SU contraseña actual para confirmar esta acción", type="password")
+                
+                if st.form_submit_button("🚨 Eliminar Usuario Permanentemente", use_container_width=True):
+                    if del_usuario == user['usuario']:
+                        st.error("Operación bloqueada: No puede eliminar su propia sesión mientras está activo.")
+                    elif not admin_pass:
+                        st.error("Debe ingresar su contraseña para autorizar el borrado.")
+                    elif verify_password(admin_pass, user['clave']):
+                        with st.spinner("Borrando registros de acceso..."):
+                            try:
+                                supabase.table("usuarios").delete().eq("usuario", del_usuario).execute()
+                                st.toast(f"Usuario {del_usuario} ha sido eliminado.", icon="🗑️")
+                                time.sleep(1.5)
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Error en la base de datos: {e}")
+                    else:
+                        st.error("❌ Contraseña de autorización incorrecta. Acción denegada.")
