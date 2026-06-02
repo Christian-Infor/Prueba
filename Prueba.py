@@ -100,7 +100,7 @@ st.markdown("""
     }
 
     /* ══════════════════════════════
-       ANIMACIONES DE BOTONES (PULSO)
+       ANIMACIONES DE BOTONES (PULSO UNIFICADO)
     ══════════════════════════════ */
     @keyframes pulsoLuz {
         0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
@@ -108,22 +108,26 @@ st.markdown("""
         100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
     }
 
-    button[kind="primary"] {
+    /* Aplica el pulso a TODOS los botones primarios (Excel, Formularios, Login) */
+    button[kind="primary"], 
+    .stForm [data-testid="stFormSubmitButton"] button {
         background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
+        color: #ffffff !important;
         border-radius: 10px !important;
         transition: all 0.3s ease !important;
-        animation: pulsoLuz 2.5s infinite; /* Pulso activado */
+        animation: pulsoLuz 2.5s infinite !important;
         border: none !important;
     }
-    button[kind="primary"]:hover {
+    
+    button[kind="primary"]:hover,
+    .stForm [data-testid="stFormSubmitButton"] button:hover {
         transform: translateY(-2px) !important;
         box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6) !important;
-        animation: none; /* Detiene el pulso al poner el mouse */
+        animation: none !important; /* Detiene el pulso al poner el mouse */
     }
     
-    /* Botón de Ingreso específico */
+    /* Detalles específicos para que los textos de los formularios se vean perfectos */
     .stForm [data-testid="stFormSubmitButton"] button {
-        color: #fff !important;
         font-weight: 700 !important;
         font-size: 0.95rem !important;
         letter-spacing: 0.06em !important;
@@ -266,7 +270,7 @@ st.markdown("""
         transition: all 0.3s ease !important;
         box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3) !important;
         margin-top: 20px !important;
-        animation: none !important; /* Quitamos el pulso azul al rojo */
+        animation: none !important; /* Asegura que el botón rojo no tenga pulso azul */
     }
     [data-testid="stSidebar"] button:hover {
         background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
