@@ -39,6 +39,24 @@ st.markdown("""
     }
     
     /* ══════════════════════════════
+       ANIMACIONES PREMIUM LOGIN
+    ══════════════════════════════ */
+    @keyframes flotarLogo {
+        0% { transform: translateY(0px); filter: brightness(1.4) drop-shadow(0px 6px 18px rgba(96, 165, 250, 0.5)); }
+        50% { transform: translateY(-8px); filter: brightness(1.6) drop-shadow(0px 12px 24px rgba(96, 165, 250, 0.7)); }
+        100% { transform: translateY(0px); filter: brightness(1.4) drop-shadow(0px 6px 18px rgba(96, 165, 250, 0.5)); }
+    }
+
+    .logo-animado {
+        animation: flotarLogo 4s ease-in-out infinite;
+    }
+
+    @keyframes entradaLoginCaja {
+        0% { opacity: 0; transform: translateY(30px) scale(0.98); }
+        100% { opacity: 1; transform: translateY(0px) scale(1); }
+    }
+
+    /* ══════════════════════════════
        LOGIN
     ══════════════════════════════ */
     .centered-login {
@@ -54,6 +72,8 @@ st.markdown("""
         border-radius: 20px !important;
         padding: 2rem 2rem 1.6rem 2rem !important;
         box-shadow: 0 0 40px rgba(59, 130, 246, 0.12), 0 20px 60px rgba(0,0,0,0.5) !important;
+        /* Animación aplicada a la caja del login */
+        animation: entradaLoginCaja 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
     }
     .stForm [data-testid="stFormSubmitButton"] button {
         background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
@@ -383,10 +403,10 @@ if "user" not in st.session_state:
     with col_mid:
         st.markdown('<div class="centered-login">', unsafe_allow_html=True)
         
-        # AQUÍ ESTÁ EL TRUCO DEL MARTILLO: Moviendo el texto exactamente 4 píxeles a la derecha
+        # Le añadimos la clase 'logo-animado' a la etiqueta img
         st.markdown(f"""
             <div style="text-align: center; margin-bottom: 28px; width: 100%;">
-                <img src="{LOGO_SRC}" style="height: 180px; object-fit: contain; mix-blend-mode: screen; filter: brightness(1.4) drop-shadow(0px 6px 18px rgba(96, 165, 250, 0.5)); margin-bottom: 16px; display: inline-block;">
+                <img src="{LOGO_SRC}" class="logo-animado" style="height: 180px; object-fit: contain; mix-blend-mode: screen; margin-bottom: 16px; display: inline-block;">
                 <h1 style="color:#e2e8f0; font-size:2.2rem; margin:0; font-weight:800; text-align:center;">GOTA DE LECHE</h1>
                 <p style="color:#64748b; font-size:0.85rem; margin:2px 0 0 0; letter-spacing:0.15em; text-transform:uppercase; font-weight:600; text-align:center; transform: translateX(4px);">SISTEMA MAESTRO DE GESTIÓN</p>
             </div>
