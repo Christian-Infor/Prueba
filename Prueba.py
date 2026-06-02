@@ -99,26 +99,46 @@ st.markdown("""
         background-color: rgba(30, 41, 59, 0.7) !important;
     }
 
-    /* BOTÓN DE INGRESO */
-    .stForm [data-testid="stFormSubmitButton"] button {
+    /* ══════════════════════════════
+       ANIMACIONES DE BOTONES (PULSO)
+    ══════════════════════════════ */
+    @keyframes pulsoLuz {
+        0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+        70% { box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    }
+
+    button[kind="primary"] {
         background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
+        border-radius: 10px !important;
+        transition: all 0.3s ease !important;
+        animation: pulsoLuz 2.5s infinite; /* Pulso activado */
+        border: none !important;
+    }
+    button[kind="primary"]:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6) !important;
+        animation: none; /* Detiene el pulso al poner el mouse */
+    }
+    
+    /* Botón de Ingreso específico */
+    .stForm [data-testid="stFormSubmitButton"] button {
         color: #fff !important;
         font-weight: 700 !important;
         font-size: 0.95rem !important;
         letter-spacing: 0.06em !important;
-        border: none !important;
-        border-radius: 12px !important;
         padding: 0.75rem 1rem !important;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 4px 20px rgba(79, 70, 229, 0.4) !important;
         margin-top: 10px !important;
     }
-    .stForm [data-testid="stFormSubmitButton"] button:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 28px rgba(79, 70, 229, 0.6) !important;
-    }
     
-    /* ── Modelo de Tarjetas del Dashboard ── */
+    /* ══════════════════════════════
+       TARJETAS 3D PANEL PRINCIPAL
+    ══════════════════════════════ */
+    @keyframes deslizarArriba {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
     .metric-card {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         border: 1px solid #334155;
@@ -127,7 +147,16 @@ st.markdown("""
         text-align: center;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         margin-bottom: 15px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: deslizarArriba 0.6s ease-out forwards;
     }
+    
+    .metric-card:hover {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 12px 25px -5px rgba(56, 189, 248, 0.4);
+        border-color: rgba(56, 189, 248, 0.5);
+    }
+
     .metric-label {
         color: #94a3b8;
         font-size: 0.85rem;
@@ -141,7 +170,14 @@ st.markdown("""
         font-size: 2.5rem;
         font-weight: 700;
         line-height: 1;
+        transition: color 0.3s ease;
     }
+    
+    .metric-card:hover .metric-value {
+        color: #ffffff;
+        text-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+    }
+
     .ficha-seccion-datos {
         background-color: #1e293b;
         border-left: 4px solid #3b82f6;
@@ -201,17 +237,7 @@ st.markdown("""
         box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4) !important;
     }
 
-    /* 4. ANIMACIÓN EXTRA A BOTONES PRIMARIOS */
-    button[kind="primary"] {
-        border-radius: 10px !important;
-        transition: all 0.3s ease !important;
-    }
-    button[kind="primary"]:hover {
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5) !important;
-    }
-    
-    /* 5. PESTAÑAS (TABS) más limpias */
+    /* 4. PESTAÑAS (TABS) más limpias */
     [data-testid="stTabs"] button {
         border-radius: 8px 8px 0 0 !important;
         transition: background 0.2s !important;
@@ -220,7 +246,7 @@ st.markdown("""
         background: rgba(255, 255, 255, 0.05) !important;
     }
 
-    /* 6. ANIMACIÓN SUAVE DE TRANSICIÓN (FADE-IN) */
+    /* 5. ANIMACIÓN SUAVE DE TRANSICIÓN (FADE-IN) */
     @keyframes suaveAparicion {
         0% { opacity: 0; transform: translateY(12px); }
         100% { opacity: 1; transform: translateY(0); }
@@ -232,7 +258,7 @@ st.markdown("""
         animation: suaveAparicion 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
     }
 
-    /* 7. BOTÓN DE CERRAR SESIÓN (ROJO / SALIDA) */
+    /* 6. BOTÓN DE CERRAR SESIÓN (ROJO / SALIDA) */
     [data-testid="stSidebar"] button {
         background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
@@ -240,6 +266,7 @@ st.markdown("""
         transition: all 0.3s ease !important;
         box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3) !important;
         margin-top: 20px !important;
+        animation: none !important; /* Quitamos el pulso azul al rojo */
     }
     [data-testid="stSidebar"] button:hover {
         background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
@@ -429,7 +456,6 @@ if "user" not in st.session_state:
     with col_mid:
         st.markdown('<div class="centered-login">', unsafe_allow_html=True)
         
-        # Le añadimos la clase 'logo-animado' a la etiqueta img
         st.markdown(f"""
             <div style="text-align: center; margin-bottom: 28px; width: 100%;">
                 <img src="{LOGO_SRC}" class="logo-animado" style="height: 180px; object-fit: contain; mix-blend-mode: screen; margin-bottom: 16px; display: inline-block;">
@@ -466,7 +492,7 @@ else:
     with st.sidebar:
         st.markdown(f"""
             <div style="text-align:center; margin-bottom:20px; margin-top:10px;">
-                <img src="{LOGO_SRC}" style="height:130px; object-fit:contain; mix-blend-mode:screen; filter:brightness(1.3);">
+                <img src="{LOGO_SRC}" class="logo-animado" style="height:130px; object-fit:contain; mix-blend-mode:screen;">
             </div>
         """, unsafe_allow_html=True)
         st.markdown(f"### 👤 {user['nombre']}")
