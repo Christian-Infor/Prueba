@@ -261,16 +261,18 @@ st.markdown("""
         background: rgba(255, 255, 255, 0.05) !important;
     }
 
-    /* 5. ANIMACIÓN SUAVE DE TRANSICIÓN (FADE-IN) */
+    /* 5. ANIMACIÓN SUAVE DE TRANSICIÓN (FADE-IN INTERNO) */
     @keyframes suaveAparicion {
-        0% { opacity: 0; transform: translateY(12px); }
+        0% { opacity: 0; transform: translateY(15px); }
         100% { opacity: 1; transform: translateY(0); }
     }
-    .stMainBlockContainer {
-        animation: suaveAparicion 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
-    }
+    
+    /* Animamos los bloques internos (DataFrames, Formularios, Expanders) para que no entren de golpe */
+    .main [data-testid="stVerticalBlock"] > div,
+    [data-testid="stDataFrame"], 
+    [data-testid="stExpander"], 
     div[role="tabpanel"] {
-        animation: suaveAparicion 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+        animation: suaveAparicion 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
     }
 
     /* 6. BOTÓN DE CERRAR SESIÓN (ROJO / SALIDA) */
