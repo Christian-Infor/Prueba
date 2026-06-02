@@ -10,9 +10,10 @@ import streamlit.components.v1 as components
 import io
 
 # ─────────────────────────────────────────
-# 0. CONFIGURACIÓN DEL LOGO OFICIAL (URL DIRECTA)
+# 0. CONFIGURACIÓN DEL SISTEMA
 # ─────────────────────────────────────────
 LOGO_SRC = "https://raw.githubusercontent.com/Christian-Infor/Prueba/refs/heads/main/Gotadeleche-removebg-preview.png"
+SUPER_ADMIN = "admin" # 👑 COLOCA AQUÍ TU NOMBRE DE USUARIO DE INICIO DE SESIÓN
 
 # ─────────────────────────────────────────
 # 1. CONFIGURACIÓN DE PÁGINA Y ESTILOS
@@ -545,13 +546,25 @@ else:
             </div>
         """, unsafe_allow_html=True)
         st.markdown(f"### 👤 {user['nombre']}")
-        st.caption(f"Operador autorizado")
+        
+        # Identificador visual de Super Admin
+        if user["usuario"].lower() == SUPER_ADMIN.lower():
+            st.caption(f"👑 Super Administrador")
+        else:
+            st.caption(f"Operador autorizado")
+            
         st.divider()
         
-        # AÑADIMOS LA OPCIÓN DEL PANEL ADMIN AL MENÚ
+        # Opciones base para todos los usuarios
+        opciones_menu = ["📊 PANEL PRINCIPAL", "📦 BODEGA CENTRAL", "⚖️ SALA DE ATENCIÓN", "👥 GESTIÓN DE NIÑOS", "📜 HISTORIAL"]
+        
+        # Si el usuario es el SUPER_ADMIN, le agregamos el panel de seguridad
+        if user["usuario"].lower() == SUPER_ADMIN.lower():
+            opciones_menu.append("🔐 PANEL ADMIN")
+        
         menu_choice = st.radio(
             "MENÚ PRINCIPAL", 
-            ["📊 PANEL PRINCIPAL", "📦 BODEGA CENTRAL", "⚖️ SALA DE ATENCIÓN", "👥 GESTIÓN DE NIÑOS", "📜 HISTORIAL", "🔐 PANEL ADMIN"],
+            opciones_menu,
             label_visibility="collapsed"
         )
         
@@ -1364,14 +1377,17 @@ else:
         st.warning("⚠️ Zona de acceso restringido. Aquí puede gestionar las cuentas de las voluntarias y operadores del sistema.")
         
         try:
-            res_users = supabase.table("usuarios").select("id, usuario, nombre").execute()
+            res_users = supabase.table("usuarios").select("usuario, nombre").execute()
             df_users = pd.DataFrame(res_users.data)
         except Exception as e:
             st.error(f"Error al conectar con la base de datos: {e}")
             st.stop()
             
         st.write("### 👥 Usuarios Actuales en el Sistema")
-        st.dataframe(df_users.rename(columns={"id": "ID", "usuario": "Nombre de Usuario (Login)", "nombre": "Nombre Completo"}), hide_index=True, use_container_width=True)
+        if not df_users.empty:
+            st.dataframe(df_users.rename(columns={"usuario": "Nombre de Usuario (Login)", "nombre": "Nombre Completo"}), hide_index=True, use_container_width=True)
+        else:
+            st.info("No hay usuarios registrados o no se pudo cargar la tabla.")
         
         st.write("---")
         
@@ -1403,7 +1419,12 @@ else:
         with tab_edit:
             with st.form("edit_user_form"):
                 st.markdown("##### Cambiar clave de una voluntaria")
-                edit_usuario = st.selectbox("Seleccione la cuenta que desea modificar", df_users['usuario'].tolist())
+                if not df_users.empty:
+                    edit_usuario = st.selectbox("Seleccione la cuenta que desea modificar", df_users['usuario'].tolist())
+                else:
+                    edit_usuario = None
+                    st.warning("No hay usuarios cargados para editar.")
+                    
                 edit_pass = st.text_input("Escriba la nueva contraseña", type="password")
                 
                 if st.form_submit_button("Actualizar Contraseña de Seguridad", type="primary", use_container_width=True):
@@ -1424,14 +1445,19 @@ else:
             with st.form("del_user_form"):
                 st.markdown("##### Revocar acceso al sistema")
                 st.caption("Esta acción es irreversible y la persona ya no podrá iniciar sesión en Gota de Leche.")
-                del_usuario = st.selectbox("Seleccionar cuenta a ELIMINAR", df_users['usuario'].tolist())
-                
+                if not df_users.empty:
+                    del_usuario = st.selectbox("Seleccionar cuenta a ELIMINAR", df_users['usuario'].tolist())
+                else:
+                    del_usuario = None
+                    
                 st.divider()
                 st.markdown("**🛡️ Verificación de Seguridad**")
                 admin_pass = st.text_input("Ingrese SU contraseña actual para confirmar esta acción", type="password")
                 
                 if st.form_submit_button("🚨 Eliminar Usuario Permanentemente", use_container_width=True):
-                    if del_usuario == user['usuario']:
+                    if not del_usuario:
+                        st.error("No hay un usuario seleccionado.")
+                    elif del_usuario == user['usuario']:
                         st.error("Operación bloqueada: No puede eliminar su propia sesión mientras está activo.")
                     elif not admin_pass:
                         st.error("Debe ingresar su contraseña para autorizar el borrado.")
