@@ -1148,7 +1148,9 @@ else:
                 
             if not egresados: st.info("No se registran egresados.")
             else:
-                busqueda_egresados = st.text_input("🔍 Buscar egresado(a) por Nombre o RUN:", placeholder="Ej: Juan Pérez o 12345678-9", key="search_egresados")
+                col_search, col_export = st.columns([3, 1])
+                with col_search:
+                    busqueda_egresados = st.text_input("🔍 Buscar egresado(a) por Nombre o RUN:", placeholder="Ej: Juan Pérez o 12345678-9", key="search_egresados")
                 
                 if busqueda_egresados:
                     termino_eg = busqueda_egresados.lower()
@@ -1156,13 +1158,39 @@ else:
                 else:
                     egresados_filtrados = egresados
 
+                with col_export:
+                    st.write("###") 
+                    df_eg = pd.DataFrame(egresados_filtrados)
+                    if not df_eg.empty:
+                        cols_rename = {
+                            "ficha": "N° Ficha", "rut": "RUT", "nombre": "Nombre Completo",
+                            "nacimiento": "Nacimiento", "sexo": "Sexo", "peso_nacer": "Peso Nacer",
+                            "comuna": "Comuna", "direccion": "Dirección", "prevision": "Previsión",
+                            "telefono_madre": "Tel. Madre", "telefono_padre": "Tel. Padre", "suplentes": "Suplentes",
+                            "fecha_ingreso": "Ingreso", "fecha_egreso": "Egreso", "historia_social": "Historia Social"
+                        }
+                        exist_cols = {k: v for k, v in cols_rename.items() if k in df_eg.columns}
+                        df_export = df_eg[list(exist_cols.keys())].rename(columns=exist_cols)
+                        
+                        buffer_eg = io.BytesIO()
+                        with pd.ExcelWriter(buffer_eg, engine='openpyxl') as writer:
+                            df_export.to_excel(writer, index=False, sheet_name='Niños Egresados')
+                        
+                        st.download_button(
+                            label="📥 Exportar Egresados",
+                            data=buffer_eg.getvalue(),
+                            file_name=f"Egresados_GotaDeLeche_{datetime.now(CHILE_TZ).strftime('%d_%m_%Y')}.xlsx",
+                            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                            use_container_width=True,
+                            type="secondary"
+                        )
+
                 if not egresados_filtrados:
                     st.warning("No se encontraron fichas de egresados que coincidan con su búsqueda.")
                 else:
                     for inactive_child in egresados_filtrados:
                         with st.expander(f"⚪ Egresado: {inactive_child['nombre']} (RUT: {inactive_child['rut']})"):
                             
-                            # --- BOTÓN DE DESHACER (Arriba para acceso rápido) ---
                             with st.popover("↩️ Deshacer Egreso (Error)", use_container_width=True):
                                 st.write("**Restaurar Ficha (Solo en caso de error)**")
                                 st.caption("Esta opción es únicamente para corregir un egreso accidental. El niño(a) no debería reingresar si fue dado de alta formalmente.")
@@ -1191,7 +1219,6 @@ else:
                             
                             st.write("---")
                             
-                            # --- MOSTRAR DATOS DEL EGRESADO ---
                             fecha_ingreso_clean = clean_timestamp_to_date(inactive_child.get('fecha_ingreso', '-'))
                             fecha_egreso_clean = clean_timestamp_to_date(inactive_child.get('fecha_egreso', '-'))
                             
