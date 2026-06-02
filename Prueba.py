@@ -364,7 +364,6 @@ def export_pdf_component(child_data):
     f_ingreso_pdf = clean_timestamp_to_date(child_data.get('fecha_ingreso', '-'))
     f_egreso_pdf = clean_timestamp_to_date(child_data.get('fecha_egreso', '-'))
 
-    # Formateo ultra simple: convertimos saltos de línea en <br> nativos
     html_madre = str(child_data.get('madre', '-')).replace('\n', '<br>')
     html_padre = str(child_data.get('padre', '-')).replace('\n', '<br>')
     html_historia = str(child_data.get('historia_social', 'No se registran antecedentes adicionales.')).replace('\n', '<br>')
@@ -729,13 +728,11 @@ else:
 
             st.write("###")
             
-            # --- MODIFICACIÓN: Agregar saldo al nombre en el desplegable ---
             product_options = ["--"] + [f"{x['producto']} (Disp: {int(x['sala'])})" for x in stock_data if x["producto"].upper() not in ["AJUAR", "OTROS"]]
             
             with st.form("delivery_master_form"):
                 st.markdown("##### 📦 Desglose Obligatorio de Insumos")
                 
-                # --- MODIFICACIÓN: Mostrar pastillas de saldo justo arriba del formulario ---
                 pills_html = "<div style='display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 18px;'>"
                 for item in stock_data:
                     if item["producto"].upper() not in ["AJUAR", "OTROS"]:
@@ -768,7 +765,6 @@ else:
                 
                 if st.form_submit_button("🔥 CONVALIDAR Y REGISTRAR ENTREGA", type="primary", use_container_width=True):
                     
-                    # Función que limpia el "(Disp: XX)" del string para buscar el nombre real en la BD
                     def clean_name(val):
                         return val.rsplit(" (Disp:", 1)[0] if val != "--" else "--"
                         
@@ -793,21 +789,24 @@ else:
                                     if peso_visita.strip():
                                         supabase.table("controles_peso").insert({
                                             "ficha": ficha_vinculada,
+                                            "rut": beneficiary["rut"],
                                             "fecha": get_local_now(),
                                             "peso": peso_visita.strip(),
                                             "responsable": user["nombre"]
                                         }).execute()
                                         
                                         nuevo_control = f"{get_local_date()} - {peso_visita.strip()}"
-                                        supabase.table("beneficiarios").update({"control": nuevo_control}).eq("ficha", ficha_vinculada).execute()
+                                        supabase.table("beneficiarios").update({"control": nuevo_control}).eq("rut", beneficiary["rut"]).execute()
 
                                     detalle_receptor = f"{quien_retira_tipo} (Recibe: {nombre_firma_especifico})"
                                     for p_name, qty in items_validados:
                                         item = next(x for x in stock_data if x["producto"] == p_name)
                                         supabase.table("stock").update({"sala": int(item["sala"] - qty)}).eq("id", int(item["id"])).execute()
+                                        
+                                        obs_limpia = f"Ficha {ficha_vinculada} | RUT: {beneficiary['rut']} - {detalle_receptor}"
                                         supabase.table("historial").insert({
                                             "responsable": user["nombre"], "producto": p_name, "cantidad": int(qty),
-                                            "tipo": "ENTREGA", "observaciones": f"Ficha {ficha_vinculada} - {detalle_receptor}", "created_at": get_local_now(),
+                                            "tipo": "ENTREGA", "observaciones": obs_limpia, "created_at": get_local_now(),
                                         }).execute()
                                     
                                     st.balloons() 
@@ -875,6 +874,14 @@ else:
         tab_active, tab_inactive = st.tabs(["🟢 NIÑOS ACTIVOS", "⚪ HISTORIAL DE EGRESOS"])
         
         try:
+            todas_fichas_res = supabase.table("beneficiarios").select("ficha").eq("estado", "Activo").execute()
+            fichas_ocupadas = {row["ficha"] for row in todas_fichas_res.data} if todas_fichas_res.data else set()
+        except: 
+            fichas_ocupadas = set()
+        
+        fichas_disponibles = sorted(list(set(range(1, MAX_FICHAS + 1)) - fichas_ocupadas))
+
+        try:
             todo_el_historial = supabase.table("historial").select("*").eq("tipo", "ENTREGA").execute().data
             df_entregas_global = pd.DataFrame(todo_el_historial) if todo_el_historial else pd.DataFrame()
             if not df_entregas_global.empty:
@@ -901,17 +908,9 @@ else:
             st.session_state.pdf_trigger = None
 
         with tab_active:
-            try:
-                todas_fichas_res = supabase.table("beneficiarios").select("ficha").execute()
-                fichas_ocupadas = {row["ficha"] for row in todas_fichas_res.data} if todas_fichas_res.data else set()
-            except: 
-                fichas_ocupadas = set()
-            
-            fichas_disponibles = sorted(list(set(range(1, MAX_FICHAS + 1)) - fichas_ocupadas))
-                
             with st.expander("➕ INSCRIBIR NUEVO BENEFICIARIO (MÁXIMO 210 FICHAS)", expanded=False):
                 if not fichas_disponibles:
-                    st.warning("⚠️ Se ha alcanzado el límite histórico de 210 fichas asignadas.")
+                    st.warning("⚠️ Se ha alcanzado el límite histórico de 210 fichas físicas asignadas al mismo tiempo.")
                 else:
                     with st.form("new_child_form"):
                         st.markdown("##### I. Identificación General")
@@ -963,8 +962,8 @@ else:
                                         u_suplentes_new = f"{nombre_suplente.strip()} - Tel: {tel_suplente.strip()}" if tel_suplente.strip() else nombre_suplente.strip()
                                         if not u_suplentes_new: u_suplentes_new = "-"
                                             
-                                        check_ficha = supabase.table("beneficiarios").select("ficha, nombre").eq("ficha", ficha).execute()
-                                        if check_ficha.data: st.error(f"Conflicto: El N° de ficha {ficha} ya está asignado a: {check_ficha.data[0]['nombre']}")
+                                        check_ficha = supabase.table("beneficiarios").select("ficha, nombre").eq("ficha", ficha).eq("estado", "Activo").execute()
+                                        if check_ficha.data: st.error(f"Conflicto: El N° de ficha {ficha} está actualmente en uso por: {check_ficha.data[0]['nombre']}")
                                         else:
                                             supabase.table("beneficiarios").insert({
                                                 "nombre": name, "rut": rut, "ficha": ficha, "nacimiento": birth_date,
@@ -985,9 +984,6 @@ else:
                 
             st.write("### Fichas Clínicas en Sistema")
             
-            # ==========================================
-            # 🚀 BUSCADOR INTELIGENTE (NIÑOS ACTIVOS)
-            # ==========================================
             busqueda_activos = st.text_input("🔍 Buscar niño(a) por Nombre o RUN:", placeholder="Ej: Juan Pérez o 12345678-9")
             
             if busqueda_activos:
@@ -1003,28 +999,28 @@ else:
                     with st.expander(f"📋 Ficha {child['ficha']} — {child['nombre']} ({child.get('sexo','-')})"):
                         btn_col1, btn_col2, btn_col3, _ = st.columns([1.5, 1.5, 1.5, 2.5])
                         with btn_col1:
-                            if st.button(f"📄 Descargar Ficha PDF", key=f"pdf_{child['ficha']}", use_container_width=True):
+                            if st.button(f"📄 Descargar Ficha PDF", key=f"pdf_{child['ficha']}_{child['rut']}", use_container_width=True):
                                 st.session_state.pdf_trigger = child; st.rerun()
                         with btn_col2:
-                            edit_key = f"edit_mode_{child['ficha']}"
+                            edit_key = f"edit_mode_{child['rut']}"
                             if edit_key not in st.session_state: st.session_state[edit_key] = False
-                            if st.button(f"✏️ Editar Datos", key=f"btn_edit_{child['ficha']}", use_container_width=True):
+                            if st.button(f"✏️ Editar Datos", key=f"btn_edit_{child['rut']}", use_container_width=True):
                                 st.session_state[edit_key] = not st.session_state[edit_key]; st.rerun()
                         with btn_col3:
                             with st.popover("❌ Registrar Egreso", use_container_width=True):
                                 st.markdown("**🔒 Seguridad: Confirmar Acción**")
-                                pass_confirm = st.text_input("Ingrese su contraseña para autorizar la baja:", type="password", key=f"pass_egr_{child['ficha']}")
+                                pass_confirm = st.text_input("Ingrese su contraseña para autorizar la baja:", type="password", key=f"pass_egr_{child['rut']}")
                                 
-                                if st.button("Confirmar Egreso", key=f"btn_conf_egr_{child['ficha']}", type="primary", use_container_width=True):
+                                if st.button("Confirmar Egreso", key=f"btn_conf_egr_{child['rut']}", type="primary", use_container_width=True):
                                     if not pass_confirm:
                                         st.error("⚠️ Debe ingresar su contraseña.")
                                     elif verify_password(pass_confirm, user["clave"]):
                                         with st.spinner("Procesando egreso de ficha..."):
                                             try:
-                                                supabase.table("beneficiarios").update({"estado": "Egresado"}).eq("ficha", child["ficha"]).execute()
-                                                supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "EGRESO", "observaciones": f"Ficha {child['ficha']} dada de baja", "created_at": get_local_now()}).execute()
-                                                st.toast(f"✅ Ficha {child['ficha']} marcada como Egresada.", icon="💼")
-                                                time.sleep(1.2); st.rerun()
+                                                supabase.table("beneficiarios").update({"estado": "Egresado"}).eq("rut", child["rut"]).execute()
+                                                supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "EGRESO", "observaciones": f"Ficha {child['ficha']} | RUT: {child['rut']} dada de baja", "created_at": get_local_now()}).execute()
+                                                st.toast(f"✅ Beneficiario marcado como Egresado y Ficha {child['ficha']} liberada.", icon="💼")
+                                                time.sleep(1.5); st.rerun()
                                             except Exception as e: 
                                                 st.error(f"Error al egresar: {e}")
                                     else:
@@ -1032,11 +1028,11 @@ else:
                         st.write("---")
                         
                         if st.session_state[edit_key]:
-                            with st.form(key=f"form_edit_data_{child['ficha']}"):
+                            with st.form(key=f"form_edit_data_{child['rut']}"):
                                 st.markdown("##### Editando Datos Médicos y Personales")
                                 ec1, ec2, ec3 = st.columns([2, 1.5, 1])
                                 u_name = ec1.text_input("Nombre Completo *", value=child["nombre"])
-                                u_rut = ec2.text_input("RUN / Identificación *", value=child["rut"])
+                                u_rut = ec2.text_input("RUN / Identificación *", value=child["rut"], disabled=True) 
                                 u_ficha = ec3.number_input("N° Ficha (Lectura)", value=int(child["ficha"]), disabled=True)
                                 
                                 ecc1, ecc2, ecc3 = st.columns(3)
@@ -1065,22 +1061,22 @@ else:
                                 u_social = st.text_area("Antecedentes / Historia Social", value=child.get("historia_social", ""))
                                 
                                 if st.form_submit_button("💾 GUARDAR CAMBIOS", type="primary", use_container_width=True):
-                                    if not u_name or not u_rut: st.error("Nombre y RUN no pueden quedar vacíos.")
+                                    if not u_name: st.error("El nombre no puede quedar vacío.")
                                     else:
                                         with st.spinner("Actualizando datos en el servidor..."):
                                             try:
                                                 supabase.table("beneficiarios").update({
-                                                    "nombre": u_name, "rut": u_rut, "nacimiento": u_birth, "sexo": u_sexo, 
+                                                    "nombre": u_name, "nacimiento": u_birth, "sexo": u_sexo, 
                                                     "peso_nacer": u_peso, "vacunas": u_vacunas, "control": u_control, 
                                                     "alergias": u_alergias, "prevision": u_prevision, "comuna": u_comuna,
                                                     "madre": u_mother, "padre": u_father, "telefono_madre": u_phone_m, 
                                                     "telefono_padre": u_phone_p, "direccion": u_address, 
                                                     "suplentes": u_suplentes_edit, "historia_social": u_social
-                                                }).eq("ficha", child["ficha"]).execute()
+                                                }).eq("rut", child["rut"]).execute()
                                                 
                                                 supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "EDICIÓN", "observaciones": f"Ficha {child['ficha']} corregida", "created_at": get_local_now()}).execute()
                                                 st.session_state[edit_key] = False
-                                                st.toast("✅ Ficha actualizada de manera exitosa.", icon="💾")
+                                                st.toast("✅ Datos actualizados de manera exitosa.", icon="💾")
                                                 time.sleep(1.2); st.rerun()
                                             except Exception as e: st.error(f"Error al actualizar: {e}")
                         else:
@@ -1125,24 +1121,25 @@ else:
                         with col_hist1:
                             st.markdown("##### 📦 HISTORIAL DE ENTREGAS RECIBIDAS")
                             if not df_entregas_global.empty:
-                                string_busqueda = f"Ficha {child['ficha']} "
-                                df_niño = df_entregas_global[df_entregas_global["observaciones"].astype(str).str.contains(string_busqueda, na=False)].copy()
+                                string_busqueda_rut = f"RUT: {child['rut']}"
+                                df_niño = df_entregas_global[df_entregas_global["observaciones"].astype(str).str.contains(string_busqueda_rut, na=False)].copy()
+                                
                                 if not df_niño.empty:
                                     df_niño["Fecha"] = df_niño["created_at"].dt.strftime("%d/%m/%Y")
                                     st.dataframe(df_niño[["Fecha", "producto", "cantidad"]].rename(columns={"producto": "Insumo", "cantidad": "Cant"}), use_container_width=True, hide_index=True)
-                                else: st.caption("No registra entregas.")
+                                else: st.caption("No registra entregas aún.")
                             else: st.caption("No registra entregas.")
                             
                         with col_hist2:
                             st.markdown("##### ⚖️ HISTORIAL DE PESO Y CONTROLES")
-                            if not df_pesos_global.empty:
-                                df_pesos_niño = df_pesos_global[df_pesos_global["ficha"] == child["ficha"]].copy()
+                            if not df_pesos_global.empty and 'rut' in df_pesos_global.columns:
+                                df_pesos_niño = df_pesos_global[df_pesos_global["rut"] == child["rut"]].copy()
                                 if not df_pesos_niño.empty:
                                     df_pesos_niño = df_pesos_niño.sort_values(by="fecha", ascending=False)
                                     df_pesos_niño["Fecha"] = df_pesos_niño["fecha"].dt.strftime("%d/%m/%Y")
                                     st.dataframe(df_pesos_niño[["Fecha", "peso", "responsable"]].rename(columns={"peso": "Peso Registrado", "responsable": "Atendió"}), use_container_width=True, hide_index=True)
-                                else: st.caption("No registra controles de peso en el sistema.")
-                            else: st.caption("No registra controles de peso en el sistema.")
+                                else: st.caption("No registra controles de peso.")
+                            else: st.caption("No registra controles de peso.")
 
         with tab_inactive:
             st.write("### Historial de Egresos Pasivos")
@@ -1151,9 +1148,6 @@ else:
                 
             if not egresados: st.info("No se registran egresados.")
             else:
-                # ==========================================
-                # 🚀 BUSCADOR INTELIGENTE (EGRESADOS)
-                # ==========================================
                 busqueda_egresados = st.text_input("🔍 Buscar egresado(a) por Nombre o RUN:", placeholder="Ej: Juan Pérez o 12345678-9", key="search_egresados")
                 
                 if busqueda_egresados:
@@ -1166,15 +1160,32 @@ else:
                     st.warning("No se encontraron fichas de egresados que coincidan con su búsqueda.")
                 else:
                     for inactive_child in egresados_filtrados:
-                        with st.expander(f"⚪ Ficha {inactive_child['ficha']} — {inactive_child['nombre']} (EGRESADO)"):
-                            if st.button(f"🟢 Re-incorporar", key=f"reactivar_{inactive_child['ficha']}", type="primary"):
-                                with st.spinner("Reactivando ficha..."): 
-                                    try:
-                                        supabase.table("beneficiarios").update({"estado": "Activo"}).eq("ficha", inactive_child["ficha"]).execute()
-                                        supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "REINGRESO", "observaciones": f"Ficha {inactive_child['ficha']} re-incorporada", "created_at": get_local_now()}).execute()
-                                        st.toast(f"✅ Ficha {inactive_child['ficha']} re-activada.", icon="🟢")
-                                        time.sleep(1.2); st.rerun()
-                                    except Exception as e: st.error(f"Error: {e}")
+                        with st.expander(f"⚪ Egresado: {inactive_child['nombre']} (RUT: {inactive_child['rut']})"):
+                            with st.popover("↩️ Deshacer Egreso (Error)", use_container_width=True):
+                                st.write("**Restaurar Ficha (Solo en caso de error)**")
+                                st.caption("Esta opción es únicamente para corregir un egreso accidental. El niño(a) no debería reingresar si fue dado de alta formalmente.")
+                                
+                                ficha_original = inactive_child['ficha']
+                                if ficha_original in fichas_disponibles:
+                                    st.success(f"La ficha física original (**N° {ficha_original}**) sigue libre. Se le reasignará automáticamente.")
+                                    ficha_a_restaurar = ficha_original
+                                else:
+                                    st.warning(f"La ficha original (**N° {ficha_original}**) ya fue ocupada por otro niño. Debe asignarle un cartón nuevo.")
+                                    if not fichas_disponibles:
+                                        st.error("No hay fichas físicas disponibles en este momento.")
+                                        ficha_a_restaurar = None
+                                    else:
+                                        ficha_a_restaurar = st.selectbox("Seleccione ficha libre para restaurarlo:", fichas_disponibles, key=f"re_ficha_{inactive_child['rut']}")
+
+                                if ficha_a_restaurar is not None:
+                                    if st.button("Confirmar Restauración", key=f"btn_re_{inactive_child['rut']}", type="primary", use_container_width=True):
+                                        with st.spinner("Restaurando ficha en el padrón..."): 
+                                            try:
+                                                supabase.table("beneficiarios").update({"estado": "Activo", "ficha": int(ficha_a_restaurar)}).eq("rut", inactive_child["rut"]).execute()
+                                                supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "RESTAURACIÓN", "observaciones": f"Error corregido: RUT {inactive_child['rut']} restaurado en Ficha {ficha_a_restaurar}", "created_at": get_local_now()}).execute()
+                                                st.toast("✅ Ficha restaurada exitosamente.", icon="↩️")
+                                                time.sleep(1.5); st.rerun()
+                                            except Exception as e: st.error(f"Error: {e}")
 
     # 📜 PANEL: HISTORIAL
     elif menu_choice == "📜 HISTORIAL":
