@@ -728,10 +728,23 @@ else:
                 st.success(f"**Beneficiario:** {recipient_name} | **Ficha:** {ficha_vinculada} | **Último Control:** {beneficiary.get('control','-')}", icon="👶")
 
             st.write("###")
-            product_options = ["--"] + [x["producto"] for x in stock_data if x["producto"].upper() not in ["AJUAR", "OTROS"]]
+            
+            # --- MODIFICACIÓN: Agregar saldo al nombre en el desplegable ---
+            product_options = ["--"] + [f"{x['producto']} (Disp: {int(x['sala'])})" for x in stock_data if x["producto"].upper() not in ["AJUAR", "OTROS"]]
             
             with st.form("delivery_master_form"):
                 st.markdown("##### 📦 Desglose Obligatorio de Insumos")
+                
+                # --- MODIFICACIÓN: Mostrar pastillas de saldo justo arriba del formulario ---
+                pills_html = "<div style='display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 18px;'>"
+                for item in stock_data:
+                    if item["producto"].upper() not in ["AJUAR", "OTROS"]:
+                        color_alerta = "#ef4444" if item['sala'] <= 0 else "#38bdf8"
+                        borde_alerta = "rgba(239, 68, 68, 0.4)" if item['sala'] <= 0 else "rgba(148, 163, 184, 0.2)"
+                        pills_html += f"<div style='background:rgba(15, 23, 42, 0.4); border:1px solid {borde_alerta}; padding: 5px 12px; border-radius: 6px; font-size: 0.85rem; color: #cbd5e1;'>{item['producto']}: <strong style='color:{color_alerta};'>{int(item['sala'])}</strong></div>"
+                pills_html += "</div>"
+                st.markdown(pills_html, unsafe_allow_html=True)
+                
                 col_p1, col_q1 = st.columns([3, 1])
                 with col_p1: prod_1 = st.selectbox("Insumo 1", product_options, key="p1")
                 with col_q1: qty_1 = st.number_input("Cant 1", min_value=0, step=1, key="q1")
@@ -754,7 +767,12 @@ else:
                 nombre_firma_especifico = st.text_input("Nombre completo de quien recibe físicamente (Firma digital):", placeholder="Escriba el nombre de la persona que se lleva los insumos")
                 
                 if st.form_submit_button("🔥 CONVALIDAR Y REGISTRAR ENTREGA", type="primary", use_container_width=True):
-                    items_validados = [(prod_1, qty_1), (prod_2, qty_2), (prod_3, qty_3)]
+                    
+                    # Función que limpia el "(Disp: XX)" del string para buscar el nombre real en la BD
+                    def clean_name(val):
+                        return val.rsplit(" (Disp:", 1)[0] if val != "--" else "--"
+                        
+                    items_validados = [(clean_name(prod_1), qty_1), (clean_name(prod_2), qty_2), (clean_name(prod_3), qty_3)]
                     any_empty = any(p == "--" or q <= 0 for p, q in items_validados)
                     
                     if ficha_vinculada == 0: st.error("Operación abortada: Debe identificar primero a un beneficiario activo mediante Ficha o RUN.")
@@ -772,7 +790,6 @@ else:
                         else:
                             with st.spinner("Validando stock y registrando operación completa..."):
                                 try:
-                                    # 1. Registrar el peso si se ingresó
                                     if peso_visita.strip():
                                         supabase.table("controles_peso").insert({
                                             "ficha": ficha_vinculada,
@@ -781,11 +798,9 @@ else:
                                             "responsable": user["nombre"]
                                         }).execute()
                                         
-                                        # Actualizar campo 'control' para vista rápida
                                         nuevo_control = f"{get_local_date()} - {peso_visita.strip()}"
                                         supabase.table("beneficiarios").update({"control": nuevo_control}).eq("ficha", ficha_vinculada).execute()
 
-                                    # 2. Descontar Stock e Historial
                                     detalle_receptor = f"{quien_retira_tipo} (Recibe: {nombre_firma_especifico})"
                                     for p_name, qty in items_validados:
                                         item = next(x for x in stock_data if x["producto"] == p_name)
@@ -963,150 +978,165 @@ else:
             except Exception as e: st.error(f"Error cargando padrón: {e}"); st.stop()
                 
             st.write("### Fichas Clínicas en Sistema")
-            for child in children:
-                with st.expander(f"📋 Ficha {child['ficha']} — {child['nombre']} ({child.get('sexo','-')})"):
-                    btn_col1, btn_col2, btn_col3, _ = st.columns([1.5, 1.5, 1.5, 2.5])
-                    with btn_col1:
-                        if st.button(f"📄 Descargar Ficha PDF", key=f"pdf_{child['ficha']}", use_container_width=True):
-                            st.session_state.pdf_trigger = child; st.rerun()
-                    with btn_col2:
-                        edit_key = f"edit_mode_{child['ficha']}"
-                        if edit_key not in st.session_state: st.session_state[edit_key] = False
-                        if st.button(f"✏️ Editar Datos", key=f"btn_edit_{child['ficha']}", use_container_width=True):
-                            st.session_state[edit_key] = not st.session_state[edit_key]; st.rerun()
-                    with btn_col3:
-                        with st.popover("❌ Registrar Egreso", use_container_width=True):
-                            st.markdown("**🔒 Seguridad: Confirmar Acción**")
-                            pass_confirm = st.text_input("Ingrese su contraseña para autorizar la baja:", type="password", key=f"pass_egr_{child['ficha']}")
-                            
-                            if st.button("Confirmar Egreso", key=f"btn_conf_egr_{child['ficha']}", type="primary", use_container_width=True):
-                                if not pass_confirm:
-                                    st.error("⚠️ Debe ingresar su contraseña.")
-                                elif verify_password(pass_confirm, user["clave"]):
-                                    with st.spinner("Procesando egreso de ficha..."):
-                                        try:
-                                            supabase.table("beneficiarios").update({"estado": "Egresado"}).eq("ficha", child["ficha"]).execute()
-                                            supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "EGRESO", "observaciones": f"Ficha {child['ficha']} dada de baja", "created_at": get_local_now()}).execute()
-                                            st.toast(f"✅ Ficha {child['ficha']} marcada como Egresada.", icon="💼")
-                                            time.sleep(1.2); st.rerun()
-                                        except Exception as e: 
-                                            st.error(f"Error al egresar: {e}")
-                                else:
-                                    st.error("❌ Contraseña incorrecta. Acción denegada.")
-                    st.write("---")
-                    
-                    if st.session_state[edit_key]:
-                        with st.form(key=f"form_edit_data_{child['ficha']}"):
-                            st.markdown("##### Editando Datos Médicos y Personales")
-                            ec1, ec2, ec3 = st.columns([2, 1.5, 1])
-                            u_name = ec1.text_input("Nombre Completo *", value=child["nombre"])
-                            u_rut = ec2.text_input("RUN / Identificación *", value=child["rut"])
-                            u_ficha = ec3.number_input("N° Ficha (Lectura)", value=int(child["ficha"]), disabled=True)
-                            
-                            ecc1, ecc2, ecc3 = st.columns(3)
-                            u_birth = ecc1.text_input("Fecha Nacimiento", value=child.get("nacimiento", ""))
-                            u_sexo = ecc2.selectbox("Sexo", ["Masculino", "Femenino"], index=0 if child.get("sexo") == "Masculino" else 1)
-                            u_peso = ecc3.text_input("Peso al Nacer", value=child.get("peso_nacer", ""))
-                            
-                            ecx1, ecx2, ecx3 = st.columns(3)
-                            u_alergias = ecx1.text_input("Alergias / Condiciones Médicas", value=child.get("alergias", ""))
-                            u_prevision = ecx2.selectbox("Previsión de Salud", ["Fonasa A", "Fonasa B", "Fonasa C", "Fonasa D", "Isapre", "Particular", "Ninguna"], index=["Fonasa A", "Fonasa B", "Fonasa C", "Fonasa D", "Isapre", "Particular", "Ninguna"].index(child.get("prevision", "Fonasa A")) if child.get("prevision") in ["Fonasa A", "Fonasa B", "Fonasa C", "Fonasa D", "Isapre", "Particular", "Ninguna"] else 0)
-                            u_vacunas = ecx3.selectbox("¿Vacunas al Día?", ["Sí", "No"], index=0 if child.get("vacunas") == "Sí" else 1)
-                            
-                            u_control = st.text_input("Último Control Médico base", value=child.get("control", ""))
-                            
-                            u_comuna = st.text_input("Comuna", value=child.get("comuna", ""))
-                            
-                            eccc1, eccc2, eccc3 = st.columns(3)
-                            u_phone_m = eccc1.text_input("Teléfono Madre", value=child.get("telefono_madre", ""))
-                            u_phone_p = eccc2.text_input("Teléfono Padre", value=child.get("telefono_padre", ""))
-                            u_suplentes_edit = eccc3.text_input("Nombre y Teléfono Suplente", value=child.get("suplentes", ""))
-                            
-                            u_address = st.text_input("Dirección Particular", value=child.get("direccion", ""))
-                            
-                            u_mother = st.text_area("Datos de la Madre (Nacionalidad, Edad, Escolaridad, Ocupación)", value=child.get("madre", ""))
-                            u_father = st.text_area("Datos del Padre (Nacionalidad, Edad, Escolaridad, Ocupación)", value=child.get("padre", ""))
-                            u_social = st.text_area("Antecedentes / Historia Social", value=child.get("historia_social", ""))
-                            
-                            if st.form_submit_button("💾 GUARDAR CAMBIOS", type="primary", use_container_width=True):
-                                if not u_name or not u_rut: st.error("Nombre y RUN no pueden quedar vacíos.")
-                                else:
-                                    with st.spinner("Actualizando datos en el servidor..."):
-                                        try:
-                                            supabase.table("beneficiarios").update({
-                                                "nombre": u_name, "rut": u_rut, "nacimiento": u_birth, "sexo": u_sexo, 
-                                                "peso_nacer": u_peso, "vacunas": u_vacunas, "control": u_control, 
-                                                "alergias": u_alergias, "prevision": u_prevision, "comuna": u_comuna,
-                                                "madre": u_mother, "padre": u_father, "telefono_madre": u_phone_m, 
-                                                "telefono_padre": u_phone_p, "direccion": u_address, 
-                                                "suplentes": u_suplentes_edit, "historia_social": u_social
-                                            }).eq("ficha", child["ficha"]).execute()
-                                            
-                                            supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "EDICIÓN", "observaciones": f"Ficha {child['ficha']} corregida", "created_at": get_local_now()}).execute()
-                                            st.session_state[edit_key] = False
-                                            st.toast("✅ Ficha actualizada de manera exitosa.", icon="💾")
-                                            time.sleep(1.2); st.rerun()
-                                        except Exception as e: st.error(f"Error al actualizar: {e}")
-                    else:
-                        fecha_ingreso_clean = clean_timestamp_to_date(child.get('fecha_ingreso', '-'))
-                        fecha_egreso_clean = clean_timestamp_to_date(child.get('fecha_egreso', '-'))
+            
+            # ==========================================
+            # 🚀 BUSCADOR INTELIGENTE (NIÑOS ACTIVOS)
+            # ==========================================
+            busqueda_activos = st.text_input("🔍 Buscar niño(a) por Nombre o RUN:", placeholder="Ej: Juan Pérez o 12345678-9")
+            
+            if busqueda_activos:
+                termino = busqueda_activos.lower()
+                children_filtrados = [c for c in children if termino in c["nombre"].lower() or termino in c["rut"].lower()]
+            else:
+                children_filtrados = children
+
+            if not children_filtrados:
+                st.warning("No se encontraron fichas activas que coincidan con su búsqueda.")
+            else:
+                for child in children_filtrados:
+                    with st.expander(f"📋 Ficha {child['ficha']} — {child['nombre']} ({child.get('sexo','-')})"):
+                        btn_col1, btn_col2, btn_col3, _ = st.columns([1.5, 1.5, 1.5, 2.5])
+                        with btn_col1:
+                            if st.button(f"📄 Descargar Ficha PDF", key=f"pdf_{child['ficha']}", use_container_width=True):
+                                st.session_state.pdf_trigger = child; st.rerun()
+                        with btn_col2:
+                            edit_key = f"edit_mode_{child['ficha']}"
+                            if edit_key not in st.session_state: st.session_state[edit_key] = False
+                            if st.button(f"✏️ Editar Datos", key=f"btn_edit_{child['ficha']}", use_container_width=True):
+                                st.session_state[edit_key] = not st.session_state[edit_key]; st.rerun()
+                        with btn_col3:
+                            with st.popover("❌ Registrar Egreso", use_container_width=True):
+                                st.markdown("**🔒 Seguridad: Confirmar Acción**")
+                                pass_confirm = st.text_input("Ingrese su contraseña para autorizar la baja:", type="password", key=f"pass_egr_{child['ficha']}")
+                                
+                                if st.button("Confirmar Egreso", key=f"btn_conf_egr_{child['ficha']}", type="primary", use_container_width=True):
+                                    if not pass_confirm:
+                                        st.error("⚠️ Debe ingresar su contraseña.")
+                                    elif verify_password(pass_confirm, user["clave"]):
+                                        with st.spinner("Procesando egreso de ficha..."):
+                                            try:
+                                                supabase.table("beneficiarios").update({"estado": "Egresado"}).eq("ficha", child["ficha"]).execute()
+                                                supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "EGRESO", "observaciones": f"Ficha {child['ficha']} dada de baja", "created_at": get_local_now()}).execute()
+                                                st.toast(f"✅ Ficha {child['ficha']} marcada como Egresada.", icon="💼")
+                                                time.sleep(1.2); st.rerun()
+                                            except Exception as e: 
+                                                st.error(f"Error al egresar: {e}")
+                                    else:
+                                        st.error("❌ Contraseña incorrecta. Acción denegada.")
+                        st.write("---")
                         
-                        sub_c1, sub_c2, sub_c3 = st.columns(3)
-                        with sub_c1:
-                            st.markdown(f"**RUN:** `{child['rut']}`")
-                            st.markdown(f"**Nacimiento:** {child.get('nacimiento', '-')}")
-                            st.markdown(f"**Peso al Nacer:** {child.get('peso_nacer', '-')}")
-                            st.markdown(f"**Vacunas al Día:** `{child.get('vacunas', '-')}`")
-                            st.markdown(f"**Control Médico:** {child.get('control', '-')}")
-                        with sub_c2:
-                            st.markdown(f"**Comuna:** {child.get('comuna', '-')}")
-                            st.markdown(f"**Dirección:** {child.get('direccion', '-')}")
-                            st.markdown(f"**Previsión:** {child.get('prevision', '-')}")
-                            st.markdown(f"**Alergias:** `{child.get('alergias', '-')}`")
-                        with sub_c3:
-                            st.markdown(f"**Tel. Madre:** `{child.get('telefono_madre', '-')}`")
-                            st.markdown(f"**Tel. Padre:** `{child.get('telefono_padre', '-')}`")
-                            st.markdown(f"**Suplentes:** {child.get('suplentes', '-')}")
-                            st.markdown(f"**Ingreso:** `{fecha_ingreso_clean}`")
-                            st.markdown(f"**Egreso:** `{fecha_egreso_clean}`")
+                        if st.session_state[edit_key]:
+                            with st.form(key=f"form_edit_data_{child['ficha']}"):
+                                st.markdown("##### Editando Datos Médicos y Personales")
+                                ec1, ec2, ec3 = st.columns([2, 1.5, 1])
+                                u_name = ec1.text_input("Nombre Completo *", value=child["nombre"])
+                                u_rut = ec2.text_input("RUN / Identificación *", value=child["rut"])
+                                u_ficha = ec3.number_input("N° Ficha (Lectura)", value=int(child["ficha"]), disabled=True)
+                                
+                                ecc1, ecc2, ecc3 = st.columns(3)
+                                u_birth = ecc1.text_input("Fecha Nacimiento", value=child.get("nacimiento", ""))
+                                u_sexo = ecc2.selectbox("Sexo", ["Masculino", "Femenino"], index=0 if child.get("sexo") == "Masculino" else 1)
+                                u_peso = ecc3.text_input("Peso al Nacer", value=child.get("peso_nacer", ""))
+                                
+                                ecx1, ecx2, ecx3 = st.columns(3)
+                                u_alergias = ecx1.text_input("Alergias / Condiciones Médicas", value=child.get("alergias", ""))
+                                u_prevision = ecx2.selectbox("Previsión de Salud", ["Fonasa A", "Fonasa B", "Fonasa C", "Fonasa D", "Isapre", "Particular", "Ninguna"], index=["Fonasa A", "Fonasa B", "Fonasa C", "Fonasa D", "Isapre", "Particular", "Ninguna"].index(child.get("prevision", "Fonasa A")) if child.get("prevision") in ["Fonasa A", "Fonasa B", "Fonasa C", "Fonasa D", "Isapre", "Particular", "Ninguna"] else 0)
+                                u_vacunas = ecx3.selectbox("¿Vacunas al Día?", ["Sí", "No"], index=0 if child.get("vacunas") == "Sí" else 1)
+                                
+                                u_control = st.text_input("Último Control Médico base", value=child.get("control", ""))
+                                
+                                u_comuna = st.text_input("Comuna", value=child.get("comuna", ""))
+                                
+                                eccc1, eccc2, eccc3 = st.columns(3)
+                                u_phone_m = eccc1.text_input("Teléfono Madre", value=child.get("telefono_madre", ""))
+                                u_phone_p = eccc2.text_input("Teléfono Padre", value=child.get("telefono_padre", ""))
+                                u_suplentes_edit = eccc3.text_input("Nombre y Teléfono Suplente", value=child.get("suplentes", ""))
+                                
+                                u_address = st.text_input("Dirección Particular", value=child.get("direccion", ""))
+                                
+                                u_mother = st.text_area("Datos de la Madre (Nacionalidad, Edad, Escolaridad, Ocupación)", value=child.get("madre", ""))
+                                u_father = st.text_area("Datos del Padre (Nacionalidad, Edad, Escolaridad, Ocupación)", value=child.get("padre", ""))
+                                u_social = st.text_area("Antecedentes / Historia Social", value=child.get("historia_social", ""))
+                                
+                                if st.form_submit_button("💾 GUARDAR CAMBIOS", type="primary", use_container_width=True):
+                                    if not u_name or not u_rut: st.error("Nombre y RUN no pueden quedar vacíos.")
+                                    else:
+                                        with st.spinner("Actualizando datos en el servidor..."):
+                                            try:
+                                                supabase.table("beneficiarios").update({
+                                                    "nombre": u_name, "rut": u_rut, "nacimiento": u_birth, "sexo": u_sexo, 
+                                                    "peso_nacer": u_peso, "vacunas": u_vacunas, "control": u_control, 
+                                                    "alergias": u_alergias, "prevision": u_prevision, "comuna": u_comuna,
+                                                    "madre": u_mother, "padre": u_father, "telefono_madre": u_phone_m, 
+                                                    "telefono_padre": u_phone_p, "direccion": u_address, 
+                                                    "suplentes": u_suplentes_edit, "historia_social": u_social
+                                                }).eq("ficha", child["ficha"]).execute()
+                                                
+                                                supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "EDICIÓN", "observaciones": f"Ficha {child['ficha']} corregida", "created_at": get_local_now()}).execute()
+                                                st.session_state[edit_key] = False
+                                                st.toast("✅ Ficha actualizada de manera exitosa.", icon="💾")
+                                                time.sleep(1.2); st.rerun()
+                                            except Exception as e: st.error(f"Error al actualizar: {e}")
+                        else:
+                            fecha_ingreso_clean = clean_timestamp_to_date(child.get('fecha_ingreso', '-'))
+                            fecha_egreso_clean = clean_timestamp_to_date(child.get('fecha_egreso', '-'))
+                            
+                            sub_c1, sub_c2, sub_c3 = st.columns(3)
+                            with sub_c1:
+                                st.markdown(f"**RUN:** `{child['rut']}`")
+                                st.markdown(f"**Nacimiento:** {child.get('nacimiento', '-')}")
+                                st.markdown(f"**Peso al Nacer:** {child.get('peso_nacer', '-')}")
+                                st.markdown(f"**Vacunas al Día:** `{child.get('vacunas', '-')}`")
+                                st.markdown(f"**Control Médico:** {child.get('control', '-')}")
+                            with sub_c2:
+                                st.markdown(f"**Comuna:** {child.get('comuna', '-')}")
+                                st.markdown(f"**Dirección:** {child.get('direccion', '-')}")
+                                st.markdown(f"**Previsión:** {child.get('prevision', '-')}")
+                                st.markdown(f"**Alergias:** `{child.get('alergias', '-')}`")
+                            with sub_c3:
+                                st.markdown(f"**Tel. Madre:** `{child.get('telefono_madre', '-')}`")
+                                st.markdown(f"**Tel. Padre:** `{child.get('telefono_padre', '-')}`")
+                                st.markdown(f"**Suplentes:** {child.get('suplentes', '-')}")
+                                st.markdown(f"**Ingreso:** `{fecha_ingreso_clean}`")
+                                st.markdown(f"**Egreso:** `{fecha_egreso_clean}`")
+                            
+                            st.write("###")
+                            st.markdown('<div class="ficha-seccion-datos">', unsafe_allow_html=True)
+                            st.markdown(f"👩 **ANTECEDENTES DE LA MADRE:** \n{child.get('madre', '-')}")
+                            st.markdown('</div>', unsafe_allow_html=True)
+                            st.markdown('<div class="ficha-seccion-datos">', unsafe_allow_html=True)
+                            st.markdown(f"👨 **ANTECEDENTES DEL PADRE:** \n{child.get('padre', '-')}")
+                            st.markdown('</div>', unsafe_allow_html=True)
+                            
+                            st.write("###")
+                            st.markdown("##### 📝 ANTECEDENTES GENERALES E HISTORIA SOCIAL")
+                            historia = child.get('historia_social')
+                            if historia: st.info(historia)
+                            else: st.caption("No se registran antecedentes sociales.")
                         
                         st.write("###")
-                        st.markdown('<div class="ficha-seccion-datos">', unsafe_allow_html=True)
-                        st.markdown(f"👩 **ANTECEDENTES DE LA MADRE:** \n{child.get('madre', '-')}")
-                        st.markdown('</div>', unsafe_allow_html=True)
-                        st.markdown('<div class="ficha-seccion-datos">', unsafe_allow_html=True)
-                        st.markdown(f"👨 **ANTECEDENTES DEL PADRE:** \n{child.get('padre', '-')}")
-                        st.markdown('</div>', unsafe_allow_html=True)
-                        
-                        st.write("###")
-                        st.markdown("##### 📝 ANTECEDENTES GENERALES E HISTORIA SOCIAL")
-                        historia = child.get('historia_social')
-                        if historia: st.info(historia)
-                        else: st.caption("No se registran antecedentes sociales.")
-                    
-                    st.write("###")
-                    col_hist1, col_hist2 = st.columns(2)
-                    with col_hist1:
-                        st.markdown("##### 📦 HISTORIAL DE ENTREGAS RECIBIDAS")
-                        if not df_entregas_global.empty:
-                            string_busqueda = f"Ficha {child['ficha']} "
-                            df_niño = df_entregas_global[df_entregas_global["observaciones"].astype(str).str.contains(string_busqueda, na=False)].copy()
-                            if not df_niño.empty:
-                                df_niño["Fecha"] = df_niño["created_at"].dt.strftime("%d/%m/%Y")
-                                st.dataframe(df_niño[["Fecha", "producto", "cantidad"]].rename(columns={"producto": "Insumo", "cantidad": "Cant"}), use_container_width=True, hide_index=True)
+                        col_hist1, col_hist2 = st.columns(2)
+                        with col_hist1:
+                            st.markdown("##### 📦 HISTORIAL DE ENTREGAS RECIBIDAS")
+                            if not df_entregas_global.empty:
+                                string_busqueda = f"Ficha {child['ficha']} "
+                                df_niño = df_entregas_global[df_entregas_global["observaciones"].astype(str).str.contains(string_busqueda, na=False)].copy()
+                                if not df_niño.empty:
+                                    df_niño["Fecha"] = df_niño["created_at"].dt.strftime("%d/%m/%Y")
+                                    st.dataframe(df_niño[["Fecha", "producto", "cantidad"]].rename(columns={"producto": "Insumo", "cantidad": "Cant"}), use_container_width=True, hide_index=True)
+                                else: st.caption("No registra entregas.")
                             else: st.caption("No registra entregas.")
-                        else: st.caption("No registra entregas.")
-                        
-                    with col_hist2:
-                        st.markdown("##### ⚖️ HISTORIAL DE PESO Y CONTROLES")
-                        if not df_pesos_global.empty:
-                            df_pesos_niño = df_pesos_global[df_pesos_global["ficha"] == child["ficha"]].copy()
-                            if not df_pesos_niño.empty:
-                                df_pesos_niño = df_pesos_niño.sort_values(by="fecha", ascending=False)
-                                df_pesos_niño["Fecha"] = df_pesos_niño["fecha"].dt.strftime("%d/%m/%Y")
-                                st.dataframe(df_pesos_niño[["Fecha", "peso", "responsable"]].rename(columns={"peso": "Peso Registrado", "responsable": "Atendió"}), use_container_width=True, hide_index=True)
+                            
+                        with col_hist2:
+                            st.markdown("##### ⚖️ HISTORIAL DE PESO Y CONTROLES")
+                            if not df_pesos_global.empty:
+                                df_pesos_niño = df_pesos_global[df_pesos_global["ficha"] == child["ficha"]].copy()
+                                if not df_pesos_niño.empty:
+                                    df_pesos_niño = df_pesos_niño.sort_values(by="fecha", ascending=False)
+                                    df_pesos_niño["Fecha"] = df_pesos_niño["fecha"].dt.strftime("%d/%m/%Y")
+                                    st.dataframe(df_pesos_niño[["Fecha", "peso", "responsable"]].rename(columns={"peso": "Peso Registrado", "responsable": "Atendió"}), use_container_width=True, hide_index=True)
+                                else: st.caption("No registra controles de peso en el sistema.")
                             else: st.caption("No registra controles de peso en el sistema.")
-                        else: st.caption("No registra controles de peso en el sistema.")
 
         with tab_inactive:
             st.write("### Historial de Egresos Pasivos")
@@ -1115,16 +1145,30 @@ else:
                 
             if not egresados: st.info("No se registran egresados.")
             else:
-                for inactive_child in egresados:
-                    with st.expander(f"⚪ Ficha {inactive_child['ficha']} — {inactive_child['nombre']} (EGRESADO)"):
-                        if st.button(f"🟢 Re-incorporar", key=f"reactivar_{inactive_child['ficha']}", type="primary"):
-                            with st.spinner("Reactivando ficha..."): 
-                                try:
-                                    supabase.table("beneficiarios").update({"estado": "Activo"}).eq("ficha", inactive_child["ficha"]).execute()
-                                    supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "REINGRESO", "observaciones": f"Ficha {inactive_child['ficha']} re-incorporada", "created_at": get_local_now()}).execute()
-                                    st.toast(f"✅ Ficha {inactive_child['ficha']} re-activada.", icon="🟢")
-                                    time.sleep(1.2); st.rerun()
-                                except Exception as e: st.error(f"Error: {e}")
+                # ==========================================
+                # 🚀 BUSCADOR INTELIGENTE (EGRESADOS)
+                # ==========================================
+                busqueda_egresados = st.text_input("🔍 Buscar egresado(a) por Nombre o RUN:", placeholder="Ej: Juan Pérez o 12345678-9", key="search_egresados")
+                
+                if busqueda_egresados:
+                    termino_eg = busqueda_egresados.lower()
+                    egresados_filtrados = [e for e in egresados if termino_eg in e["nombre"].lower() or termino_eg in e["rut"].lower()]
+                else:
+                    egresados_filtrados = egresados
+
+                if not egresados_filtrados:
+                    st.warning("No se encontraron fichas de egresados que coincidan con su búsqueda.")
+                else:
+                    for inactive_child in egresados_filtrados:
+                        with st.expander(f"⚪ Ficha {inactive_child['ficha']} — {inactive_child['nombre']} (EGRESADO)"):
+                            if st.button(f"🟢 Re-incorporar", key=f"reactivar_{inactive_child['ficha']}", type="primary"):
+                                with st.spinner("Reactivando ficha..."): 
+                                    try:
+                                        supabase.table("beneficiarios").update({"estado": "Activo"}).eq("ficha", inactive_child["ficha"]).execute()
+                                        supabase.table("historial").insert({"responsable": user["nombre"], "producto": "PADRÓN", "cantidad": 1, "tipo": "REINGRESO", "observaciones": f"Ficha {inactive_child['ficha']} re-incorporada", "created_at": get_local_now()}).execute()
+                                        st.toast(f"✅ Ficha {inactive_child['ficha']} re-activada.", icon="🟢")
+                                        time.sleep(1.2); st.rerun()
+                                    except Exception as e: st.error(f"Error: {e}")
 
     # 📜 PANEL: HISTORIAL
     elif menu_choice == "📜 HISTORIAL":
