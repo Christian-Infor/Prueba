@@ -223,6 +223,17 @@ st.markdown("""
         border-left: 4px solid #3b82f6 !important;
     }
 
+    /* ANIMACIÓN EN CASCADA PARA EL MENÚ */
+    @keyframes entradaCascada {
+        from { opacity: 0; transform: translateX(-25px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(1) { animation: entradaCascada 0.5s ease-out 0.1s forwards; opacity: 0; }
+    [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(2) { animation: entradaCascada 0.5s ease-out 0.2s forwards; opacity: 0; }
+    [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(3) { animation: entradaCascada 0.5s ease-out 0.3s forwards; opacity: 0; }
+    [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(4) { animation: entradaCascada 0.5s ease-out 0.4s forwards; opacity: 0; }
+    [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(5) { animation: entradaCascada 0.5s ease-out 0.5s forwards; opacity: 0; }
+
     /* 3. BOTONES SECUNDARIOS (Efecto Glassmorphism Ahumado) */
     button[kind="secondary"] {
         background: rgba(30, 41, 59, 0.5) !important;
