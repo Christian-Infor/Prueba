@@ -27,9 +27,19 @@ st.markdown("""
     <style>
     html, body, [class*="st-"] { font-size: 1.1rem !important; }
     
-    /* Fondo global Azul Corporativo para el Login */
+    /* ══════════════════════════════
+       FONDO ANIMADO (MOVIMIENTO SUTIL)
+    ══════════════════════════════ */
+    @keyframes movimientoFondo {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
     .stApp:not(:has(div[data-testid="stSidebar"])) {
-        background: linear-gradient(135deg, #0A1931 0%, #050C17 100%) !important;
+        background: linear-gradient(-45deg, #050C17, #0A1931, #112240, #0a1128) !important;
+        background-size: 400% 400% !important;
+        animation: movimientoFondo 18s ease infinite !important;
     }
     
     /* Bajar un poco el contenido desde el techo */
@@ -39,7 +49,7 @@ st.markdown("""
     }
     
     /* ══════════════════════════════
-       ANIMACIONES PREMIUM LOGIN
+       ANIMACIONES Y EFECTO CRISTAL (LOGIN)
     ══════════════════════════════ */
     @keyframes flotarLogo {
         0% { transform: translateY(0px); filter: brightness(1.4) drop-shadow(0px 6px 18px rgba(96, 165, 250, 0.5)); }
@@ -56,9 +66,6 @@ st.markdown("""
         100% { opacity: 1; transform: translateY(0px) scale(1); }
     }
 
-    /* ══════════════════════════════
-       LOGIN
-    ══════════════════════════════ */
     .centered-login {
         max-width: 420px;
         margin: 0 auto;
@@ -66,15 +73,33 @@ st.markdown("""
         padding-top: 5vh;
     }
 
+    /* EFECTO GLASSMORPHISM (VIDRIO ESMERILADO) */
     .stForm {
-        background: linear-gradient(160deg, #111827 0%, #0f172a 100%) !important;
-        border: 1px solid rgba(99, 131, 246, 0.35) !important;
+        background: rgba(15, 23, 42, 0.55) !important;
+        backdrop-filter: blur(16px) saturate(120%) !important;
+        -webkit-backdrop-filter: blur(16px) saturate(120%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
         border-radius: 20px !important;
         padding: 2rem 2rem 1.6rem 2rem !important;
-        box-shadow: 0 0 40px rgba(59, 130, 246, 0.12), 0 20px 60px rgba(0,0,0,0.5) !important;
-        /* Animación aplicada a la caja del login */
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
         animation: entradaLoginCaja 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
     }
+    
+    /* CAJAS DE TEXTO REACTIVAS */
+    .stForm [data-baseweb="input"] {
+        background-color: rgba(30, 41, 59, 0.4) !important;
+        border: 1px solid rgba(148, 163, 184, 0.2) !important;
+        border-radius: 10px !important;
+        transition: all 0.3s ease !important;
+    }
+    .stForm [data-baseweb="input"]:focus-within {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 12px rgba(59, 130, 246, 0.5) !important;
+        background-color: rgba(30, 41, 59, 0.7) !important;
+    }
+
+    /* BOTÓN DE INGRESO */
     .stForm [data-testid="stFormSubmitButton"] button {
         background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%) !important;
         color: #fff !important;
@@ -86,10 +111,11 @@ st.markdown("""
         padding: 0.75rem 1rem !important;
         transition: all 0.3s ease !important;
         box-shadow: 0 4px 20px rgba(79, 70, 229, 0.4) !important;
+        margin-top: 10px !important;
     }
     .stForm [data-testid="stFormSubmitButton"] button:hover {
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 28px rgba(79, 70, 229, 0.55) !important;
+        box-shadow: 0 6px 28px rgba(79, 70, 229, 0.6) !important;
     }
     
     /* ── Modelo de Tarjetas del Dashboard ── */
