@@ -902,77 +902,83 @@ else:
 
         with tab_active:
             try:
-                res_max = supabase.table("beneficiarios").select("ficha").order("ficha", desc=True).limit(1).execute()
-                siguiente_ficha = (res_max.data[0]['ficha'] + 1) if res_max.data else 1
-            except: siguiente_ficha = 1
+                todas_fichas_res = supabase.table("beneficiarios").select("ficha").execute()
+                fichas_ocupadas = {row["ficha"] for row in todas_fichas_res.data} if todas_fichas_res.data else set()
+            except: 
+                fichas_ocupadas = set()
+            
+            fichas_disponibles = sorted(list(set(range(1, MAX_FICHAS + 1)) - fichas_ocupadas))
                 
             with st.expander("➕ INSCRIBIR NUEVO BENEFICIARIO (MÁXIMO 210 FICHAS)", expanded=False):
-                with st.form("new_child_form"):
-                    st.markdown("##### I. Identificación General")
-                    c1, c2, c3 = st.columns([2, 1.5, 1])
-                    name = c1.text_input("Nombre Completo del Niño(a) *")
-                    rut = c2.text_input("RUN / Identificación *")
-                    ficha = c3.number_input("N° Ficha Asignado", min_value=1, value=siguiente_ficha, step=1)
-                    
-                    st.markdown("##### II. Datos Clínicos")
-                    cc1, cc2, cc3 = st.columns(3)
-                    birth_date = cc1.text_input("Fecha Nacimiento (DD/MM/AAAA)")
-                    sexo = cc2.selectbox("Sexo", ["Masculino", "Femenino"])
-                    peso_nacer = cc3.text_input("Peso al Nacer (ej: 3.935 kg)")
-                    
-                    cx1, cx2, cx3 = st.columns(3)
-                    alergias = cx1.text_input("Alergias / Condiciones Médicas")
-                    prevision = cx2.selectbox("Previsión de Salud", ["Fonasa A", "Fonasa B", "Fonasa C", "Fonasa D", "Isapre", "Particular", "Ninguna"])
-                    vacunas = cx3.selectbox("¿Vacunas al Día?", ["Sí", "No"])
-                    
-                    ultimo_control = st.text_input("Último Control Médico base (ej: 30.03.26 / 3.820 kg)")
-                    
-                    st.markdown("##### III. Contacto y Familia")
-                    comuna = st.text_input("Comuna de Residencia")
-                    
-                    c_tel1, c_tel2, c_tel3 = st.columns(3)
-                    tel_madre = c_tel1.text_input("Teléfono de la Madre")
-                    tel_padre = c_tel2.text_input("Teléfono del Padre")
-                    tel_suplente = c_tel3.text_input("Teléfono de Suplente")
-                    
-                    address = st.text_input("Dirección Particular Completa")
-                    
-                    nombre_suplente = st.text_input("Nombre del Suplente Autorizado (Asociado al teléfono arriba)")
-                    
-                    mother = st.text_area("Datos de la Madre (Nacionalidad, Edad, Escolaridad, Ocupación)")
-                    father = st.text_area("Datos del Padre (Nacionalidad, Edad, Escolaridad, Ocupación)")
-                    social_history = st.text_area("Antecedentes Importantes / Historia Social")
-                    
-                    if st.form_submit_button("INGRESAR BENEFICIARIO AL SISTEMA", type="primary"):
-                        if not name or not rut: st.error("Campos obligatorios faltantes: Nombre y RUN son requeridos.")
-                        else:
-                            with st.spinner("Generando nueva ficha clínica en el servidor..."):
-                                try:
-                                    f_ingreso_dt = datetime.now(CHILE_TZ)
-                                    f_egreso_dt = f_ingreso_dt + timedelta(days=730)
-                                    
-                                    string_ingreso = f_ingreso_dt.strftime("%Y-%m-%d")
-                                    string_egreso = f_egreso_dt.strftime("%Y-%m-%d")
-                                    
-                                    u_suplentes_new = f"{nombre_suplente.strip()} - Tel: {tel_suplente.strip()}" if tel_suplente.strip() else nombre_suplente.strip()
-                                    if not u_suplentes_new: u_suplentes_new = "-"
+                if not fichas_disponibles:
+                    st.warning("⚠️ Se ha alcanzado el límite histórico de 210 fichas asignadas.")
+                else:
+                    with st.form("new_child_form"):
+                        st.markdown("##### I. Identificación General")
+                        c1, c2, c3 = st.columns([2, 1.5, 1])
+                        name = c1.text_input("Nombre Completo del Niño(a) *")
+                        rut = c2.text_input("RUN / Identificación *")
+                        ficha = c3.selectbox("N° Ficha Disponible", fichas_disponibles)
+                        
+                        st.markdown("##### II. Datos Clínicos")
+                        cc1, cc2, cc3 = st.columns(3)
+                        birth_date = cc1.text_input("Fecha Nacimiento (DD/MM/AAAA)")
+                        sexo = cc2.selectbox("Sexo", ["Masculino", "Femenino"])
+                        peso_nacer = cc3.text_input("Peso al Nacer (ej: 3.935 kg)")
+                        
+                        cx1, cx2, cx3 = st.columns(3)
+                        alergias = cx1.text_input("Alergias / Condiciones Médicas")
+                        prevision = cx2.selectbox("Previsión de Salud", ["Fonasa A", "Fonasa B", "Fonasa C", "Fonasa D", "Isapre", "Particular", "Ninguna"])
+                        vacunas = cx3.selectbox("¿Vacunas al Día?", ["Sí", "No"])
+                        
+                        ultimo_control = st.text_input("Último Control Médico base (ej: 30.03.26 / 3.820 kg)")
+                        
+                        st.markdown("##### III. Contacto y Familia")
+                        comuna = st.text_input("Comuna de Residencia")
+                        
+                        c_tel1, c_tel2, c_tel3 = st.columns(3)
+                        tel_madre = c_tel1.text_input("Teléfono de la Madre")
+                        tel_padre = c_tel2.text_input("Teléfono del Padre")
+                        tel_suplente = c_tel3.text_input("Teléfono de Suplente")
+                        
+                        address = st.text_input("Dirección Particular Completa")
+                        
+                        nombre_suplente = st.text_input("Nombre del Suplente Autorizado (Asociado al teléfono arriba)")
+                        
+                        mother = st.text_area("Datos de la Madre (Nacionalidad, Edad, Escolaridad, Ocupación)")
+                        father = st.text_area("Datos del Padre (Nacionalidad, Edad, Escolaridad, Ocupación)")
+                        social_history = st.text_area("Antecedentes Importantes / Historia Social")
+                        
+                        if st.form_submit_button("INGRESAR BENEFICIARIO AL SISTEMA", type="primary"):
+                            if not name or not rut: st.error("Campos obligatorios faltantes: Nombre y RUN son requeridos.")
+                            else:
+                                with st.spinner("Generando nueva ficha clínica en el servidor..."):
+                                    try:
+                                        f_ingreso_dt = datetime.now(CHILE_TZ)
+                                        f_egreso_dt = f_ingreso_dt + timedelta(days=730)
                                         
-                                    check_ficha = supabase.table("beneficiarios").select("ficha, nombre").eq("ficha", ficha).execute()
-                                    if check_ficha.data: st.error(f"Conflicto: El N° de ficha {ficha} ya está asignado a: {check_ficha.data[0]['nombre']}")
-                                    else:
-                                        supabase.table("beneficiarios").insert({
-                                            "nombre": name, "rut": rut, "ficha": ficha, "nacimiento": birth_date,
-                                            "sexo": sexo, "peso_nacer": peso_nacer, "vacunas": vacunas, "control": ultimo_control,
-                                            "alergias": alergias, "prevision": prevision, "comuna": comuna,
-                                            "telefono_madre": tel_madre, "telefono_padre": tel_padre, 
-                                            "direccion": address, "madre": mother, "padre": father,
-                                            "suplentes": u_suplentes_new, "historia_social": social_history, "estado": "Activo",
-                                            "fecha_ingreso": string_ingreso, "fecha_egreso": string_egreso
-                                        }).execute()
-                                        st.success("Registro clínico-social creado exitosamente.")
-                                        st.balloons() 
-                                        time.sleep(1.8); st.rerun() 
-                                except Exception as e: st.error(f"Fallo en inserción: {e}")
+                                        string_ingreso = f_ingreso_dt.strftime("%Y-%m-%d")
+                                        string_egreso = f_egreso_dt.strftime("%Y-%m-%d")
+                                        
+                                        u_suplentes_new = f"{nombre_suplente.strip()} - Tel: {tel_suplente.strip()}" if tel_suplente.strip() else nombre_suplente.strip()
+                                        if not u_suplentes_new: u_suplentes_new = "-"
+                                            
+                                        check_ficha = supabase.table("beneficiarios").select("ficha, nombre").eq("ficha", ficha).execute()
+                                        if check_ficha.data: st.error(f"Conflicto: El N° de ficha {ficha} ya está asignado a: {check_ficha.data[0]['nombre']}")
+                                        else:
+                                            supabase.table("beneficiarios").insert({
+                                                "nombre": name, "rut": rut, "ficha": ficha, "nacimiento": birth_date,
+                                                "sexo": sexo, "peso_nacer": peso_nacer, "vacunas": vacunas, "control": ultimo_control,
+                                                "alergias": alergias, "prevision": prevision, "comuna": comuna,
+                                                "telefono_madre": tel_madre, "telefono_padre": tel_padre, 
+                                                "direccion": address, "madre": mother, "padre": father,
+                                                "suplentes": u_suplentes_new, "historia_social": social_history, "estado": "Activo",
+                                                "fecha_ingreso": string_ingreso, "fecha_egreso": string_egreso
+                                            }).execute()
+                                            st.success("Registro clínico-social creado exitosamente.")
+                                            st.balloons() 
+                                            time.sleep(1.8); st.rerun() 
+                                    except Exception as e: st.error(f"Fallo en inserción: {e}")
                                 
             try: children = supabase.table("beneficiarios").select("*").eq("estado", "Activo").order("ficha").execute().data
             except Exception as e: st.error(f"Error cargando padrón: {e}"); st.stop()
