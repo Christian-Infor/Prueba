@@ -43,18 +43,16 @@ st.markdown("""
     }
     
     /* ══════════════════════════════
-       FONDO ANIMADO (MOVIMIENTO SUTIL)
+       FONDO MODERNO CON IMAGEN (LOGIN)
     ══════════════════════════════ */
-    @keyframes movimientoFondo {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-    
     .stApp:not(:has(div[data-testid="stSidebar"])) {
-        background: linear-gradient(-45deg, #050C17, #0A1931, #112240, #0a1128) !important;
-        background-size: 400% 400% !important;
-        animation: movimientoFondo 18s ease infinite !important;
+        /* Capa oscura semitransparente para que la caja de login resalte + Imagen de fondo */
+        background: 
+            linear-gradient(rgba(5, 12, 23, 0.75), rgba(10, 25, 49, 0.85)),
+            url("https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000&auto=format&fit=crop") !important;
+        background-size: cover !important;
+        background-position: center center !important;
+        background-attachment: fixed !important;
     }
     
     /* Bajar un poco el contenido desde el techo */
@@ -514,7 +512,7 @@ if "user" not in st.session_state:
             <div style="text-align: center; margin-bottom: 28px; width: 100%;">
                 <img src="{LOGO_SRC}" class="logo-neon" style="display: inline-block;">
                 <h1 style="color:#e2e8f0; font-size:2.2rem; margin:0; font-weight:800; text-align:center;">GOTA DE LECHE</h1>
-                <p style="color:#64748b; font-size:0.85rem; margin:2px 0 0 0; letter-spacing:0.15em; text-transform:uppercase; font-weight:600; text-align:center; transform: translateX(4px);">SISTEMA MAESTRO DE GESTIÓN</p>
+                <p style="color:#cbd5e1; font-size:0.85rem; margin:2px 0 0 0; letter-spacing:0.15em; text-transform:uppercase; font-weight:600; text-align:center; transform: translateX(4px);">SISTEMA MAESTRO DE GESTIÓN</p>
             </div>
         """, unsafe_allow_html=True)
         
