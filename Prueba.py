@@ -28,6 +28,20 @@ st.markdown("""
     <style>
     html, body, [class*="st-"] { font-size: 1.1rem !important; }
     
+    /* ── CORRECCIÓN ICONOS EXPANDERS (Elimina el texto _arrow_right_) ── */
+    details[data-testid="stExpander"] summary::after,
+    details[data-testid="stExpander"] summary::before {
+        display: none !important;
+    }
+
+    /* ── EFECTO NEÓN PARA EL LOGO (Sin movimiento) ── */
+    .logo-neon {
+        height: 180px; 
+        object-fit: contain; 
+        mix-blend-mode: screen; 
+        filter: brightness(1.2) drop-shadow(0 0 10px #3b82f6) drop-shadow(0 0 20px #3b82f6) drop-shadow(0 0 30px #3b82f6);
+    }
+    
     /* ══════════════════════════════
        FONDO ANIMADO (MOVIMIENTO SUTIL)
     ══════════════════════════════ */
@@ -52,16 +66,6 @@ st.markdown("""
     /* ══════════════════════════════
        ANIMACIONES Y EFECTO CRISTAL (LOGIN)
     ══════════════════════════════ */
-    @keyframes flotarLogo {
-        0% { transform: translateY(0px); filter: brightness(1.4) drop-shadow(0px 6px 18px rgba(96, 165, 250, 0.5)); }
-        50% { transform: translateY(-8px); filter: brightness(1.6) drop-shadow(0px 12px 24px rgba(96, 165, 250, 0.7)); }
-        100% { transform: translateY(0px); filter: brightness(1.4) drop-shadow(0px 6px 18px rgba(96, 165, 250, 0.5)); }
-    }
-
-    .logo-animado {
-        animation: flotarLogo 4s ease-in-out infinite;
-    }
-
     @keyframes entradaLoginCaja {
         0% { opacity: 0; transform: translateY(30px) scale(0.98); }
         100% { opacity: 1; transform: translateY(0px) scale(1); }
@@ -508,7 +512,7 @@ if "user" not in st.session_state:
         
         st.markdown(f"""
             <div style="text-align: center; margin-bottom: 28px; width: 100%;">
-                <img src="{LOGO_SRC}" class="logo-animado" style="height: 180px; object-fit: contain; mix-blend-mode: screen; margin-bottom: 16px; display: inline-block;">
+                <img src="{LOGO_SRC}" class="logo-neon" style="display: inline-block;">
                 <h1 style="color:#e2e8f0; font-size:2.2rem; margin:0; font-weight:800; text-align:center;">GOTA DE LECHE</h1>
                 <p style="color:#64748b; font-size:0.85rem; margin:2px 0 0 0; letter-spacing:0.15em; text-transform:uppercase; font-weight:600; text-align:center; transform: translateX(4px);">SISTEMA MAESTRO DE GESTIÓN</p>
             </div>
@@ -542,7 +546,7 @@ else:
     with st.sidebar:
         st.markdown(f"""
             <div style="text-align:center; margin-bottom:20px; margin-top:10px;">
-                <img src="{LOGO_SRC}" class="logo-animado" style="height:130px; object-fit:contain; mix-blend-mode:screen;">
+                <img src="{LOGO_SRC}" class="logo-neon" style="height:130px; object-fit:contain;">
             </div>
         """, unsafe_allow_html=True)
         st.markdown(f"### 👤 {user['nombre']}")
