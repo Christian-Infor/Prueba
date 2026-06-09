@@ -752,12 +752,15 @@ else:
             with st.form("delivery_master_form"):
                 st.markdown("##### 📦 Desglose Obligatorio de Insumos")
                 
-                pills_html = "<div style='display:flex; flex-wrap:wrap; gap:8px; margin-bottom: 18px;'>"
+                # ── MODIFICACIÓN: CAJAS DE INSUMOS MÁS GRANDES Y LEGIBLES ──
+                pills_html = "<div style='display:flex; flex-wrap:wrap; gap:12px; margin-bottom: 24px;'>"
                 for item in stock_data:
                     if item["producto"].upper() not in ["AJUAR", "OTROS"]:
                         color_alerta = "#ef4444" if item['sala'] <= 0 else "#38bdf8"
-                        borde_alerta = "rgba(239, 68, 68, 0.4)" if item['sala'] <= 0 else "rgba(148, 163, 184, 0.2)"
-                        pills_html += f"<div style='background:rgba(15, 23, 42, 0.4); border:1px solid {borde_alerta}; padding: 5px 12px; border-radius: 6px; font-size: 0.85rem; color: #cbd5e1;'>{item['producto']}: <strong style='color:{color_alerta};'>{int(item['sala'])}</strong></div>"
+                        borde_alerta = "rgba(239, 68, 68, 0.6)" if item['sala'] <= 0 else "rgba(148, 163, 184, 0.3)"
+                        bg_alerta = "rgba(239, 68, 68, 0.15)" if item['sala'] <= 0 else "rgba(15, 23, 42, 0.6)"
+                        
+                        pills_html += f"<div style='background:{bg_alerta}; border:2px solid {borde_alerta}; padding: 10px 18px; border-radius: 8px; font-size: 1.15rem; color: #f8fafc; display: flex; align-items: center; gap: 8px;'><span>{item['producto']}:</span> <strong style='color:{color_alerta}; font-size: 1.4rem;'>{int(item['sala'])}</strong></div>"
                 pills_html += "</div>"
                 st.markdown(pills_html, unsafe_allow_html=True)
                 
