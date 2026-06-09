@@ -752,7 +752,7 @@ else:
             with st.form("delivery_master_form"):
                 st.markdown("##### 📦 Desglose Obligatorio de Insumos")
                 
-                # ── MODIFICACIÓN: CAJAS DE INSUMOS MÁS GRANDES Y LEGIBLES ──
+                # ── CAJAS DE INSUMOS MÁS GRANDES Y LEGIBLES ──
                 pills_html = "<div style='display:flex; flex-wrap:wrap; gap:12px; margin-bottom: 24px;'>"
                 for item in stock_data:
                     if item["producto"].upper() not in ["AJUAR", "OTROS"]:
@@ -1324,7 +1324,8 @@ else:
             with col1: seleccion_mes = st.selectbox("Seleccione el MES:", list(meses.keys()), index=datetime.now(CHILE_TZ).month - 1)
             with col2: seleccion_anio = st.selectbox("Seleccione el AÑO:", [2026, 2025], index=0)
         else:
-            fecha_dia = st.date_input("Seleccione el DÍA específico:", value=st.session_state.fecha_seleccionada)
+            # CORRECCIÓN DE FORMATO FECHA A DD/MM/YYYY
+            fecha_dia = st.date_input("Seleccione el DÍA específico:", value=st.session_state.fecha_seleccionada, format="DD/MM/YYYY")
             st.session_state.fecha_seleccionada = fecha_dia
 
         try:
