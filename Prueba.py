@@ -33,26 +33,20 @@ st.markdown("""
     details[data-testid="stExpander"] summary::before {
         display: none !important;
     }
-
-    /* ── EFECTO NEÓN PARA EL LOGO (Sin movimiento) ── */
-    .logo-neon {
-        height: 180px; 
-        object-fit: contain; 
-        mix-blend-mode: screen; 
-        filter: brightness(1.2) drop-shadow(0 0 10px #3b82f6) drop-shadow(0 0 20px #3b82f6) drop-shadow(0 0 30px #3b82f6);
-    }
     
     /* ══════════════════════════════
-       FONDO MODERNO CON IMAGEN (LOGIN)
+       FONDO ANIMADO (MOVIMIENTO SUTIL)
     ══════════════════════════════ */
+    @keyframes movimientoFondo {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
     .stApp:not(:has(div[data-testid="stSidebar"])) {
-        /* Capa oscura semitransparente para que la caja de login resalte + Imagen de fondo */
-        background: 
-            linear-gradient(rgba(5, 12, 23, 0.75), rgba(10, 25, 49, 0.85)),
-            url("https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=2000&auto=format&fit=crop") !important;
-        background-size: cover !important;
-        background-position: center center !important;
-        background-attachment: fixed !important;
+        background: linear-gradient(-45deg, #050C17, #0A1931, #112240, #0a1128) !important;
+        background-size: 400% 400% !important;
+        animation: movimientoFondo 18s ease infinite !important;
     }
     
     /* Bajar un poco el contenido desde el techo */
@@ -510,7 +504,7 @@ if "user" not in st.session_state:
         
         st.markdown(f"""
             <div style="text-align: center; margin-bottom: 28px; width: 100%;">
-                <img src="{LOGO_SRC}" class="logo-neon" style="display: inline-block;">
+                <img src="{LOGO_SRC}" style="height: 180px; object-fit: contain; mix-blend-mode: screen; filter: brightness(1.3) drop-shadow(0px 4px 10px rgba(96, 165, 250, 0.3)); display: inline-block;">
                 <h1 style="color:#e2e8f0; font-size:2.2rem; margin:0; font-weight:800; text-align:center;">GOTA DE LECHE</h1>
                 <p style="color:#cbd5e1; font-size:0.85rem; margin:2px 0 0 0; letter-spacing:0.15em; text-transform:uppercase; font-weight:600; text-align:center; transform: translateX(4px);">SISTEMA MAESTRO DE GESTIÓN</p>
             </div>
@@ -544,7 +538,7 @@ else:
     with st.sidebar:
         st.markdown(f"""
             <div style="text-align:center; margin-bottom:20px; margin-top:10px;">
-                <img src="{LOGO_SRC}" class="logo-neon" style="height:130px; object-fit:contain;">
+                <img src="{LOGO_SRC}" style="height:130px; object-fit:contain; mix-blend-mode: screen; filter: brightness(1.3) drop-shadow(0px 4px 8px rgba(96, 165, 250, 0.2));">
             </div>
         """, unsafe_allow_html=True)
         st.markdown(f"### 👤 {user['nombre']}")
