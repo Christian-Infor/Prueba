@@ -33,6 +33,14 @@ st.markdown("""
     details[data-testid="stExpander"] summary::before {
         display: none !important;
     }
+
+    /* ── EFECTO NEÓN PARA EL LOGO (Sin movimiento) ── */
+    .logo-neon {
+        height: 180px; 
+        object-fit: contain; 
+        mix-blend-mode: screen; 
+        filter: brightness(1.2) drop-shadow(0 0 10px #3b82f6) drop-shadow(0 0 20px #3b82f6) drop-shadow(0 0 30px #3b82f6);
+    }
     
     /* ══════════════════════════════
        FONDO ANIMADO (MOVIMIENTO SUTIL)
@@ -504,7 +512,7 @@ if "user" not in st.session_state:
         
         st.markdown(f"""
             <div style="text-align: center; margin-bottom: 28px; width: 100%;">
-                <img src="{LOGO_SRC}" style="height: 180px; object-fit: contain; mix-blend-mode: screen; filter: brightness(1.3) drop-shadow(0px 4px 10px rgba(96, 165, 250, 0.3)); display: inline-block;">
+                <img src="{LOGO_SRC}" class="logo-neon" style="display: inline-block;">
                 <h1 style="color:#e2e8f0; font-size:2.2rem; margin:0; font-weight:800; text-align:center;">GOTA DE LECHE</h1>
                 <p style="color:#cbd5e1; font-size:0.85rem; margin:2px 0 0 0; letter-spacing:0.15em; text-transform:uppercase; font-weight:600; text-align:center; transform: translateX(4px);">SISTEMA MAESTRO DE GESTIÓN</p>
             </div>
@@ -538,7 +546,7 @@ else:
     with st.sidebar:
         st.markdown(f"""
             <div style="text-align:center; margin-bottom:20px; margin-top:10px;">
-                <img src="{LOGO_SRC}" style="height:130px; object-fit:contain; mix-blend-mode: screen; filter: brightness(1.3) drop-shadow(0px 4px 8px rgba(96, 165, 250, 0.2));">
+                <img src="{LOGO_SRC}" class="logo-neon" style="height:130px; object-fit:contain;">
             </div>
         """, unsafe_allow_html=True)
         st.markdown(f"### 👤 {user['nombre']}")
@@ -956,10 +964,11 @@ else:
                         
                         address = st.text_input("Dirección Particular Completa")
                         
-                        nombre_suplente = st.text_input("Nombre del Suplente Autorizado (Asociado al teléfono arriba)")
-                        
+                        # ORDEN CORREGIDO: MADRE, PADRE, SUPLENTE
                         mother = st.text_area("Datos de la Madre (Nacionalidad, Edad, Escolaridad, Ocupación)")
                         father = st.text_area("Datos del Padre (Nacionalidad, Edad, Escolaridad, Ocupación)")
+                        nombre_suplente = st.text_input("Nombre del Suplente Autorizado (Asociado al teléfono arriba)")
+                        
                         social_history = st.text_area("Antecedentes Importantes / Historia Social")
                         
                         if st.form_submit_button("INGRESAR BENEFICIARIO AL SISTEMA", type="primary"):
