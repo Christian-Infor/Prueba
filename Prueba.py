@@ -502,6 +502,7 @@ if "user" not in st.session_state:
     with col_mid:
         st.markdown('<div class="centered-login">', unsafe_allow_html=True)
         
+        # LOGO TOTALMENTE LIMPIO
         st.markdown(f"""
             <div style="text-align: center; margin-bottom: 28px; width: 100%;">
                 <img src="{LOGO_SRC}" style="height: 180px; object-fit: contain; display: inline-block;">
@@ -536,6 +537,7 @@ else:
     MAX_FICHAS = 210
     
     with st.sidebar:
+        # LOGO LATERAL TOTALMENTE LIMPIO
         st.markdown(f"""
             <div style="text-align:center; margin-bottom:20px; margin-top:10px;">
                 <img src="{LOGO_SRC}" style="height:130px; object-fit:contain;">
