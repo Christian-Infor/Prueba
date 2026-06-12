@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 from supabase import create_client, Client
+import pytz
 import time
 import bcrypt
-import pytz
 from datetime import datetime, timedelta
 import streamlit.components.v1 as components
 import io
@@ -485,7 +485,6 @@ if "user" not in st.session_state:
     with col_mid:
         st.markdown('<div class="centered-login">', unsafe_allow_html=True)
         
-        # LOGO TOTALMENTE LIMPIO
         st.markdown(f"""
             <div style="text-align: center; margin-bottom: 28px; width: 100%;">
                 <img src="{LOGO_SRC}" style="height: 180px; object-fit: contain; display: inline-block;">
@@ -520,7 +519,6 @@ else:
     MAX_FICHAS = 210
     
     with st.sidebar:
-        # LOGO LATERAL TOTALMENTE LIMPIO
         st.markdown(f"""
             <div style="text-align:center; margin-bottom:20px; margin-top:10px;">
                 <img src="{LOGO_SRC}" style="height:130px; object-fit:contain;">
@@ -535,7 +533,6 @@ else:
             
         st.divider()
         
-        # MENU CON MATERIAL ICONS DE STREAMLIT
         opciones_menu = [
             ":material/bar_chart: PANEL PRINCIPAL", 
             ":material/inventory_2: BODEGA CENTRAL", 
@@ -577,7 +574,6 @@ else:
             
             productos_filtrados = [item for item in stock_res.data if item["producto"].upper() not in ["AJUAR", "OTROS"]]
             
-            # 📦 STOCK DE BODEGA NORMALIZADO
             st.write("###")
             st.markdown("### :material/inventory_2: Stock de Bodega")
             cols_bodega = st.columns(3)
@@ -590,7 +586,6 @@ else:
                         </div>
                     ''', unsafe_allow_html=True)
 
-            # ⚖️ INSUMOS SALA NORMALIZADOS
             st.write("###")
             st.markdown("### :material/medical_services: Insumos Sala de Atención")
             cols_sala = st.columns(3)
@@ -1288,9 +1283,12 @@ else:
         if "fecha_seleccionada" not in st.session_state:
             st.session_state.fecha_seleccionada = datetime.now(CHILE_TZ).date()
 
-        tipo_busqueda = st.radio("¿Cómo desea buscar?", ["Por Mes completo", "Por Día específico"], 
-                                 index=0 if st.session_state.tipo_busqueda == "Por Mes completo" else 1)
-        st.session_state.tipo_busqueda = tipo_busqueda
+        # El parámetro 'key' amarra automáticamente el widget a st.session_state para evitar doble clic
+        tipo_busqueda = st.radio(
+            "¿Cómo desea buscar?", 
+            ["Por Mes completo", "Por Día específico"], 
+            key="tipo_busqueda"
+        )
 
         if tipo_busqueda == "Por Mes completo":
             col1, col2 = st.columns(2)
@@ -1301,8 +1299,11 @@ else:
             with col1: seleccion_mes = st.selectbox("Seleccione el MES:", list(meses.keys()), index=datetime.now(CHILE_TZ).month - 1)
             with col2: seleccion_anio = st.selectbox("Seleccione el AÑO:", [2026, 2025], index=0)
         else:
-            fecha_dia = st.date_input("Seleccione el DÍA específico:", value=st.session_state.fecha_seleccionada, format="DD/MM/YYYY")
-            st.session_state.fecha_seleccionada = fecha_dia
+            fecha_dia = st.date_input(
+                "Seleccione el DÍA específico:", 
+                key="fecha_seleccionada", 
+                format="DD/MM/YYYY"
+            )
 
         try:
             with st.spinner("Consultando..."): 
