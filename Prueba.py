@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 from supabase import create_client, Client
-import plotly.express as px
 import time
 import bcrypt
 import pytz
@@ -555,7 +554,7 @@ else:
             st.session_state.clear()
             st.rerun()
 
-    # 📊 PANEL PRINCIPAL (CON GRÁFICOS INTERACTIVOS)
+    # 📊 PANEL PRINCIPAL
     if menu_choice == ":material/bar_chart: PANEL PRINCIPAL":
         st.header(":material/bar_chart: Resumen de Operación e Info Inmediata", divider="blue")
         try:
@@ -570,63 +569,39 @@ else:
             niños_activos = benef_res.count if benef_res.count else 0
             fichas_disponibles = max(0, MAX_FICHAS - niños_activos)
             
-            # Tarjetas de Métricas Rápidas
             m1, m2, m3, m4 = st.columns(4)
             with m1: st.markdown(f'<div class="metric-card"><div class="metric-label">Niños Activos</div><div class="metric-value">{niños_activos} <span style="font-size:1.1rem; color:#94a3b8;">/ {MAX_FICHAS}</span></div></div>', unsafe_allow_html=True)
             with m2: st.markdown(f'<div class="metric-card"><div class="metric-label">Fichas Disponibles</div><div class="metric-value" style="color:#10b981;">{fichas_disponibles}</div></div>', unsafe_allow_html=True)
             with m3: st.markdown(f'<div class="metric-card"><div class="metric-label">Total en Sala</div><div class="metric-value">{int(df["sala"].sum())} <span style="font-size:1.1rem; color:#94a3b8;">unid</span></div></div>', unsafe_allow_html=True)
             with m4: st.markdown(f'<div class="metric-card"><div class="metric-label">Bodega Central</div><div class="metric-value">{int(df["bodega"].sum())} <span style="font-size:1.1rem; color:#94a3b8;">unid</span></div></div>', unsafe_allow_html=True)
             
-            st.write("---")
-            st.markdown("### :material/insights: Análisis de Inventario en Tiempo Real")
+            productos_filtrados = [item for item in stock_res.data if item["producto"].upper() not in ["AJUAR", "OTROS"]]
             
-            # Preparar datos excluyendo AJUAR y OTROS
-            df_chart = df[~df["producto"].str.upper().isin(["AJUAR", "OTROS"])].copy()
-            
-            col_chart1, col_chart2 = st.columns([3, 2])
-            
-            with col_chart1:
-                # GRÁFICO 1: Barras Agrupadas (Bodega vs Sala)
-                df_melted = df_chart.melt(id_vars="producto", value_vars=["bodega", "sala"], var_name="Ubicación", value_name="Cantidad")
-                df_melted["Ubicación"] = df_melted["Ubicación"].replace({"bodega": "Bodega Central", "sala": "Sala de Atención"})
-                
-                fig_bar = px.bar(df_melted, x="producto", y="Cantidad", color="Ubicación", barmode="group",
-                                 color_discrete_map={"Bodega Central": "#3b82f6", "Sala de Atención": "#10b981"},
-                                 title="Disponibilidad de Insumos por Ubicación")
-                
-                # Configuración de diseño transparente y moderno
-                fig_bar.update_layout(
-                    plot_bgcolor="rgba(0,0,0,0)",
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    font_color="#cbd5e1",
-                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-                    xaxis_title="Insumo / Producto",
-                    yaxis_title="Cantidad Fìsica"
-                )
-                st.plotly_chart(fig_bar, use_container_width=True)
-                
-            with col_chart2:
-                # GRÁFICO 2: Anillo (Donut Chart) Distribución Global
-                total_bodega = int(df_chart["bodega"].sum())
-                total_sala = int(df_chart["sala"].sum())
-                df_pie = pd.DataFrame({
-                    "Ubicación": ["Bodega Central", "Sala de Atención"],
-                    "Total": [total_bodega, total_sala]
-                })
-                
-                fig_pie = px.pie(df_pie, values="Total", names="Ubicación", hole=0.6,
-                                 color="Ubicación", color_discrete_map={"Bodega Central": "#3b82f6", "Sala de Atención": "#10b981"},
-                                 title="Distribución Global del Stock")
-                
-                fig_pie.update_layout(
-                    plot_bgcolor="rgba(0,0,0,0)",
-                    paper_bgcolor="rgba(0,0,0,0)",
-                    font_color="#cbd5e1",
-                    showlegend=False
-                )
-                fig_pie.update_traces(textposition='inside', textinfo='percent+label', 
-                                      marker=dict(line=dict(color='#0f172a', width=2)))
-                st.plotly_chart(fig_pie, use_container_width=True)
+            # 📦 STOCK DE BODEGA NORMALIZADO
+            st.write("###")
+            st.markdown("### :material/inventory_2: Stock de Bodega")
+            cols_bodega = st.columns(3)
+            for i, item in enumerate(productos_filtrados):
+                with cols_bodega[i % 3]:
+                    st.markdown(f'''
+                        <div class="metric-card">
+                            <div class="metric-label" style="font-size:1rem; min-height:40px; display:flex; align-items:center; justify-content:center;">{item["producto"]}</div>
+                            <div class="metric-value" style="color: #38bdf8;">{int(item["bodega"])} <span style="font-size:1.2rem; color:#94a3b8;">ud</span></div>
+                        </div>
+                    ''', unsafe_allow_html=True)
+
+            # ⚖️ INSUMOS SALA NORMALIZADOS
+            st.write("###")
+            st.markdown("### :material/medical_services: Insumos Sala de Atención")
+            cols_sala = st.columns(3)
+            for i, item in enumerate(productos_filtrados):
+                with cols_sala[i % 3]:
+                    st.markdown(f'''
+                        <div class="metric-card">
+                            <div class="metric-label" style="font-size:1rem; min-height:40px; display:flex; align-items:center; justify-content:center;">{item["producto"]}</div>
+                            <div class="metric-value" style="color: #38bdf8;">{int(item["sala"])} <span style="font-size:1.2rem; color:#94a3b8;">ud</span></div>
+                        </div>
+                    ''', unsafe_allow_html=True)
 
     # 📦 PANEL: BODEGA CENTRAL
     elif menu_choice == ":material/inventory_2: BODEGA CENTRAL":
