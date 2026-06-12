@@ -29,9 +29,15 @@ st.markdown("""
     /* ── IMPORTAR FUENTE MODERNA INTER ── */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     
-    html, body, [class*="st-"] { 
+    html, body { 
         font-family: 'Inter', sans-serif !important; 
         font-size: 1.1rem !important; 
+    }
+    
+    /* ── CORRECCIÓN URGENTE PARA EL ERROR DE LOS ÍCONOS (_arrow_right_) ── */
+    /* Protegemos la fuente original de los iconos para que 'Inter' no los convierta en texto */
+    span[class*="material"], i[class*="material"], [data-testid="stIconMaterial"] {
+        font-family: 'Material Symbols Rounded', 'Material Icons' !important;
     }
     
     /* ── CORRECCIÓN ICONOS EXPANDERS ── */
@@ -55,6 +61,7 @@ st.markdown("""
         animation: movimientoFondo 18s ease infinite !important;
     }
     
+    /* Bajar un poco el contenido desde el techo */
     .stApp:not(:has(div[data-testid="stSidebar"])) .stMainBlockContainer {
         padding-top: 6vh !important; 
         max-width: 100% !important;
@@ -75,6 +82,7 @@ st.markdown("""
         padding-top: 5vh;
     }
 
+    /* EFECTO GLASSMORPHISM (VIDRIO ESMERILADO) */
     .stForm {
         background: rgba(15, 23, 42, 0.55) !important;
         backdrop-filter: blur(16px) saturate(120%) !important;
@@ -87,6 +95,7 @@ st.markdown("""
         animation: entradaLoginCaja 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
     }
     
+    /* CAJAS DE TEXTO REACTIVAS */
     .stForm [data-baseweb="input"], .stForm [data-baseweb="textarea"], .stForm [data-baseweb="select"] {
         background-color: rgba(30, 41, 59, 0.4) !important;
         border: 1px solid rgba(148, 163, 184, 0.2) !important;
@@ -99,6 +108,9 @@ st.markdown("""
         background-color: rgba(30, 41, 59, 0.7) !important;
     }
 
+    /* ══════════════════════════════
+       ANIMACIONES DE BOTONES (PULSO UNIFICADO)
+    ══════════════════════════════ */
     @keyframes pulsoLuz {
         0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
         70% { box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); }
@@ -129,6 +141,14 @@ st.markdown("""
         padding: 0.75rem 1rem !important;
         margin-top: 10px !important;
     }
+    
+    /* ══════════════════════════════
+       TARJETAS 3D PANEL PRINCIPAL
+    ══════════════════════════════ */
+    @keyframes deslizarArriba {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
     .metric-card {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -139,6 +159,7 @@ st.markdown("""
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         margin-bottom: 15px;
         transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: deslizarArriba 0.6s ease-out forwards;
     }
     
     .metric-card:hover {
@@ -147,9 +168,26 @@ st.markdown("""
         border-color: rgba(56, 189, 248, 0.5);
     }
 
-    .metric-label { color: #94a3b8; font-size: 0.85rem; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 8px; }
-    .metric-value { color: #38bdf8; font-size: 2.5rem; font-weight: 700; line-height: 1; transition: color 0.3s ease; }
-    .metric-card:hover .metric-value { color: #ffffff; text-shadow: 0 0 10px rgba(56, 189, 248, 0.8); }
+    .metric-label {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+    .metric-value {
+        color: #38bdf8;
+        font-size: 2.5rem;
+        font-weight: 700;
+        line-height: 1;
+        transition: color 0.3s ease;
+    }
+    
+    .metric-card:hover .metric-value {
+        color: #ffffff;
+        text-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+    }
 
     .ficha-seccion-datos {
         background-color: #1e293b;
@@ -158,6 +196,10 @@ st.markdown("""
         border-radius: 8px;
         margin-bottom: 15px;
     }
+
+    /* ══════════════════════════════
+       MODERNIZACIÓN DE INTERFAZ (MENÚ Y BOTONES SEGUROS)
+    ══════════════════════════════ */
     
     [data-testid="stSidebar"] {
         background-color: #080b13 !important;
@@ -186,6 +228,17 @@ st.markdown("""
         border-left: 4px solid #3b82f6 !important;
     }
 
+    @keyframes entradaCascada {
+        from { opacity: 0; transform: translateX(-25px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(1) { animation: entradaCascada 0.5s ease-out 0.1s forwards; opacity: 0; }
+    [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(2) { animation: entradaCascada 0.5s ease-out 0.2s forwards; opacity: 0; }
+    [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(3) { animation: entradaCascada 0.5s ease-out 0.3s forwards; opacity: 0; }
+    [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(4) { animation: entradaCascada 0.5s ease-out 0.4s forwards; opacity: 0; }
+    [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(5) { animation: entradaCascada 0.5s ease-out 0.5s forwards; opacity: 0; }
+    [data-testid="stSidebar"] div[role="radiogroup"] label:nth-child(6) { animation: entradaCascada 0.5s ease-out 0.6s forwards; opacity: 0; }
+
     button[kind="secondary"] {
         background: rgba(30, 41, 59, 0.5) !important;
         color: #cbd5e1 !important;
@@ -203,8 +256,25 @@ st.markdown("""
         box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4) !important;
     }
 
-    [data-testid="stTabs"] button { border-radius: 8px 8px 0 0 !important; transition: background 0.2s !important; }
-    [data-testid="stTabs"] button:hover { background: rgba(255, 255, 255, 0.05) !important; }
+    [data-testid="stTabs"] button {
+        border-radius: 8px 8px 0 0 !important;
+        transition: background 0.2s !important;
+    }
+    [data-testid="stTabs"] button:hover {
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    @keyframes suaveAparicion {
+        0% { opacity: 0; transform: translateY(15px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    .main [data-testid="stVerticalBlock"] > div,
+    [data-testid="stDataFrame"], 
+    [data-testid="stExpander"], 
+    div[role="tabpanel"] {
+        animation: suaveAparicion 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards !important;
+    }
 
     [data-testid="stSidebar"] button {
         background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%) !important;
@@ -213,6 +283,7 @@ st.markdown("""
         transition: all 0.3s ease !important;
         box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3) !important;
         margin-top: 20px !important;
+        animation: none !important; 
     }
     [data-testid="stSidebar"] button:hover {
         background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
@@ -220,13 +291,33 @@ st.markdown("""
         box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6) !important;
         border-color: #ffffff !important;
     }
-    [data-testid="stSidebar"] button p { color: #ffffff !important; font-weight: 800 !important; }
+    [data-testid="stSidebar"] button p {
+        color: #ffffff !important;
+        font-weight: 800 !important;
+    }
     
-    ::-webkit-scrollbar { width: 10px; height: 10px; }
-    ::-webkit-scrollbar-track { background: #050C17; }
-    ::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.3); border-radius: 5px; transition: background 0.3s ease; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.8); }
+    /* ══════════════════════════════
+       BARRA DE DESPLAZAMIENTO (SCROLLBAR) DE LUJO
+    ══════════════════════════════ */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #050C17;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: rgba(59, 130, 246, 0.3);
+        border-radius: 5px;
+        transition: background 0.3s ease;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: rgba(59, 130, 246, 0.8);
+    }
 
+    /* ══════════════════════════════
+       FICHAS (EXPANDERS) REACTIVAS
+    ══════════════════════════════ */
     [data-testid="stExpander"] {
         border-radius: 12px !important;
         border: 1px solid rgba(148, 163, 184, 0.15) !important;
